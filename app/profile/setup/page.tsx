@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -35,7 +35,7 @@ const TIMES = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function ProfileSetupPage() {
+function ProfileSetupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isEditing = searchParams.get('edit') === 'true'
@@ -434,5 +434,13 @@ export default function ProfileSetupPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function ProfileSetupPage() {
+  return (
+    <Suspense>
+      <ProfileSetupForm />
+    </Suspense>
   )
 }
