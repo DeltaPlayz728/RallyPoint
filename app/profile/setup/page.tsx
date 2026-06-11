@@ -79,7 +79,7 @@ export default function ProfileSetupPage() {
 
       const { data } = await supabase
         .from('profiles')
-        .select('username, city, bio, interests, vibe, social_battery, available_this_week, preferred_time, instagram, tiktok, snapchat')
+        .select('username, city, bio, interests, vibe, social_battery, available_this_week, preferred_time, instagram, tiktok, snapchat, avatar_url')
         .eq('id', user.id)
         .single()
 
