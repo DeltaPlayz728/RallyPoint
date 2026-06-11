@@ -1,0 +1,71 @@
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+import { isRateLimited } from '@/lib/rateLimit'
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown'
+
+  // Rate limit auth routes — 10 attempts per IP per 15 minutes
+  if (pathname.startsWith('/auth/')) {
+    if (isRateLimited(`auth:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 })) {
+      return new NextResponse('Too many requests. Please wait before trying again.', {
+        status: 429,
+        headers: { 'Retry-After': '900' },
+      })
+    }
+  }
+  let supabaseResponse = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Public routes — no auth needed
+  const publicRoutes = ['/auth/login', '/auth/signup', '/', '/onboarding', '/tos', '/privacy', '/suspended', '/early-access']
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
+    return supabaseResponse
+  }
+
+  // Redirect unauthenticated users to login
+  if (!user) {
+    return NextResponse.redirect(new URL('/auth/login', request.url))
+  }
+
+  // Check suspension (skip for auth/logout routes to avoid infinite loop)
+  if (!pathname.startsWith('/auth/') && !pathname.startsWith('/suspended')) {
+    const { data: suspension } = await supabase
+      .from('user_suspensions')
+      .select('id')
+      .eq('user_id', user.id)
+      .is('lifted_at', null)
+      .maybeSingle()
+
+    if (suspension) {
+      return NextResponse.redirect(new URL('/suspended', request.url))
+    }
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+}
