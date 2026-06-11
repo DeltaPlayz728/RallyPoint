@@ -84,11 +84,13 @@ export default function FriendsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ friendshipId, userId, action }),
     })
-    setFriends(prev => prev.map(f =>
-      f.friendshipId === friendshipId
-        ? { ...f, status: action === 'accepted' ? 'accepted' : 'declined' }
-        : f
-    ).filter(f => f.status !== 'declined'))
+    if (action === 'accepted') {
+      setFriends(prev => prev.map(f =>
+        f.friendshipId === friendshipId ? { ...f, status: 'accepted' as const } : f
+      ))
+    } else {
+      setFriends(prev => prev.filter(f => f.friendshipId !== friendshipId))
+    }
   }
 
   const handleRemove = async (friendshipId: string) => {
