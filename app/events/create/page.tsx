@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { moderateEvent } from '@/lib/contentModeration'
@@ -11,7 +11,7 @@ const PRICE_MAP: Record<string, number> = {
   large: 75,
 }
 
-export default function CreateEventPage() {
+function CreateEventForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [type, setType] = useState<'casual' | 'social'>('casual')
@@ -263,5 +263,13 @@ export default function CreateEventPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function CreateEventPage() {
+  return (
+    <Suspense>
+      <CreateEventForm />
+    </Suspense>
   )
 }
