@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import BottomNav from './BottomNav'
 
 // Pages that should NOT show the bottom nav
-const NO_NAV_ROUTES = ['/', '/auth/login', '/auth/signup', '/onboarding', '/tos', '/privacy']
+const NO_NAV_ROUTES = ['/', '/auth/login', '/auth/signup', '/onboarding', '/welcome', '/tos', '/privacy']
 
 export default function BottomNavWrapper() {
   const pathname = usePathname()
