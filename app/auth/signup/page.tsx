@@ -45,12 +45,22 @@ export default function SignupPage() {
     }
 
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
+      // Pick up interests + vibe from pre-signup onboarding
+      const savedInterests = JSON.parse(sessionStorage.getItem('rp_interests') ?? '[]')
+      const savedVibe = sessionStorage.getItem('rp_vibe') || null
+      sessionStorage.removeItem('rp_interests')
+      sessionStorage.removeItem('rp_vibe')
+
+      const profilePayload: Record<string, any> = {
         id: data.user.id,
         full_name: fullName,
         date_of_birth: dob,
         is_minor: isMinor,
-      })
+      }
+      if (savedInterests.length > 0) profilePayload.interests = savedInterests
+      if (savedVibe) profilePayload.vibe = savedVibe
+
+      const { error: profileError } = await supabase.from('profiles').insert(profilePayload)
 
       if (profileError) {
         setError(profileError.message)

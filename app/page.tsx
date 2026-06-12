@@ -17,7 +17,7 @@ export default function LandingPage() {
             Log in
           </Link>
           <Link
-            href="/auth/signup"
+            href="/welcome"
             className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
           >
             Sign up free
@@ -46,7 +46,7 @@ export default function LandingPage() {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
-            href="/auth/signup"
+            href="/welcome"
             className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl text-lg transition"
           >
             Find events near me →
@@ -113,7 +113,7 @@ export default function LandingPage() {
           Join RallyPoint and start meeting people in Breda today.
         </p>
         <Link
-          href="/auth/signup"
+          href="/welcome"
           className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-4 rounded-xl text-lg transition"
         >
           Create your free account →
@@ -124,7 +124,7 @@ export default function LandingPage() {
       <footer className="border-t border-gray-800 px-6 py-6 text-center text-gray-600 text-xs">
         <div className="flex items-center justify-center gap-6 mb-3">
           <Link href="/auth/login" className="hover:text-gray-400 transition">Log in</Link>
-          <Link href="/auth/signup" className="hover:text-gray-400 transition">Sign up</Link>
+          <Link href="/welcome" className="hover:text-gray-400 transition">Sign up</Link>
           <Link href="/feed" className="hover:text-gray-400 transition">Browse events</Link>
           <Link href="/tos" className="hover:text-gray-400 transition">Terms</Link>
           <Link href="/privacy" className="hover:text-gray-400 transition">Privacy</Link>

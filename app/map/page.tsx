@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import type { EventPin, Venue } from '@/components/MapView'
+import TopBar from '@/components/TopBar'
 
 // Leaflet must be loaded client-side only
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -339,25 +340,10 @@ export default function MapPage() {
   return (
     <div className="flex flex-col h-screen bg-black overflow-hidden">
 
-      {/* Header */}
-      <div className="px-4 pt-6 pb-2 shrink-0 z-10">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-xl font-bold text-white">Pulse Map</h1>
-            <p className="text-gray-500 text-xs">
-              {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
-              {venues.length > 0 ? ` · ${venues.length} venues` : ''}
-            </p>
-          </div>
-          <Link
-            href="/events/create"
-            className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition"
-          >
-            + Create
-          </Link>
-        </div>
+      <TopBar title={`${filteredEvents.length} event${filteredEvents.length !== 1 ? 's' : ''}${venues.length > 0 ? ` · ${venues.length} venues` : ''}`} />
 
-        {/* Filter chips */}
+      {/* Filter chips */}
+      <div className="px-4 pt-2 pb-2 shrink-0 z-10">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {FILTERS.map((f) => (
             <button

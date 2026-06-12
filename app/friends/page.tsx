@@ -3,14 +3,23 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import FriendButton from '@/components/FriendButton'
+import TopBar from '@/components/TopBar'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
-function Avatar({ name, index }: { name: string; index: number }) {
+function Avatar({ name, avatarUrl, index, size = 'md' }: {
+  name: string
+  avatarUrl?: string | null
+  index: number
+  size?: 'sm' | 'md' | 'lg'
+}) {
+  const sizeClass = size === 'lg' ? 'w-14 h-14 text-lg' : size === 'sm' ? 'w-9 h-9 text-xs' : 'w-11 h-11 text-sm'
+  if (avatarUrl) {
+    return <img src={avatarUrl} alt={name} className={`${sizeClass} rounded-full object-cover shrink-0`} />
+  }
   return (
     <div
-      className="w-11 h-11 rounded-full flex items-center justify-center font-black text-black text-sm shrink-0"
+      className={`${sizeClass} rounded-full flex items-center justify-center font-black text-black shrink-0`}
       style={{ background: AVATAR_COLORS[index % AVATAR_COLORS.length] }}
     >
       {(name ?? '?')[0].toUpperCase()}
@@ -23,15 +32,43 @@ type FriendRow = {
   userId: string
   name: string
   username: string | null
+  avatarUrl: string | null
   status: 'pending' | 'accepted'
   iRequested: boolean
+  recentEvent?: string | null
 }
 
+type DmRow = {
+  id: string
+  otherUserId: string
+  otherName: string
+  otherUsername: string | null
+  otherAvatar: string | null
+  lastMessage: string
+  lastAt: string
+  unread: boolean
+}
+
+type EventChatRow = {
+  id: string
+  eventId: string
+  eventTitle: string
+  lastMessage: string
+  lastAt: string
+  unread: boolean
+  emoji: string
+}
+
+type View = 'chat' | 'requests'
+
 export default function FriendsPage() {
-  const [userId, setUserId]     = useState<string | null>(null)
-  const [friends, setFriends]   = useState<FriendRow[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [tab, setTab]           = useState<'requests' | 'friends'>('requests')
+  const [userId, setUserId] = useState<string | null>(null)
+  const [friends, setFriends] = useState<FriendRow[]>([])
+  const [dms, setDms] = useState<DmRow[]>([])
+  const [eventChats, setEventChats] = useState<EventChatRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [view, setView] = useState<View>('chat')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     const load = async () => {
@@ -39,21 +76,19 @@ export default function FriendsPage() {
       if (!user) return
       setUserId(user.id)
 
-      const { data } = await supabase
+      // Load friendships
+      const { data: friendData } = await supabase
         .from('friendships')
         .select(`
-          id,
-          status,
-          requester_id,
-          receiver_id,
-          requester:profiles!friendships_requester_id_fkey(full_name, username),
-          receiver:profiles!friendships_receiver_id_fkey(full_name, username)
+          id, status, requester_id, receiver_id,
+          requester:profiles!friendships_requester_id_fkey(full_name, username, avatar_url),
+          receiver:profiles!friendships_receiver_id_fkey(full_name, username, avatar_url)
         `)
         .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .neq('status', 'declined')
         .order('created_at', { ascending: false })
 
-      const rows: FriendRow[] = (data ?? []).map((f: any) => {
+      const rows: FriendRow[] = (friendData ?? []).map((f: any) => {
         const iRequested = f.requester_id === user.id
         const other = iRequested ? f.receiver : f.requester
         const otherId = iRequested ? f.receiver_id : f.requester_id
@@ -62,20 +97,46 @@ export default function FriendsPage() {
           userId: otherId,
           name: other?.full_name ?? 'Unknown',
           username: other?.username ?? null,
+          avatarUrl: other?.avatar_url ?? null,
           status: f.status,
           iRequested,
+          recentEvent: null,
         }
       })
-
       setFriends(rows)
+
+      // Load event chats (events the user has joined)
+      const { data: attendeeData } = await supabase
+        .from('event_attendees')
+        .select('event_id, events(id, title)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      const chatRows: EventChatRow[] = (attendeeData ?? []).map((a: any, i: number) => ({
+        id: a.event_id,
+        eventId: a.event_id,
+        eventTitle: a.events?.title ?? 'Event',
+        lastMessage: 'Tap to open chat',
+        lastAt: '',
+        unread: false,
+        emoji: ['🎳', '🎵', '🍕', '🎨', '⚽', '🎭'][i % 6],
+      }))
+      setEventChats(chatRows)
+
       setLoading(false)
     }
     load()
   }, [])
 
+  const accepted = friends.filter(f => f.status === 'accepted')
   const pendingReceived = friends.filter(f => f.status === 'pending' && !f.iRequested)
-  const pendingSent     = friends.filter(f => f.status === 'pending' && f.iRequested)
-  const accepted        = friends.filter(f => f.status === 'accepted')
+  const pendingSent = friends.filter(f => f.status === 'pending' && f.iRequested)
+
+  const filteredFriends = accepted.filter(f =>
+    !search || f.name.toLowerCase().includes(search.toLowerCase()) ||
+    f.username?.toLowerCase().includes(search.toLowerCase())
+  )
 
   const handleRespond = async (friendshipId: string, action: 'accepted' | 'declined') => {
     if (!userId) return
@@ -105,57 +166,162 @@ export default function FriendsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-28">
-      {/* Header */}
-      <div className="px-4 pt-8 pb-4 sticky top-0 bg-black/95 backdrop-blur-sm border-b border-gray-900/60 z-10">
-        <h1 className="text-xl font-bold mb-4">Friends</h1>
-        <div className="flex gap-2">
-          {(['requests', 'friends'] as const).map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition capitalize ${
-                tab === t
-                  ? 'bg-orange-500 border-orange-500 text-white'
-                  : 'bg-transparent border-gray-800 text-gray-400'
-              }`}
-            >
-              {t}
-              {t === 'requests' && pendingReceived.length > 0 && (
-                <span className="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                  {pendingReceived.length}
-                </span>
-              )}
-            </button>
-          ))}
+      <TopBar title="Friends" />
+
+      {/* Search bar */}
+      <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-black z-10">
+        <div className="flex items-center gap-2 bg-gray-900 rounded-2xl px-4 py-2.5">
+          <span className="text-gray-600 text-sm">🔍</span>
+          <input
+            type="text"
+            placeholder="Search friends..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="bg-transparent text-sm text-white placeholder-gray-600 outline-none flex-1"
+          />
         </div>
       </div>
 
-      <div className="px-4 pt-4 max-w-lg mx-auto">
-        {loading ? (
-          <div className="space-y-3">
-            {[0, 1, 2].map(i => (
-              <div key={i} className="flex items-center gap-3 p-4 bg-[#111] rounded-2xl border border-gray-800/50">
-                <div className="w-11 h-11 rounded-full bg-gray-800 animate-pulse" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-32 bg-gray-800 rounded animate-pulse" />
-                  <div className="h-3 w-20 bg-gray-800 rounded animate-pulse" />
+      {/* Friends activity row */}
+      {accepted.length > 0 && (
+        <div className="px-4 pt-2 pb-3 border-b border-gray-900/60">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+            {accepted.map((f, i) => (
+              <Link key={f.friendshipId} href={`/profile/${f.userId}`} className="flex flex-col items-center gap-1.5 shrink-0">
+                <div className="relative">
+                  <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} size="lg" />
+                  {f.recentEvent && (
+                    <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full text-[10px] px-1.5 py-0.5 border-2 border-black">
+                      {f.recentEvent}
+                    </div>
+                  )}
                 </div>
-              </div>
+                <span className="text-[11px] text-gray-500 max-w-[52px] truncate text-center">
+                  {f.username ?? f.name.split(' ')[0]}
+                </span>
+              </Link>
             ))}
           </div>
-        ) : tab === 'requests' ? (
-          <>
-            {/* Incoming requests */}
+        </div>
+      )}
+
+      {/* View toggle */}
+      <div className="flex gap-2 px-4 pt-3 pb-1">
+        {(['chat', 'requests'] as const).map(v => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition capitalize ${
+              view === v
+                ? 'bg-orange-500 border-orange-500 text-white'
+                : 'bg-transparent border-gray-800 text-gray-400'
+            }`}
+          >
+            {v === 'chat' ? 'Messages' : 'Requests'}
+            {v === 'requests' && pendingReceived.length > 0 && (
+              <span className="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                {pendingReceived.length}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="max-w-lg mx-auto">
+
+        {view === 'chat' ? (
+          <div className="pb-4">
+
+            {/* DMs section */}
+            <div className="px-4 pt-4 pb-1">
+              <p className="text-gray-600 text-[11px] font-semibold uppercase tracking-widest mb-2">
+                💬 Messages &amp; Groups
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="space-y-1 px-4">
+                {[0, 1].map(i => (
+                  <div key={i} className="flex items-center gap-3 py-3">
+                    <div className="w-11 h-11 rounded-full bg-gray-900 animate-pulse shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3.5 w-28 bg-gray-900 rounded animate-pulse" />
+                      <div className="h-3 w-40 bg-gray-900 rounded animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredFriends.length === 0 ? (
+              <div className="px-4 py-4 text-center">
+                <p className="text-gray-600 text-sm">
+                  {search ? 'No friends match your search' : 'No friends yet — join events to meet people'}
+                </p>
+              </div>
+            ) : (
+              <div>
+                {filteredFriends.map((f, i) => (
+                  <Link
+                    key={f.friendshipId}
+                    href={`/inbox/dm/${f.userId}`}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-900/40 active:bg-gray-900/60 transition"
+                  >
+                    <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">
+                        {f.username ? `@${f.username}` : f.name}
+                      </p>
+                      <p className="text-gray-600 text-xs truncate">Tap to message</p>
+                    </div>
+                    <span className="text-gray-700 text-lg">›</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Event & Venue Chats section */}
+            {eventChats.length > 0 && (
+              <>
+                <div className="px-4 pt-5 pb-1">
+                  <p className="text-gray-600 text-[11px] font-semibold uppercase tracking-widest mb-2">
+                    🎳 Event &amp; Venue Chats
+                  </p>
+                </div>
+                <div>
+                  {eventChats.map(ec => (
+                    <Link
+                      key={ec.id}
+                      href={`/events/${ec.eventId}/chat`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-900/40 active:bg-gray-900/60 transition"
+                    >
+                      <div className="w-11 h-11 bg-orange-950/60 border border-orange-900/40 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                        {ec.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold text-sm truncate">{ec.eventTitle}</p>
+                        <p className="text-gray-600 text-xs truncate">{ec.lastMessage}</p>
+                      </div>
+                      {ec.unread && (
+                        <div className="w-2 h-2 bg-orange-500 rounded-full shrink-0" />
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+        ) : (
+          /* Requests view */
+          <div className="px-4 pt-4">
+            {/* Incoming */}
             {pendingReceived.length > 0 && (
               <div className="mb-6">
-                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">
-                  Incoming
-                </p>
+                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Incoming</p>
                 <div className="space-y-2">
                   {pendingReceived.map((f, i) => (
                     <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-[#111] rounded-2xl border border-gray-800/50">
                       <Link href={`/profile/${f.userId}`}>
-                        <Avatar name={f.name} index={i} />
+                        <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                       </Link>
                       <div className="flex-1 min-w-0">
                         <Link href={`/profile/${f.userId}`}>
@@ -163,7 +329,7 @@ export default function FriendsPage() {
                             {f.username ? `@${f.username}` : f.name}
                           </p>
                         </Link>
-                        <p className="text-gray-600 text-xs">Wants to be friends</p>
+                        <p className="text-gray-600 text-xs">Wants to connect</p>
                       </div>
                       <div className="flex gap-1.5 shrink-0">
                         <button
@@ -185,17 +351,15 @@ export default function FriendsPage() {
               </div>
             )}
 
-            {/* Sent requests */}
+            {/* Sent */}
             {pendingSent.length > 0 && (
-              <div>
-                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">
-                  Sent
-                </p>
+              <div className="mb-6">
+                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Sent</p>
                 <div className="space-y-2">
                   {pendingSent.map((f, i) => (
                     <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-[#111] rounded-2xl border border-gray-800/50">
                       <Link href={`/profile/${f.userId}`}>
-                        <Avatar name={f.name} index={i} />
+                        <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                       </Link>
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-semibold text-sm truncate">
@@ -219,52 +383,10 @@ export default function FriendsPage() {
               <div className="flex flex-col items-center justify-center mt-20 text-center">
                 <div className="text-4xl mb-4">👋</div>
                 <p className="text-white font-bold mb-1">No pending requests</p>
-                <p className="text-gray-500 text-sm">
-                  Add friends from event attendee lists
-                </p>
+                <p className="text-gray-500 text-sm">Add friends from event attendee lists</p>
               </div>
             )}
-          </>
-        ) : (
-          /* Friends list */
-          <>
-            {accepted.length === 0 ? (
-              <div className="flex flex-col items-center justify-center mt-20 text-center">
-                <div className="text-4xl mb-4">🤝</div>
-                <p className="text-white font-bold mb-1">No friends yet</p>
-                <p className="text-gray-500 text-sm max-w-xs">
-                  Join events and add people from the attendee list
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-gray-600 text-xs mb-3">{accepted.length} friend{accepted.length !== 1 ? 's' : ''}</p>
-                {accepted.map((f, i) => (
-                  <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-[#111] rounded-2xl border border-gray-800/50">
-                    <Link href={`/profile/${f.userId}`}>
-                      <Avatar name={f.name} index={i} />
-                    </Link>
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/profile/${f.userId}`}>
-                        <p className="text-white font-semibold text-sm truncate hover:text-orange-400 transition">
-                          {f.username ? `@${f.username}` : f.name}
-                        </p>
-                      </Link>
-                      {f.username && (
-                        <p className="text-gray-600 text-xs">{f.name}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleRemove(f.friendshipId)}
-                      className="text-xs border border-gray-800 text-gray-600 px-3 py-1.5 rounded-xl transition hover:border-red-900 hover:text-red-500"
-                    >
-                      Unfriend
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+          </div>
         )}
       </div>
     </div>
