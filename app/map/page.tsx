@@ -234,6 +234,8 @@ function EventSheet({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+const FALLBACK_CENTER: [number, number] = [51.5719, 4.7683] // Breda
+
 export default function MapPage() {
   const router = useRouter()
   const [events, setEvents]               = useState<EventPin[]>([])
@@ -242,6 +244,8 @@ export default function MapPage() {
   const [activeFilter, setActiveFilter]   = useState<Filter>('all')
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<EventPin | null>(null)
+  const [userCenter, setUserCenter]       = useState<[number, number]>(FALLBACK_CENTER)
+  const [userDot, setUserDot]             = useState<[number, number] | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -264,14 +268,30 @@ export default function MapPage() {
       setEvents(mapped)
       setLoading(false)
 
-      // Fetch venues (non-blocking — map shows events immediately)
-      try {
-        const res = await fetch('/api/venues?lat=51.5719&lng=4.7683&city=Breda')
-        const data = await res.json()
-        if (data.venues) setVenues(data.venues)
-      } catch {
-        // Venue layer is optional — silently skip on error
-      }
+      // Get user location — center map + fetch local venues
+      navigator.geolocation?.getCurrentPosition(
+        async (pos) => {
+          const { latitude: lat, longitude: lng } = pos.coords
+          setUserCenter([lat, lng])
+          setUserDot([lat, lng])
+
+          // Fetch venues near the user
+          try {
+            const res = await fetch(`/api/venues?lat=${lat}&lng=${lng}&city=`)
+            const data = await res.json()
+            if (data.venues) setVenues(data.venues)
+          } catch { /* venue layer optional */ }
+        },
+        async () => {
+          // Location denied — fall back to Breda venues
+          try {
+            const res = await fetch('/api/venues?lat=51.5719&lng=4.7683&city=Breda')
+            const data = await res.json()
+            if (data.venues) setVenues(data.venues)
+          } catch { /* venue layer optional */ }
+        },
+        { timeout: 6000, maximumAge: 60000 }
+      )
     }
 
     load()
@@ -387,6 +407,8 @@ export default function MapPage() {
           selectedVenueId={selectedVenue?.place_id ?? null}
           onVenueClick={handleVenueClick}
           onEventClick={handleEventClick}
+          center={userCenter}
+          userDot={userDot}
         />
       </div>
 

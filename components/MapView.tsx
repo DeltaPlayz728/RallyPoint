@@ -34,6 +34,8 @@ interface MapViewProps {
   selectedVenueId: string | null
   onVenueClick: (venue: Venue) => void
   onEventClick: (event: EventPin) => void
+  center?: [number, number]
+  userDot?: [number, number] | null
 }
 
 // ─── Icon helpers ────────────────────────────────────────────────────────────
@@ -165,12 +167,31 @@ function useMapAnimations() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+function createUserDotIcon() {
+  return L.divIcon({
+    className: '',
+    html: `
+      <div style="
+        width: 16px; height: 16px;
+        background: #3b82f6;
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(59,130,246,0.3), 0 2px 8px rgba(0,0,0,0.5);
+      "></div>
+    `,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  })
+}
+
 export default function MapView({
   events,
   venues,
   selectedVenueId,
   onVenueClick,
   onEventClick,
+  center = [51.5719, 4.7683],
+  userDot,
 }: MapViewProps) {
   useMapAnimations()
 
@@ -184,11 +205,9 @@ export default function MapView({
     })
   }, [])
 
-  const defaultCenter: [number, number] = [51.5719, 4.7683]
-
   return (
     <MapContainer
-      center={defaultCenter}
+      center={center}
       zoom={14}
       style={{ height: '100%', width: '100%', background: '#0d0d0d' }}
       zoomControl={false}
@@ -197,6 +216,9 @@ export default function MapView({
         attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
+
+      {/* Recenter when user location arrives */}
+      <MapCenter center={center} />
 
       {/* Heat zones — semi-transparent circles that stack where events cluster */}
       {events.map((event) => (
@@ -236,6 +258,16 @@ export default function MapView({
           }}
         />
       ))}
+
+      {/* User location dot */}
+      {userDot && (
+        <Marker
+          position={userDot}
+          icon={createUserDotIcon()}
+          interactive={false}
+          zIndexOffset={1000}
+        />
+      )}
     </MapContainer>
   )
 }
