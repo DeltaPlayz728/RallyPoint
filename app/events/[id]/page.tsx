@@ -122,6 +122,8 @@ export default function EventDetailPage() {
   const [sendingRequest, setSendingRequest] = useState(false)
   const [showRating, setShowRating]         = useState(false)
   const [showShare, setShowShare]           = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [cancelling, setCancelling]         = useState(false)
 
   // Inject animation CSS
   useEffect(() => {
@@ -233,6 +235,40 @@ export default function EventDetailPage() {
     setActionLoading(false)
   }
 
+  const handleCancelEvent = async () => {
+    if (!event || !userId || !isHost) return
+    setCancelling(true)
+
+    const { error } = await supabase
+      .from('events')
+      .update({ status: 'cancelled' })
+      .eq('id', event.id)
+      .eq('created_by', userId)
+
+    if (error) {
+      setCancelling(false)
+      return
+    }
+
+    // Let everyone who joined know it's off
+    const others = attendees.filter((a: any) => a.user_id !== userId)
+    if (others.length > 0) {
+      await supabase.from('notifications').insert(
+        others.map((a: any) => ({
+          user_id: a.user_id,
+          type: 'event_cancelled',
+          title: `"${event.title}" was cancelled`,
+          body: 'The host cancelled this event.',
+          link: '/events',
+        }))
+      )
+    }
+
+    setCancelling(false)
+    setShowCancelConfirm(false)
+    router.push('/events')
+  }
+
   const sendMeetupRequest = async (message: string) => {
     if (!requestModal || !userId || !event) return
     setSendingRequest(true)
@@ -313,6 +349,38 @@ export default function EventDetailPage() {
           onClose={() => setRequestModal(null)}
           sending={sendingRequest}
         />
+      )}
+
+      {/* Cancel event confirmation */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
+          <div className="relative bg-[#111] border border-gray-800 rounded-3xl w-full max-w-md p-5 z-10"
+            style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}>
+            <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
+            <h3 className="font-bold text-lg mb-1 text-white">Cancel this event?</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              {attendees.length > 1
+                ? `${attendees.length - 1} other ${attendees.length - 1 === 1 ? 'person' : 'people'} joined — they'll be notified it's cancelled. This can't be undone.`
+                : "This can't be undone."}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                className="flex-1 border border-gray-700 text-gray-400 font-medium py-3 rounded-xl transition hover:border-gray-500"
+              >
+                Keep event
+              </button>
+              <button
+                onClick={handleCancelEvent}
+                disabled={cancelling}
+                className="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50"
+              >
+                {cancelling ? 'Cancelling…' : 'Cancel event'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── Hero header ─────────────────────────────────────────────────── */}
@@ -503,6 +571,13 @@ export default function EventDetailPage() {
             >
               💬
             </Link>
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              className="flex items-center justify-center px-4 border border-red-900/60 text-red-400 hover:bg-red-950/40 rounded-2xl transition text-sm font-medium"
+              title="Cancel event"
+            >
+              Cancel
+            </button>
           </div>
         ) : isAttending ? (
           <div className="flex gap-2">
