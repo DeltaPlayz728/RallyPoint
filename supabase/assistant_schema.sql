@@ -10,6 +10,10 @@ alter table profiles add column if not exists is_bot boolean not null default fa
 alter table events add column if not exists is_suggested boolean not null default false;
 alter table events add column if not exists suggested_by uuid references auth.users(id);
 
+-- ── events: real venue tied to AI-suggested events ──────────────
+alter table events add column if not exists venue_name text;
+alter table events add column if not exists venue_address text;
+
 -- ── dm_threads ───────────────────────────────────────────────
 create table if not exists dm_threads (
   id uuid primary key default gen_random_uuid(),
@@ -84,6 +88,8 @@ create table if not exists event_proposals (
   city text not null,
   lat double precision not null,
   lng double precision not null,
+  venue_name text,
+  venue_address text,
   starts_at timestamptz not null,
   max_attendees int,
   price numeric not null default 0,

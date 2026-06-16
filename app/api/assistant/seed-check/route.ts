@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
+import { findRealVenue } from '@/lib/venueFinder'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -78,16 +79,23 @@ export async function POST(req: NextRequest) {
 
   const template = TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)]
 
+  // Try to anchor the proposal to a real nearby venue instead of just the
+  // user's coordinates. Free OSM lookup first; AI web search only kicks in
+  // (and only costs anything) if OSM finds nothing AND a key is configured.
+  const venue = await findRealVenue({ lat, lng, city, templateTitle: template.title })
+
   const { data: proposal, error: proposalError } = await supabaseAdmin
     .from('event_proposals')
     .insert({
       user_id: userId,
-      title: template.title,
+      title: venue ? `${template.title} at ${venue.name}` : template.title,
       description: template.description,
       type: template.type,
       city,
-      lat,
-      lng,
+      lat: venue?.lat ?? lat,
+      lng: venue?.lng ?? lng,
+      venue_name: venue?.name ?? null,
+      venue_address: venue?.address ?? null,
       starts_at: nextSaturdayEvening().toISOString(),
       max_attendees: 8,
       price: 0,
@@ -116,10 +124,14 @@ export async function POST(req: NextRequest) {
     weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
   })
 
+  const venueLine = proposal.venue_name
+    ? ` at ${proposal.venue_name}${proposal.venue_address ? ` (${proposal.venue_address})` : ''}`
+    : ''
+
   await supabaseAdmin.from('dm_messages').insert({
     thread_id: thread.id,
     sender_id: bot.id,
-    content: `Hey — it's pretty quiet around ${city} right now. Want me to set up a "${template.title}" for ${when}? It'd be marked as suggested by me, and you (or anyone) can still tweak the details after. [[PROPOSAL:${proposal.id}]]`,
+    content: `Hey — it's pretty quiet around ${city} right now. Want me to set up a "${template.title}"${venueLine} for ${when}? It'd be marked as suggested by me, and you (or anyone) can still tweak the details after. [[PROPOSAL:${proposal.id}]]`,
   })
 
   return NextResponse.json({ proposed: true, proposalId: proposal.id, threadId: thread.id })

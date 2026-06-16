@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
       price: proposal.price,
       lat: proposal.lat,
       lng: proposal.lng,
+      venue_name: proposal.venue_name,
+      venue_address: proposal.venue_address,
       status: 'active',
       is_suggested: true,
       suggested_by: bot.id,
@@ -84,10 +86,11 @@ export async function POST(req: NextRequest) {
     .eq('id', proposalId)
 
   if (thread) {
+    const addressLine = event.venue_address ? ` It's at ${event.venue_address}.` : ''
     await supabaseAdmin.from('dm_messages').insert({
       thread_id: thread.id,
       sender_id: bot.id,
-      content: `Done — "${event.title}" is live and you're on the list. Invite a few people to get it going! 🎉`,
+      content: `Done — "${event.title}" is live and you're on the list.${addressLine} Invite a few people to get it going! 🎉`,
     })
   }
 
