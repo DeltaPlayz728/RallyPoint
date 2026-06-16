@@ -212,6 +212,8 @@ function useMapAnimations() {
         box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
       }
       .leaflet-popup-content { margin: 0 !important; }
+      /* The "you are here" dot must never intercept clicks meant for pins underneath it */
+      .rp-user-dot { pointer-events: none !important; }
     `
     document.head.appendChild(style)
   }, [])
@@ -221,7 +223,7 @@ function useMapAnimations() {
 
 function createUserDotIcon() {
   return L.divIcon({
-    className: '',
+    className: 'rp-user-dot',
     html: `
       <div style="
         width: 16px; height: 16px;
