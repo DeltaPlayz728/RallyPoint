@@ -22,6 +22,7 @@ type Event = {
   price: number
   created_by: string
   status: string
+  is_suggested?: boolean
 }
 
 type MeetupRequestMap = Record<string, 'pending' | 'accepted' | 'declined'>
@@ -349,6 +350,11 @@ export default function EventDetailPage() {
           }`}>
             {isCasual ? '😊 Casual Meetup' : '🎳 Social Event'}
           </span>
+          {event.is_suggested && (
+            <span className="ml-2 text-xs px-3 py-1.5 rounded-full font-semibold border bg-orange-500/10 text-orange-400 border-orange-500/30">
+              ✨ Suggested by RallyPoint
+            </span>
+          )}
         </div>
 
         {/* Title + price */}

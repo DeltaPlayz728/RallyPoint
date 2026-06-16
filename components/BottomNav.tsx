@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 const navItems = [
   { href: '/map',           label: 'Map',     icon: '🗺️' },
   { href: '/events',        label: 'Events',  icon: '🎳' },
-  { href: '/events/create', label: 'Create',  icon: '➕', special: true },
+  { href: '/events/create', label: 'Rally',   icon: '📍', special: true },
   { href: '/friends',       label: 'Friends', icon: '🤝' },
   { href: '/profile',       label: 'Profile', icon: '👤' },
 ]
@@ -20,10 +20,17 @@ export default function BottomNav() {
         {navItems.map(item => {
           const isActive = pathname === item.href || (item.href !== '/events/create' && pathname.startsWith(item.href))
           if (item.special) {
+            const isCreateActive = pathname.startsWith(item.href)
             return (
               <Link key={item.href} href={item.href} className="flex flex-col items-center px-3 py-1">
-                <span className="bg-orange-500 w-10 h-10 rounded-2xl flex items-center justify-center text-xl mb-0.5">➕</span>
-                <span className="text-xs text-gray-500">Create</span>
+                <span className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl mb-0.5 transition ${
+                  isCreateActive ? 'bg-orange-500' : 'bg-transparent'
+                }`}>
+                  {item.icon}
+                </span>
+                <span className={`text-xs transition ${isCreateActive ? 'text-orange-500' : 'text-gray-500'}`}>
+                  {item.label}
+                </span>
               </Link>
             )
           }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -187,16 +187,18 @@ function VenueSheet({
 
 function EventSheet({
   event,
+  nearbyEvents,
   onClose,
 }: {
   event: EventPin
+  nearbyEvents: EventPin[]
   onClose: () => void
 }) {
   return (
     <>
       <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
       <div
-        className="fixed left-0 right-0 bottom-[72px] z-50 bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6"
+        className="fixed left-0 right-0 bottom-[72px] z-50 bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
         style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
@@ -227,6 +229,95 @@ function EventSheet({
         >
           View Event →
         </Link>
+
+        {/* Nearby events */}
+        {nearbyEvents.length > 0 && (
+          <div className="mt-5">
+            <div className="h-px bg-gray-800 mb-4" />
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">
+              Also nearby
+            </p>
+            <div className="space-y-2">
+              {nearbyEvents.map((nearby) => (
+                <Link
+                  key={nearby.id}
+                  href={`/events/${nearby.id}`}
+                  className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold text-sm truncate">{nearby.title}</p>
+                    <p className="text-gray-500 text-xs mt-0.5">{formatDate(nearby.starts_at)}</p>
+                  </div>
+                  <span className={`ml-3 text-xs font-bold shrink-0 ${nearby.price > 0 ? 'text-orange-400' : 'text-green-400'}`}>
+                    {nearby.price > 0 ? `€${nearby.price}` : 'Free'}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+// ─── City search sheet ────────────────────────────────────────────────────────
+
+function CitySheet({
+  cityName,
+  events,
+  onClose,
+}: {
+  cityName: string
+  events: EventPin[]
+  onClose: () => void
+}) {
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
+      <div
+        className="fixed left-0 right-0 bottom-[72px] z-50 bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
+        style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
+      >
+        <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
+
+        <h2 className="text-white font-bold text-lg mb-1">
+          {cityName}
+        </h2>
+        <p className="text-gray-500 text-xs mb-4">
+          {events.length} event{events.length !== 1 ? 's' : ''} in this area
+        </p>
+
+        {events.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-400 text-sm">No upcoming events in this area yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {events.map((event) => (
+              <Link
+                key={event.id}
+                href={`/events/${event.id}`}
+                className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm truncate">{event.title}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    {formatDate(event.starts_at)} · {event.location}
+                  </p>
+                </div>
+                <div className="ml-3 flex flex-col items-end gap-1 shrink-0">
+                  <span className={`text-xs font-bold ${event.price > 0 ? 'text-orange-400' : 'text-green-400'}`}>
+                    {event.price > 0 ? `€${event.price}` : 'Free'}
+                  </span>
+                  {event.attendee_count > 0 && (
+                    <span className="text-gray-500 text-xs">👥 {event.attendee_count}</span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </>
   )
@@ -242,10 +333,16 @@ export default function MapPage() {
   const [venues, setVenues]               = useState<Venue[]>([])
   const [loading, setLoading]             = useState(true)
   const [activeFilter, setActiveFilter]   = useState<Filter>('all')
-  const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null)
-  const [selectedEvent, setSelectedEvent] = useState<EventPin | null>(null)
-  const [userCenter, setUserCenter]       = useState<[number, number]>(FALLBACK_CENTER)
-  const [userDot, setUserDot]             = useState<[number, number] | null>(null)
+  const [selectedVenue, setSelectedVenue]   = useState<Venue | null>(null)
+  const [selectedEvent, setSelectedEvent]   = useState<EventPin | null>(null)
+  const [nearbyEvents, setNearbyEvents]     = useState<EventPin[]>([])
+  const [userCenter, setUserCenter]         = useState<[number, number]>(FALLBACK_CENTER)
+  const [userDot, setUserDot]               = useState<[number, number] | null>(null)
+  const [cityQuery, setCityQuery]           = useState('')
+  const [citySearching, setCitySearching]   = useState(false)
+  const [citySheet, setCitySheet]           = useState<{ name: string; events: EventPin[] } | null>(null)
+  const [mapCenter, setMapCenter]           = useState<[number, number]>(FALLBACK_CENTER)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -273,6 +370,7 @@ export default function MapPage() {
         async (pos) => {
           const { latitude: lat, longitude: lng } = pos.coords
           setUserCenter([lat, lng])
+          setMapCenter([lat, lng])
           setUserDot([lat, lng])
 
           // Fetch venues near the user
@@ -281,6 +379,23 @@ export default function MapPage() {
             const data = await res.json()
             if (data.venues) setVenues(data.venues)
           } catch { /* venue layer optional */ }
+
+          // Once per browser session: if this area looks empty, let the assistant propose a seed event
+          if (!sessionStorage.getItem('rp_seed_checked')) {
+            sessionStorage.setItem('rp_seed_checked', '1')
+            try {
+              const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+              const geoData = await geoRes.json()
+              const city = geoData?.address?.city || geoData?.address?.town || geoData?.address?.village || geoData?.address?.county
+              if (city) {
+                await fetch('/api/assistant/seed-check', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: user.id, lat, lng, city }),
+                })
+              }
+            } catch { /* seed proposal is best-effort, never block the map */ }
+          }
         },
         async () => {
           // Location denied — fall back to Breda venues
@@ -333,17 +448,58 @@ export default function MapPage() {
 
   const handleVenueClick = (venue: Venue) => {
     setSelectedEvent(null)
+    setCitySheet(null)
     setSelectedVenue(venue)
   }
 
   const handleEventClick = (event: EventPin) => {
     setSelectedVenue(null)
+    setCitySheet(null)
+    const nearby = events.filter(
+      (e) => e.id !== event.id && distanceM(event.lat, event.lng, e.lat, e.lng) < 300
+    )
+    setNearbyEvents(nearby)
     setSelectedEvent(event)
+  }
+
+  const handleCitySearch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const q = cityQuery.trim()
+    if (!q) return
+    setCitySearching(true)
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      )
+      const data = await res.json()
+      if (data.length === 0) {
+        alert(`Couldn't find "${q}"`)
+        setCitySearching(false)
+        return
+      }
+      const { lat, lon, display_name } = data[0]
+      const center: [number, number] = [parseFloat(lat), parseFloat(lon)]
+      setMapCenter(center)
+      // Events within 25km of the city center
+      const cityEvents = events.filter(
+        (ev) => distanceM(center[0], center[1], ev.lat, ev.lng) < 25000
+      )
+      const shortName = display_name.split(',')[0]
+      setCitySheet({ name: shortName, events: cityEvents })
+      setSelectedEvent(null)
+      setSelectedVenue(null)
+      searchRef.current?.blur()
+    } catch {
+      alert('Search failed. Please try again.')
+    }
+    setCitySearching(false)
   }
 
   const closeSheets = () => {
     setSelectedVenue(null)
     setSelectedEvent(null)
+    setCitySheet(null)
   }
 
   if (loading) {
@@ -362,8 +518,35 @@ export default function MapPage() {
 
       <TopBar title={`${filteredEvents.length} event${filteredEvents.length !== 1 ? 's' : ''}${venues.length > 0 ? ` · ${venues.length} venues` : ''}`} />
 
+      {/* City search bar */}
+      <form onSubmit={handleCitySearch} className="px-4 pt-2 pb-1 shrink-0 z-10">
+        <div className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-full px-4 py-2">
+          <span className="text-gray-500 text-sm">🔍</span>
+          <input
+            ref={searchRef}
+            type="text"
+            value={cityQuery}
+            onChange={(e) => setCityQuery(e.target.value)}
+            placeholder="Search a city or area…"
+            className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-600"
+          />
+          {cityQuery && (
+            <button
+              type="button"
+              onClick={() => setCityQuery('')}
+              className="text-gray-600 hover:text-gray-400 text-xs"
+            >
+              ✕
+            </button>
+          )}
+          {citySearching && (
+            <div className="w-3.5 h-3.5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          )}
+        </div>
+      </form>
+
       {/* Filter chips */}
-      <div className="px-4 pt-2 pb-2 shrink-0 z-10">
+      <div className="px-4 pt-1 pb-2 shrink-0 z-10">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {FILTERS.map((f) => (
             <button
@@ -407,7 +590,7 @@ export default function MapPage() {
           selectedVenueId={selectedVenue?.place_id ?? null}
           onVenueClick={handleVenueClick}
           onEventClick={handleEventClick}
-          center={userCenter}
+          center={mapCenter}
           userDot={userDot}
         />
       </div>
@@ -425,6 +608,16 @@ export default function MapPage() {
       {selectedEvent && (
         <EventSheet
           event={selectedEvent}
+          nearbyEvents={nearbyEvents}
+          onClose={closeSheets}
+        />
+      )}
+
+      {/* City search sheet */}
+      {citySheet && (
+        <CitySheet
+          cityName={citySheet.name}
+          events={citySheet.events}
           onClose={closeSheets}
         />
       )}

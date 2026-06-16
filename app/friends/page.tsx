@@ -66,6 +66,7 @@ export default function FriendsPage() {
   const [friends, setFriends] = useState<FriendRow[]>([])
   const [dms, setDms] = useState<DmRow[]>([])
   const [eventChats, setEventChats] = useState<EventChatRow[]>([])
+  const [botId, setBotId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<View>('chat')
   const [search, setSearch] = useState('')
@@ -104,6 +105,14 @@ export default function FriendsPage() {
         }
       })
       setFriends(rows)
+
+      // RallyPoint Assistant — always pinned at the top, even with 0 friends
+      const { data: bot } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('is_bot', true)
+        .maybeSingle()
+      setBotId(bot?.id ?? null)
 
       // Load event chats (events the user has joined)
       const { data: attendeeData } = await supabase
@@ -238,6 +247,28 @@ export default function FriendsPage() {
                 💬 Messages &amp; Groups
               </p>
             </div>
+
+            {/* RallyPoint Assistant — pinned, always visible */}
+            {botId && !search && (
+              <Link
+                href={`/inbox/dm/${botId}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-900/40 active:bg-gray-900/60 transition"
+              >
+                <div className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center text-lg shrink-0">
+                  📍
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm truncate flex items-center gap-1.5">
+                    RallyPoint Assistant
+                    <span className="text-[10px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded-full font-semibold">
+                      AI
+                    </span>
+                  </p>
+                  <p className="text-gray-600 text-xs truncate">Find something to do, or plan your own</p>
+                </div>
+                <span className="text-gray-700 text-lg">›</span>
+              </Link>
+            )}
 
             {loading ? (
               <div className="space-y-1 px-4">

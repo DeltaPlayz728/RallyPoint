@@ -84,14 +84,20 @@ function createVenueIcon(types: string[], selected: boolean) {
   })
 }
 
-function createEventIcon(type: string, attendeeCount: number) {
+function createEventIcon(type: string, attendeeCount: number, eventId: string) {
   const color = type === 'casual' ? '#22c55e' : '#f97316'
   const bg    = type === 'casual' ? '#052e16' : '#1c0a00'
+
+  // Deterministic drift variant + timing based on event id
+  const hash = eventId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  const driftClass = `rp-dot-drift-${(hash % 3) + 1}`
+  const driftDur   = (4.5 + (hash % 30) * 0.1).toFixed(1) + 's'
+  const driftDelay = -((hash % 40) * 0.1).toFixed(1) + 's'
 
   return L.divIcon({
     className: '',
     html: `
-      <div style="position: relative; width: 36px; height: 44px;">
+      <div class="${driftClass}" style="position: relative; width: 36px; height: 44px; --drift-dur:${driftDur}; --drift-delay:${driftDelay};">
         <div style="
           width: 36px; height: 36px;
           background: ${bg};
@@ -134,6 +140,28 @@ function MapCenter({ center }: { center: [number, number] }) {
   return null
 }
 
+// ─── Organic heat zone helper ─────────────────────────────────────────────────
+// Returns 3 slightly offset circle centers + radii to make a non-circular blob
+
+function heatZonePetals(lat: number, lng: number): Array<{ lat: number; lng: number; r: number; opacity: number }> {
+  // Use fractional digits to seed consistent offsets
+  const seed = (lat * 1000 % 1 + lng * 1000 % 1 + 1) % 1  // 0–1
+  const seed2 = (lat * 3000 % 1 + lng * 2000 % 1 + 1) % 1
+  const seed3 = (lat * 7000 % 1 + lng * 5000 % 1 + 1) % 1
+  // 1m ≈ 0.000009° lat, 0.0000143° lng (at ~51° lat)
+  const mLat = 0.000009
+  const mLng = 0.0000143
+
+  return [
+    // Main blob — slightly off-center
+    { lat: lat + (seed - 0.5) * 30 * mLat,  lng: lng + (seed2 - 0.5) * 30 * mLng, r: 260 + seed * 60,  opacity: 0.14 },
+    // Left lobe
+    { lat: lat + (seed2 - 0.3) * 50 * mLat, lng: lng - (seed3 + 0.2) * 50 * mLng, r: 160 + seed3 * 50, opacity: 0.09 },
+    // Right lobe
+    { lat: lat - (seed3 - 0.4) * 40 * mLat, lng: lng + (seed + 0.3) * 40 * mLng,  r: 140 + seed2 * 60, opacity: 0.08 },
+  ]
+}
+
 // ─── Inject animation CSS once ───────────────────────────────────────────────
 
 function useMapAnimations() {
@@ -148,9 +176,33 @@ function useMapAnimations() {
         65%  { transform: translateY(5px)   scale(1.08); opacity: 1; }
         100% { transform: translateY(0)     scale(1);    opacity: 1; }
       }
+      @keyframes rpDotDrift1 {
+        0%,100% { transform: translate(0px, 0px); }
+        25%     { transform: translate(1.5px, -1px); }
+        50%     { transform: translate(-1px, 1.5px); }
+        75%     { transform: translate(1px, 1px); }
+      }
+      @keyframes rpDotDrift2 {
+        0%,100% { transform: translate(0px, 0px); }
+        20%     { transform: translate(-1.5px, 1px); }
+        55%     { transform: translate(1px, -1.5px); }
+        80%     { transform: translate(-0.5px, -0.5px); }
+      }
+      @keyframes rpDotDrift3 {
+        0%,100% { transform: translate(0px, 0px); }
+        33%     { transform: translate(1px, 1.5px); }
+        66%     { transform: translate(-1.5px, -0.5px); }
+      }
+      @keyframes rpZonePulse {
+        0%,100% { opacity: 1; }
+        50%     { opacity: 0.6; }
+      }
       .rp-venue-pin {
         animation: rpFlagDrop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
       }
+      .rp-dot-drift-1 { animation: rpDotDrift1 var(--drift-dur, 5s) ease-in-out infinite; animation-delay: var(--drift-delay, 0s); }
+      .rp-dot-drift-2 { animation: rpDotDrift2 var(--drift-dur, 5s) ease-in-out infinite; animation-delay: var(--drift-delay, 0s); }
+      .rp-dot-drift-3 { animation: rpDotDrift3 var(--drift-dur, 5s) ease-in-out infinite; animation-delay: var(--drift-delay, 0s); }
       /* Override Leaflet popup styles */
       .leaflet-popup-content-wrapper,
       .leaflet-popup-tip {
@@ -220,20 +272,22 @@ export default function MapView({
       {/* Recenter when user location arrives */}
       <MapCenter center={center} />
 
-      {/* Heat zones — semi-transparent circles that stack where events cluster */}
-      {events.map((event) => (
-        <Circle
-          key={`zone-${event.id}`}
-          center={[event.lat, event.lng]}
-          radius={280}
-          interactive={false}
-          pathOptions={{
-            fillColor: '#f59e0b',
-            fillOpacity: 0.13,
-            stroke: false,
-          }}
-        />
-      ))}
+      {/* Heat zones — organic multi-petal blobs */}
+      {events.flatMap((event) =>
+        heatZonePetals(event.lat, event.lng).map((petal, i) => (
+          <Circle
+            key={`zone-${event.id}-${i}`}
+            center={[petal.lat, petal.lng]}
+            radius={petal.r}
+            interactive={false}
+            pathOptions={{
+              fillColor: '#f59e0b',
+              fillOpacity: petal.opacity,
+              stroke: false,
+            }}
+          />
+        ))
+      )}
 
       {/* Venue markers */}
       {venues.map((venue) => (
@@ -252,7 +306,7 @@ export default function MapView({
         <Marker
           key={event.id}
           position={[event.lat, event.lng]}
-          icon={createEventIcon(event.type, event.attendee_count)}
+          icon={createEventIcon(event.type, event.attendee_count, event.id)}
           eventHandlers={{
             click: () => onEventClick(event),
           }}
