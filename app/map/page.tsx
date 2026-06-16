@@ -107,13 +107,13 @@ function VenueSheet({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 z-40"
+        className="fixed inset-0 bg-black/40 z-[1000]"
         onClick={onClose}
       />
 
       {/* Sheet */}
       <div
-        className="fixed left-0 right-0 bottom-[72px] z-50 bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[65vh] overflow-y-auto"
+        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[65vh] overflow-y-auto"
         style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         {/* Drag handle */}
@@ -196,9 +196,9 @@ function EventSheet({
 }) {
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 z-[1000]" onClick={onClose} />
       <div
-        className="fixed left-0 right-0 bottom-[72px] z-50 bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
+        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
         style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
@@ -274,9 +274,9 @@ function CitySheet({
 }) {
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 z-[1000]" onClick={onClose} />
       <div
-        className="fixed left-0 right-0 bottom-[72px] z-50 bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
+        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-[#0f0f0f] border border-gray-800 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
         style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
@@ -583,7 +583,11 @@ export default function MapPage() {
       </div>
 
       {/* Map */}
-      <div className="flex-1 min-h-0 pb-[72px]">
+      <div
+        className={`flex-1 min-h-0 pb-[72px] transition-opacity duration-200 ${
+          selectedVenue || selectedEvent || citySheet ? 'opacity-30 pointer-events-none' : ''
+        }`}
+      >
         <MapView
           events={filteredEvents}
           venues={venues}
