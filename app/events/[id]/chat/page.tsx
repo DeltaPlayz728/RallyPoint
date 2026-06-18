@@ -228,4 +228,16 @@ export default function EventChatPage() {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Send a message..."
-          className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-
+          className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+        />
+        <button
+          type="submit"
+          disabled={sending || !newMessage.trim()}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-40"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  )
+}

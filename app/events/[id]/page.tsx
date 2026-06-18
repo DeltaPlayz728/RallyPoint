@@ -623,4 +623,8 @@ export default function EventDetailPage() {
               ? `Pay €${event.price} & Join →`
               : `Join ${isCasual ? 'Meetup' : 'Event'} →`}
           </button>
-        )
+        )}
+      </div>
+    </div>
+  )
+}
