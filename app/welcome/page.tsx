@@ -63,7 +63,7 @@ export default function WelcomePage() {
                 <span className="text-orange-500">Start showing up.</span>
               </h1>
               <p className="text-gray-400 text-base leading-relaxed">
-                RallyPoint connects people 16–30 through real events — casual meetups, bowling nights, and everything in between.
+                RallyPoint connects people 18–30 through real events — casual meetups, bowling nights, and everything in between.
               </p>
             </div>
 

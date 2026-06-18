@@ -123,16 +123,22 @@ export default function EventChatPage() {
 
     const content = newMessage.trim()
 
-    const { error } = await supabase.from('messages').insert({
-      chat_id: chatId,
-      user_id: userId,
-      content,
-    })
+    const { data: inserted, error } = await supabase
+      .from('messages')
+      .insert({ chat_id: chatId, user_id: userId, content })
+      .select('*, profiles(username, full_name)')
+      .single()
 
     if (error) {
       console.error('Send error:', error.message)
     } else {
       setNewMessage('')
+
+      // Show it immediately rather than waiting on the realtime subscription —
+      // dedupe in case the realtime event also delivers it.
+      if (inserted) {
+        setMessages(prev => prev.some(m => m.id === inserted.id) ? prev : [...prev, inserted])
+      }
 
       // Notify all other attendees
       const { data: attendees } = await supabase
@@ -222,16 +228,4 @@ export default function EventChatPage() {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Send a message..."
-          className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
-        />
-        <button
-          type="submit"
-          disabled={sending || !newMessage.trim()}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-40"
-        >
-          Send
-        </button>
-      </form>
-    </div>
-  )
-}
+          className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-

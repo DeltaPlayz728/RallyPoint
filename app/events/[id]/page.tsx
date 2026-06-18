@@ -320,7 +320,7 @@ export default function EventDetailPage() {
   const isCasual = event.type === 'casual'
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32">
+    <div className="min-h-screen bg-black text-white pb-48">
 
       {/* Post-event rating modal */}
       {showRating && event && (
@@ -558,8 +558,9 @@ export default function EventDetailPage() {
         </div>
       )}
 
-      {/* ── Fixed bottom CTA bar ─────────────────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-black/95 backdrop-blur-sm border-t border-gray-900 px-4 pt-3 pb-8">
+      {/* ── Fixed bottom CTA bar — sits above the bottom nav (which is z-50 and
+            would otherwise swallow clicks meant for this bar) ──────────────── */}
+      <div className="fixed bottom-20 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-t border-gray-900 px-4 pt-3 pb-4">
         {isHost ? (
           <div className="flex gap-2">
             <div className="flex-1 bg-gray-900 border border-gray-800 rounded-2xl px-4 py-3 text-sm text-gray-500 text-center">
@@ -622,8 +623,4 @@ export default function EventDetailPage() {
               ? `Pay €${event.price} & Join →`
               : `Join ${isCasual ? 'Meetup' : 'Event'} →`}
           </button>
-        )}
-      </div>
-    </div>
-  )
-}
+        )
