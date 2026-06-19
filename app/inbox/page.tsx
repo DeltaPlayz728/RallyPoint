@@ -40,6 +40,7 @@ export default function InboxPage() {
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+        .limit(50)
 
       setNotifications(data ?? [])
       setLoading(false)
