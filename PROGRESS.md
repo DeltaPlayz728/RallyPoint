@@ -75,29 +75,19 @@ Looked at `<img>` usage as a possible `next/image` swap (5 small avatar images a
 
 Not done (didn't seem worth the risk/complexity for an MVP at this stage): no infinite-scroll/cursor pagination was added — the `.limit()` caps are a quick safety net, not real pagination. If event/notification volume grows past a few hundred rows, revisit with proper cursor-based pagination.
 
-**Still need to push:** both `e85f88b` and `96c90dc` are committed locally but not pushed (no GitHub credentials in this sandbox). Run from your machine:
+**Still need to push:** `e85f88b`, `96c90dc`, and `5bf0980` are committed locally but not pushed (no GitHub credentials in this sandbox). Run from your machine:
 ```
 git pull --ff-only   # if needed
 git push origin main
 ```
 
-## What's still blocked on you (not actionable by an agent)
+### 8. Mobile/responsive pass (#93) — code-level review only, live click-through blocked by tooling
+**Important caveat: I could not actually shrink the browser viewport in this sandbox** — `resize_window` reports success but `window.innerWidth` stayed locked at 1568px regardless of what size I requested (confirmed via JS). So I was not able to do a real narrow-viewport click-through like I did for the earlier smoke tests. Don't take this section as "verified live on mobile" — it's a code review only. **Please do a real 2-minute check on your phone before considering Phase 4 done**: open the feed, create-event flow, an event detail page, and a DM thread on your actual device.
 
-- **#27**: Add a Google Places API key (map venue pins currently fall back to cache-only).
-- **#30**: Roll the Stripe keys — flagged as compromised in an earlier session; not yet rotated.
-- **#71**: Add an Anthropic API key to get real AI replies from the assistant bot (currently running in canned/template mode — deliberate, deferred to launch per earlier decision).
-- **#83**: Register the business + activate the live Stripe account.
+What the code review did check, and came back clean:
+- Viewport meta tag: confirmed via live JS (`document.querySelector('meta[name="viewport"]')`) that Next.js is correctly auto-injecting `width=device-width, initial-scale=1` — no explicit `viewport` export needed.
+- No fixed oversized pixel widths (`w-[Npx]` ≥ 400px) anywhere in `app/` or `components/` — layout is mobile-first (`grid-cols-1` default, `sm:` breakpoints scale *up* for desktop, not down).
+- Form inputs use the browser default 16px font (no `text-xs`/`text-sm` on `<input>`/`<textarea>` elements) — avoids the classic iOS Safari auto-zoom-on-focus bug.
+- Bottom-sheet modals (cancel-event, meetup request, report) already fixed at `z-[60]` above `BottomNav`'s `z-50` from an earlier session (#85) — checked this didn't regress.
 
-## Files worth knowing about
-
-- `lib/adminAuth.ts` — admin-only auth check, used by `/api/admin/*` routes.
-- `lib/sessionAuth.ts` — general "does this request's session match the claimed user id" check, used by friends/report/assistant routes.
-- `supabase/rls_policies.sql` — full RLS policy reference; has the fix for the events_select bug, not yet applied live.
-- `scripts/seed-test-cities.js` — existing pattern for one-off service-role scripts, if you need to seed test data (note: this sandbox has no network egress, so such scripts must be run from a machine that can actually reach Supabase).
-
-## Suggested next steps for the next session
-
-1. Confirm the admin/checkout/session-auth fixes are deployed and didn't break any flows (manually exercise: send a friend request, file a report, message the assistant bot, do a paid-event checkout).
-2. #85 is closed out (see item #1 update above). Optional follow-up: add a "cancelled" UI state to the event detail page.
-3. Decide how to close out #86 (seed a real past event vs. wait for a real one) — this is the last open smoke test blocking Phase 3.
-4. Move into Phase 4 (#78) launch polish: the remaining unreviewed surface area is mostly UI/UX polish at this point, not security — the security audit (#87) is done for the routes that exist today.
+One real gap found, not fixed (low priority, cosmetic): `components/BottomNav.tsx` is `fixed bottom-0` with `py-2` padding but no `padding-bottom: env(safe-area-inset-bottom)`. On notched/home-indicator iPhones this means the nav icons sit close to the gesture bar instead of being padded above it. Worth a smal
