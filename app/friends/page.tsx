@@ -149,11 +149,15 @@ export default function FriendsPage() {
 
   const handleRespond = async (friendshipId: string, action: 'accepted' | 'declined') => {
     if (!userId) return
-    await fetch('/api/friends', {
+    const res = await fetch('/api/friends', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ friendshipId, userId, action }),
     })
+    if (!res.ok) {
+      alert('Something went wrong. Please try again.')
+      return
+    }
     if (action === 'accepted') {
       setFriends(prev => prev.map(f =>
         f.friendshipId === friendshipId ? { ...f, status: 'accepted' as const } : f
@@ -165,11 +169,15 @@ export default function FriendsPage() {
 
   const handleRemove = async (friendshipId: string) => {
     if (!userId) return
-    await fetch('/api/friends', {
+    const res = await fetch('/api/friends', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ friendshipId, userId }),
     })
+    if (!res.ok) {
+      alert('Something went wrong. Please try again.')
+      return
+    }
     setFriends(prev => prev.filter(f => f.friendshipId !== friendshipId))
   }
 
