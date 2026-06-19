@@ -26,9 +26,13 @@ drop policy if exists "events_insert" on events;
 drop policy if exists "events_update" on events;
 drop policy if exists "events_delete" on events;
 
--- Anyone logged in can read active events
+-- Anyone logged in can read active events; hosts can always read their own
+-- (otherwise a host loses all access to their event the instant they cancel it —
+-- the event detail page's lookup-by-id starts returning 0 rows and bounces them away)
 create policy "events_select" on events
-  for select using (auth.role() = 'authenticated' and status = 'active');
+  for select using (
+    auth.role() = 'authenticated' and (status = 'active' or auth.uid() = created_by)
+  );
 
 -- Any logged-in user can create an event
 create policy "events_insert" on events

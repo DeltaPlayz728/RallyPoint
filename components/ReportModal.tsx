@@ -50,7 +50,7 @@ export default function ReportModal({ targetType, targetId, targetName, onClose 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div
         className="relative bg-[#111] border border-gray-800 rounded-3xl w-full max-w-md p-5 z-10"

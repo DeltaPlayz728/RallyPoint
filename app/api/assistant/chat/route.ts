@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
 import { generateAssistantReply } from '@/lib/assistant'
+import { requireMatchingUser } from '@/lib/sessionAuth'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,6 +56,11 @@ export async function POST(req: NextRequest) {
   }
   if (message.length > 2000) {
     return NextResponse.json({ error: 'Message too long' }, { status: 400 })
+  }
+  // userId must match the actual signed-in session — otherwise anyone could
+  // read/send DMs in someone else's bot conversation just by knowing their id.
+  if (!(await requireMatchingUser(req, userId))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const botId = await getBotId()

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
+import { requireMatchingUser } from '@/lib/sessionAuth'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +18,11 @@ export async function POST(req: NextRequest) {
   const { requesterId, receiverId } = await req.json()
   if (!requesterId || !receiverId || requesterId === receiverId) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+  // requesterId must match the actual signed-in session — otherwise anyone
+  // could send friend requests "as" someone else just by knowing their id.
+  if (!(await requireMatchingUser(req, requesterId))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   // Check if a friendship already exists in either direction
@@ -69,6 +75,9 @@ export async function PATCH(req: NextRequest) {
   if (!friendshipId || !userId || !['accepted', 'declined'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
+  if (!(await requireMatchingUser(req, userId))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const { data, error } = await supabaseAdmin
     .from('friendships')
@@ -107,6 +116,9 @@ export async function PATCH(req: NextRequest) {
 // DELETE — cancel request or unfriend
 export async function DELETE(req: NextRequest) {
   const { friendshipId, userId } = await req.json()
+  if (!(await requireMatchingUser(req, userId))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const { error } = await supabaseAdmin
     .from('friendships')

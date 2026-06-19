@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getAdminUser } from '@/lib/adminAuth'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await getAdminUser(req))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { data, error } = await supabaseAdmin
     .from('reports')
     .select('*')
@@ -18,6 +23,10 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
+  if (!(await getAdminUser(req))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { id, status } = await req.json()
   const { error } = await supabaseAdmin
     .from('reports')

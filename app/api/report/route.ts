@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
+import { requireMatchingUser } from '@/lib/sessionAuth'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +18,12 @@ export async function POST(req: NextRequest) {
 
   if (!reporterId || !targetType || !targetId || !reason) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  }
+  // reporterId must match the actual signed-in session — otherwise anyone
+  // could file reports "as" someone else, polluting moderation data and
+  // potentially triggering auto-suspension logic attributed to the wrong user.
+  if (!(await requireMatchingUser(req, reporterId))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const { error } = await supabaseAdmin.from('reports').insert({

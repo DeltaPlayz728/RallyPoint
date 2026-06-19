@@ -67,7 +67,7 @@ function MeetupModal({
 }) {
   const [message, setMessage] = useState('')
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-[#111] border border-gray-800 rounded-3xl w-full max-w-md p-5 z-10"
         style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}>
@@ -353,7 +353,7 @@ export default function EventDetailPage() {
 
       {/* Cancel event confirmation */}
       {showCancelConfirm && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
           <div className="relative bg-[#111] border border-gray-800 rounded-3xl w-full max-w-md p-5 z-10"
             style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}>
@@ -628,3 +628,4 @@ export default function EventDetailPage() {
     </div>
   )
 }
+

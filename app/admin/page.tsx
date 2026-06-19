@@ -70,20 +70,28 @@ export default function AdminPage() {
   }, [])
 
   const updateReport = async (id: string, status: string) => {
-    await fetch('/api/admin/reports', {
+    const res = await fetch('/api/admin/reports', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
+    if (!res.ok) {
+      alert('Failed to update report. Please try again.')
+      return
+    }
     setReports(prev => prev.map(r => r.id === id ? { ...r, status } : r))
   }
 
   const liftSuspension = async (userId: string) => {
-    await fetch('/api/admin/suspensions', {
+    const res = await fetch('/api/admin/suspensions', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId }),
     })
+    if (!res.ok) {
+      alert('Failed to lift suspension. Please try again.')
+      return
+    }
     setSuspensions(prev => prev.filter(s => s.user_id !== userId))
   }
 
