@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { triggerSeedCheck } from '@/lib/seedCheck'
 
 // Avatar colour palette — used for attendee dot row
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
@@ -231,6 +232,10 @@ export default function FeedPage() {
       setIsMinor(profile?.is_minor ?? false)
       setUserInterests(profile?.interests ?? [])
 
+      // If this area looks empty, let the assistant propose a seed event (at most
+      // once/day across Map/Feed/Events — see lib/seedCheck.ts).
+      triggerSeedCheck(user.id)
+
       // Load casual events with attendee count — only upcoming events
       const { data, error } = await supabase
         .from('events')
@@ -239,6 +244,7 @@ export default function FeedPage() {
         .eq('type', 'casual')
         .gte('starts_at', new Date().toISOString())
         .order('starts_at', { ascending: true })
+        .limit(100)
 
       if (!error && data) {
         setEvents(data.map((e: any) => ({

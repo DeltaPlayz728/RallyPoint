@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import type { EventPin, Venue } from '@/components/MapView'
 import TopBar from '@/components/TopBar'
+import { triggerSeedCheck } from '@/lib/seedCheck'
 
 // Leaflet must be loaded client-side only
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -357,6 +358,7 @@ export default function MapPage() {
         .not('lat', 'is', null)
         .not('lng', 'is', null)
         .gte('starts_at', new Date().toISOString())
+        .limit(200)
 
       const mapped: EventPin[] = (eventData ?? []).map((e: any) => ({
         ...e,
@@ -380,30 +382,16 @@ export default function MapPage() {
             if (data.venues) setVenues(data.venues)
           } catch { /* venue layer optional */ }
 
-          // Once per browser session: if this area looks empty, let the assistant propose a seed event
-          if (!sessionStorage.getItem('rp_seed_checked')) {
-            sessionStorage.setItem('rp_seed_checked', '1')
-            try {
-              const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
-              const geoData = await geoRes.json()
-              const city = geoData?.address?.city || geoData?.address?.town || geoData?.address?.village || geoData?.address?.county
-              if (city) {
-                await fetch('/api/assistant/seed-check', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ userId: user.id, lat, lng, city }),
-                })
-              }
-            } catch { /* seed proposal is best-effort, never block the map */ }
-          }
+          // If this area looks empty, let the assistant propose a seed event. This used
+          // to be inline here (once-per-session, Map-only); now shared via lib/seedCheck.ts
+          // so Feed and Events trigger it too, with one shared once-per-day gate.
+          triggerSeedCheck(user.id)
         },
         async () => {
-          // Location denied — fall back to Breda venues
-          try {
-            const res = await fetch('/api/venues?lat=51.5719&lng=4.7683&city=Breda')
-            const data = await res.json()
-            if (data.venues) setVenues(data.venues)
-          } catch { /* venue layer optional */ }
+          // Location denied — we don't actually know where this user is, so showing
+          // hardcoded Breda, NL venues to someone anywhere else in the world was just
+          // wrong (and meant the seed-event bot never even ran for these users). Leave
+          // the venue layer empty rather than silently lying about location.
         },
         { timeout: 6000, maximumAge: 60000 }
       )

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import TopBar from '@/components/TopBar'
+import { triggerSeedCheck } from '@/lib/seedCheck'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -133,6 +134,10 @@ export default function EventsPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
 
+      // If this area looks empty, let the assistant propose a seed event (at most
+      // once/day across Map/Feed/Events — see lib/seedCheck.ts).
+      triggerSeedCheck(user.id)
+
       const { data } = await supabase
         .from('events')
         .select(`
@@ -144,6 +149,7 @@ export default function EventsPage() {
         .eq('type', 'social')
         .gte('starts_at', new Date().toISOString())
         .order('starts_at', { ascending: true })
+        .limit(100)
 
       setEvents((data ?? []).map((e: any) => ({
         ...e,
