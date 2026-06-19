@@ -144,7 +144,6 @@ export default function EventsPage() {
         .eq('type', 'social')
         .gte('starts_at', new Date().toISOString())
         .order('starts_at', { ascending: true })
-        .limit(100)
 
       setEvents((data ?? []).map((e: any) => ({
         ...e,

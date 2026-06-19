@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RallyPoint
 
-## Getting Started
+A social app for spontaneous, low-pressure real-world meetups — casual hangouts, pickup sports, and organizer-run events. Find what's happening nearby, RSVP, chat with attendees, and meet up.
 
-First, run the development server:
+Live: https://rally-point-eb1q.vercel.app
+
+For current build status, known issues, and what's blocked, see [PROGRESS.md](./PROGRESS.md).
+
+## Stack
+
+- [Next.js](https://nextjs.org) (App Router)
+- [Supabase](https://supabase.com) — Postgres, Auth, Row Level Security, Storage
+- [Stripe](https://stripe.com) — paid event checkout
+- [Tailwind CSS](https://tailwindcss.com)
+- [Leaflet](https://leafletjs.com) / react-leaflet — map view
+- Deployed on [Vercel](https://vercel.com), auto-deploy from `main`
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You'll need a `.env.local` with Supabase, Stripe, and app URL variables (see the project's environment config — not committed). Without `GOOGLE_PLACES_API_KEY` or `ANTHROPIC_API_KEY` set, the map falls back to cached venues only and the assistant bot runs in canned/template-reply mode — both are deliberate fallbacks, not bugs.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure
 
-## Learn More
+- `app/` — routes (App Router), one folder per page; `app/api/*/route.ts` for API routes
+- `lib/` — shared server/client helpers (Supabase clients, rate limiting, auth checks, assistant logic)
+- `supabase/*.sql` — schema and Row Level Security policy definitions, run manually in the Supabase SQL Editor
+- `scripts/` — one-off Node scripts (seeding, migrations) that use the Supabase service-role key
 
-To learn more about Next.js, take a look at the following resources:
+## Security model
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Row Level Security on every table — see `supabase/rls_policies.sql` for the full policy set and rationale comments.
+- API routes that act on behalf of a specific user verify the caller's real Supabase session matches the claimed user id (`lib/sessionAuth.ts`) rather than trusting a client-supplied id.
+- Admin routes (`/api/admin/*`) require a verified session matching the admin allowlist (`lib/adminAuth.ts`) — there is no client-side-only gate left anywhere.
+- Stripe checkout amounts are always looked up server-side from the database, never taken from the client.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Learn more
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)

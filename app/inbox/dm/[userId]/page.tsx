@@ -171,17 +171,13 @@ export default function DmThreadPage() {
   const respondToProposal = async (proposalId: string, accept: boolean) => {
     if (!userId) return
     setRespondingTo(proposalId)
-    const res = await fetch('/api/assistant/seed-confirm', {
+    await fetch('/api/assistant/seed-confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, proposalId, accept }),
     })
-    setRespondingTo(null)
-    if (!res.ok) {
-      alert('Something went wrong. Please try again.')
-      return
-    }
     setResolvedProposals(prev => new Set(prev).add(proposalId))
+    setRespondingTo(null)
   }
 
   if (loading || !other) return (

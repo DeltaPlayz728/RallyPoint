@@ -357,7 +357,6 @@ export default function MapPage() {
         .not('lat', 'is', null)
         .not('lng', 'is', null)
         .gte('starts_at', new Date().toISOString())
-        .limit(200)
 
       const mapped: EventPin[] = (eventData ?? []).map((e: any) => ({
         ...e,

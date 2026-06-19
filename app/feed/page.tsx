@@ -239,7 +239,6 @@ export default function FeedPage() {
         .eq('type', 'casual')
         .gte('starts_at', new Date().toISOString())
         .order('starts_at', { ascending: true })
-        .limit(100)
 
       if (!error && data) {
         setEvents(data.map((e: any) => ({
