@@ -229,4 +229,5 @@ export default function PublicProfilePage() {
         </Link>
       </div>
     </div>
-  
+)
+}
