@@ -49,4 +49,12 @@ export default function BottomNav() {
                 isActive ? 'text-orange-500' : 'text-gray-500 hover:text-black dark:hover:text-white'
               }`}
             >
-              <span className
+              <span className="text-xl mb-0.5">{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
