@@ -79,40 +79,40 @@ export default function MeetupsPage() {
   }
 
   const statusBadge = (status: string) => {
-    if (status === 'accepted') return <span className="text-xs text-green-400 font-medium">✓ Accepted</span>
-    if (status === 'declined') return <span className="text-xs text-red-400 font-medium">✗ Declined</span>
-    return <span className="text-xs text-yellow-400 font-medium">⏳ Pending</span>
+    if (status === 'accepted') return <span className="text-xs text-green-600 font-medium">✓ Accepted</span>
+    if (status === 'declined') return <span className="text-xs text-red-600 font-medium">✗ Declined</span>
+    return <span className="text-xs text-yellow-700 font-medium">⏳ Pending</span>
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center text-gray-400">Loading...</div>
+    <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center text-gray-500">Loading...</div>
   )
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 pt-6 pb-24">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 pt-6 pb-24">
       <div className="max-w-lg mx-auto">
         <h1 className="text-2xl font-bold mb-1">1:1 Meetups</h1>
-        <p className="text-gray-400 text-sm mb-6">Connect with people from your events.</p>
+        <p className="text-gray-500 text-sm mb-6">Connect with people from your events.</p>
 
         {/* Incoming */}
         <section className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-400 mb-3">
+          <h2 className="text-sm font-semibold text-gray-500 mb-3">
             Incoming ({incoming.length})
           </h2>
           {incoming.length === 0 ? (
-            <div className="bg-gray-900 rounded-xl p-4 text-center text-gray-500 text-sm">
+            <div className="bg-white rounded-xl p-4 text-center text-gray-500 text-sm">
               No incoming requests yet.
             </div>
           ) : (
             <div className="space-y-3">
               {incoming.map(req => (
-                <div key={req.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div key={req.id} className="bg-white border border-gray-200 rounded-xl p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <p className="font-medium text-white">
+                      <p className="font-medium text-[#15110d]">
                         {req.sender?.full_name ?? 'Someone'}
                         {req.sender?.username && (
-                          <span className="text-gray-400 text-sm ml-1">@{req.sender.username}</span>
+                          <span className="text-gray-500 text-sm ml-1">@{req.sender.username}</span>
                         )}
                       </p>
                       {req.events && (
@@ -122,7 +122,7 @@ export default function MeetupsPage() {
                     {statusBadge(req.status)}
                   </div>
                   {req.message && (
-                    <p className="text-sm text-gray-300 mb-3 italic">"{req.message}"</p>
+                    <p className="text-sm text-gray-600 mb-3 italic">"{req.message}"</p>
                   )}
                   {req.status === 'pending' && (
                     <div className="flex gap-2">
@@ -134,7 +134,7 @@ export default function MeetupsPage() {
                       </button>
                       <button
                         onClick={() => respond(req.id, 'declined')}
-                        className="flex-1 border border-gray-700 text-gray-400 hover:text-white text-sm font-medium py-2 rounded-lg transition"
+                        className="flex-1 border border-gray-300 text-gray-500 hover:text-black text-sm font-medium py-2 rounded-lg transition"
                       >
                         Decline
                       </button>
@@ -148,24 +148,24 @@ export default function MeetupsPage() {
 
         {/* Outgoing */}
         <section>
-          <h2 className="text-sm font-semibold text-gray-400 mb-3">
+          <h2 className="text-sm font-semibold text-gray-500 mb-3">
             Sent ({outgoing.length})
           </h2>
           {outgoing.length === 0 ? (
-            <div className="bg-gray-900 rounded-xl p-4 text-center text-gray-500 text-sm">
+            <div className="bg-white rounded-xl p-4 text-center text-gray-500 text-sm">
               You haven't sent any meetup requests yet.<br />
               <span className="text-xs mt-1 block">Request meetups from the attendee list on any event.</span>
             </div>
           ) : (
             <div className="space-y-3">
               {outgoing.map(req => (
-                <div key={req.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div key={req.id} className="bg-white border border-gray-200 rounded-xl p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-medium text-white">
+                      <p className="font-medium text-[#15110d]">
                         {req.receiver?.full_name ?? 'Someone'}
                         {req.receiver?.username && (
-                          <span className="text-gray-400 text-sm ml-1">@{req.receiver.username}</span>
+                          <span className="text-gray-500 text-sm ml-1">@{req.receiver.username}</span>
                         )}
                       </p>
                       {req.events && (
@@ -175,7 +175,7 @@ export default function MeetupsPage() {
                     {statusBadge(req.status)}
                   </div>
                   {req.message && (
-                    <p className="text-sm text-gray-300 mt-2 italic">"{req.message}"</p>
+                    <p className="text-sm text-gray-600 mt-2 italic">"{req.message}"</p>
                   )}
                 </div>
               ))}
@@ -184,5 +184,4 @@ export default function MeetupsPage() {
         </section>
       </div>
     </div>
-  )
-}
+  

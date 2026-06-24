@@ -27,14 +27,14 @@ export default function TopBar({ title }: TopBarProps) {
   }, [])
 
   return (
-    <div className="flex items-center justify-between px-4 pt-12 pb-3 bg-black border-b border-gray-900/60 sticky top-0 z-20">
+    <div className="flex items-center justify-between px-4 pt-12 pb-3 bg-[#fdf6ec] border-b border-gray-300 sticky top-0 z-20">
       {/* Logo */}
       <Link href="/map" className="shrink-0">
         <Logo size={30} />
       </Link>
 
       {/* Page title */}
-      <span className="text-sm font-medium text-gray-400">{title}</span>
+      <span className="text-sm font-medium text-gray-500">{title}</span>
 
       {/* Inbox bell */}
       <Link href="/inbox" className="relative p-1">

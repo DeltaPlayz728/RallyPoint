@@ -75,57 +75,57 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-white mb-2">Join RallyPoint</h1>
-        <p className="text-gray-400 mb-8">Find your people. Do things together.</p>
+        <h1 className="text-3xl font-bold text-[#15110d] mb-2">Join RallyPoint</h1>
+        <p className="text-gray-500 mb-8">Find your people. Do things together.</p>
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Full Name</label>
+            <label className="block text-sm text-gray-500 mb-1">Full Name</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="Your name"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <label className="block text-sm text-gray-500 mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Password</label>
+            <label className="block text-sm text-gray-500 mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="Min 6 characters"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Date of Birth</label>
+            <label className="block text-sm text-gray-500 mb-1">Date of Birth</label>
             <input
               type="date"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
             />
           </div>
 
@@ -140,7 +140,7 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p className="text-gray-400 text-sm text-center mt-6">
+        <p className="text-gray-500 text-sm text-center mt-6">
           Already have an account?{' '}
           <Link href="/auth/login" className="text-orange-500 hover:underline">
             Log in

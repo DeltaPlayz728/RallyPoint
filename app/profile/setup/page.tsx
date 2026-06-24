@@ -172,27 +172,27 @@ function ProfileSetupForm() {
 
   if (hydrating) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 py-8 pb-16">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 py-8 pb-16">
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
         <div className="mb-8">
           {isEditing && (
-            <button onClick={() => router.push('/profile')} className="text-gray-500 text-sm mb-4 block hover:text-gray-300 transition">
+            <button onClick={() => router.push('/profile')} className="text-gray-500 text-sm mb-4 block hover:text-black transition">
               ← Back
             </button>
           )}
           <h1 className="text-2xl font-bold mb-1">
             {isEditing ? 'Edit your profile' : 'Set up your profile'}
           </h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-500 text-sm">
             {isEditing
               ? 'Update your info, vibe, and availability.'
               : 'Help people know who you are before showing up.'}
@@ -205,7 +205,7 @@ function ProfileSetupForm() {
           <div className="flex flex-col items-center">
             <label className="cursor-pointer group relative" htmlFor="avatar-input">
               {/* Circle */}
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-900 border-2 border-gray-700 group-hover:border-orange-500 transition relative">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-white border-2 border-gray-300 group-hover:border-orange-500 transition relative">
                 {(avatarPreview ?? avatarUrl) ? (
                   <img
                     src={avatarPreview ?? avatarUrl!}
@@ -219,7 +219,7 @@ function ProfileSetupForm() {
                 )}
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-full">
-                  <span className="text-white text-xs font-semibold">Change</span>
+                  <span className="text-[#15110d] text-xs font-semibold">Change</span>
                 </div>
               </div>
               {/* Camera badge */}
@@ -242,29 +242,29 @@ function ProfileSetupForm() {
             <h2 className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-4">01 · Basics</h2>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Username</label>
+                <label className="block text-sm text-gray-500 mb-1">Username</label>
                 <input
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
                   required
                   placeholder="@yourname"
-                  className="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500"
+                  className="w-full bg-white text-[#15110d] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Your City</label>
+                <label className="block text-sm text-gray-500 mb-1">Your City</label>
                 <input
                   type="text"
                   value={city}
                   onChange={e => setCity(e.target.value)}
                   required
                   placeholder="e.g. Breda"
-                  className="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500"
+                  className="w-full bg-white text-[#15110d] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">
+                <label className="block text-sm text-gray-500 mb-1">
                   Bio <span className="text-gray-600">(optional)</span>
                 </label>
                 <textarea
@@ -273,7 +273,7 @@ function ProfileSetupForm() {
                   maxLength={160}
                   rows={2}
                   placeholder="A line about yourself..."
-                  className="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none"
+                  className="w-full bg-white text-[#15110d] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none"
                 />
                 <p className="text-gray-700 text-xs mt-1 text-right">{bio.length}/160</p>
               </div>
@@ -293,7 +293,7 @@ function ProfileSetupForm() {
                   className={`px-3 py-1.5 rounded-full text-sm border transition ${
                     selectedInterests.includes(interest)
                       ? 'bg-orange-500 border-orange-500 text-white'
-                      : 'bg-gray-900 border-gray-700 text-gray-300 hover:border-gray-500'
+                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-500'
                   }`}
                 >
                   {interest}
@@ -316,7 +316,7 @@ function ProfileSetupForm() {
                   className={`w-full text-left px-4 py-3 rounded-xl border transition ${
                     selectedVibe === vibe.id
                       ? 'bg-orange-500/15 border-orange-500 text-white'
-                      : 'bg-gray-900 border-gray-800 text-gray-300 hover:border-gray-600'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-gray-600'
                   }`}
                 >
                   <div className="font-semibold text-sm">{vibe.label}</div>
@@ -333,7 +333,7 @@ function ProfileSetupForm() {
 
             {/* Social battery */}
             <div className="mb-4">
-              <label className="block text-sm text-gray-400 mb-2">Social battery</label>
+              <label className="block text-sm text-gray-500 mb-2">Social battery</label>
               <div className="flex gap-2">
                 {BATTERIES.map(b => (
                   <button
@@ -343,7 +343,7 @@ function ProfileSetupForm() {
                     className={`flex-1 py-3 rounded-xl border text-center transition ${
                       battery === b.id
                         ? 'bg-orange-500/15 border-orange-500 text-white'
-                        : 'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600'
+                        : 'bg-white border-gray-200 text-gray-500 hover:border-gray-600'
                     }`}
                   >
                     <div className="text-lg mb-0.5">{b.label.split(' ')[0]}</div>
@@ -355,9 +355,9 @@ function ProfileSetupForm() {
             </div>
 
             {/* Open to meetups */}
-            <div className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4">
               <div>
-                <p className="text-sm text-white font-medium">Open to meetups this week</p>
+                <p className="text-sm text-[#15110d] font-medium">Open to meetups this week</p>
                 <p className="text-xs text-gray-500">Others can see you're available</p>
               </div>
               <button
@@ -375,7 +375,7 @@ function ProfileSetupForm() {
 
             {/* Preferred time */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Preferred time</label>
+              <label className="block text-sm text-gray-500 mb-2">Preferred time</label>
               <div className="grid grid-cols-2 gap-2">
                 {TIMES.map(t => (
                   <button
@@ -385,7 +385,7 @@ function ProfileSetupForm() {
                     className={`py-2.5 rounded-xl border text-sm transition ${
                       preferredTime === t.id
                         ? 'bg-orange-500/15 border-orange-500 text-white font-medium'
-                        : 'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600'
+                        : 'bg-white border-gray-200 text-gray-500 hover:border-gray-600'
                     }`}
                   >
                     {t.label}
@@ -407,14 +407,14 @@ function ProfileSetupForm() {
                 { label: 'TikTok',    value: tiktok,    set: setTiktok,    placeholder: '@username' },
                 { label: 'Snapchat',  value: snapchat,  set: setSnapchat,  placeholder: 'username' },
               ].map(({ label, value, set, placeholder }) => (
-                <div key={label} className="flex items-center bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 gap-3 focus-within:border-orange-500 transition">
+                <div key={label} className="flex items-center bg-white border border-gray-300 rounded-xl px-4 py-3 gap-3 focus-within:border-orange-500 transition">
                   <span className="text-gray-500 text-sm w-20 shrink-0">{label}</span>
                   <input
                     type="text"
                     value={value}
                     onChange={e => set(e.target.value)}
                     placeholder={placeholder}
-                    className="flex-1 bg-transparent text-white text-sm focus:outline-none"
+                    className="flex-1 bg-transparent text-[#15110d] text-sm focus:outline-none"
                   />
                 </div>
               ))}

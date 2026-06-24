@@ -182,26 +182,26 @@ export default function FriendsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-28">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] pb-28">
       <TopBar title="Friends" />
 
       {/* Search bar */}
-      <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-black z-10">
-        <div className="flex items-center gap-2 bg-gray-900 rounded-2xl px-4 py-2.5">
+      <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-[#fdf6ec] z-10">
+        <div className="flex items-center gap-2 bg-white rounded-2xl px-4 py-2.5">
           <span className="text-gray-600 text-sm">🔍</span>
           <input
             type="text"
             placeholder="Search friends..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-transparent text-sm text-white placeholder-gray-600 outline-none flex-1"
+            className="bg-transparent text-sm text-[#15110d] placeholder-gray-600 outline-none flex-1"
           />
         </div>
       </div>
 
       {/* Friends activity row */}
       {accepted.length > 0 && (
-        <div className="px-4 pt-2 pb-3 border-b border-gray-900/60">
+        <div className="px-4 pt-2 pb-3 border-b border-gray-300">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide">
             {accepted.map((f, i) => (
               <Link key={f.friendshipId} href={`/profile/${f.userId}`} className="flex flex-col items-center gap-1.5 shrink-0">
@@ -231,7 +231,7 @@ export default function FriendsPage() {
             className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition capitalize ${
               view === v
                 ? 'bg-orange-500 border-orange-500 text-white'
-                : 'bg-transparent border-gray-800 text-gray-400'
+                : 'bg-transparent border-gray-200 text-gray-500'
             }`}
           >
             {v === 'chat' ? 'Messages' : 'Requests'}
@@ -260,15 +260,15 @@ export default function FriendsPage() {
             {botId && !search && (
               <Link
                 href={`/inbox/dm/${botId}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-900/40 active:bg-gray-900/60 transition"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white active:bg-white transition"
               >
                 <div className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center text-lg shrink-0">
                   📍
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold text-sm truncate flex items-center gap-1.5">
+                  <p className="text-[#15110d] font-semibold text-sm truncate flex items-center gap-1.5">
                     RallyPoint Assistant
-                    <span className="text-[10px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-semibold">
                       AI
                     </span>
                   </p>
@@ -282,10 +282,10 @@ export default function FriendsPage() {
               <div className="space-y-1 px-4">
                 {[0, 1].map(i => (
                   <div key={i} className="flex items-center gap-3 py-3">
-                    <div className="w-11 h-11 rounded-full bg-gray-900 animate-pulse shrink-0" />
+                    <div className="w-11 h-11 rounded-full bg-white animate-pulse shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-3.5 w-28 bg-gray-900 rounded animate-pulse" />
-                      <div className="h-3 w-40 bg-gray-900 rounded animate-pulse" />
+                      <div className="h-3.5 w-28 bg-white rounded animate-pulse" />
+                      <div className="h-3 w-40 bg-white rounded animate-pulse" />
                     </div>
                   </div>
                 ))}
@@ -302,11 +302,11 @@ export default function FriendsPage() {
                   <Link
                     key={f.friendshipId}
                     href={`/inbox/dm/${f.userId}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-900/40 active:bg-gray-900/60 transition"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-white active:bg-white transition"
                   >
                     <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm truncate">
+                      <p className="text-[#15110d] font-semibold text-sm truncate">
                         {f.username ? `@${f.username}` : f.name}
                       </p>
                       <p className="text-gray-600 text-xs truncate">Tap to message</p>
@@ -330,13 +330,13 @@ export default function FriendsPage() {
                     <Link
                       key={ec.id}
                       href={`/events/${ec.eventId}/chat`}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-900/40 active:bg-gray-900/60 transition"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-white active:bg-white transition"
                     >
-                      <div className="w-11 h-11 bg-orange-950/60 border border-orange-900/40 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                      <div className="w-11 h-11 bg-orange-500 border border-black rounded-2xl flex items-center justify-center text-xl shrink-0">
                         {ec.emoji}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-semibold text-sm truncate">{ec.eventTitle}</p>
+                        <p className="text-[#15110d] font-semibold text-sm truncate">{ec.eventTitle}</p>
                         <p className="text-gray-600 text-xs truncate">{ec.lastMessage}</p>
                       </div>
                       {ec.unread && (
@@ -358,13 +358,13 @@ export default function FriendsPage() {
                 <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Incoming</p>
                 <div className="space-y-2">
                   {pendingReceived.map((f, i) => (
-                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-[#111] rounded-2xl border border-gray-800/50">
+                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-200">
                       <Link href={`/profile/${f.userId}`}>
                         <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                       </Link>
                       <div className="flex-1 min-w-0">
                         <Link href={`/profile/${f.userId}`}>
-                          <p className="text-white font-semibold text-sm truncate">
+                          <p className="text-[#15110d] font-semibold text-sm truncate">
                             {f.username ? `@${f.username}` : f.name}
                           </p>
                         </Link>
@@ -379,7 +379,7 @@ export default function FriendsPage() {
                         </button>
                         <button
                           onClick={() => handleRespond(f.friendshipId, 'declined')}
-                          className="text-xs border border-gray-700 text-gray-500 px-3 py-1.5 rounded-xl transition hover:border-gray-500"
+                          className="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-xl transition hover:border-gray-500"
                         >
                           ✕
                         </button>
@@ -396,19 +396,19 @@ export default function FriendsPage() {
                 <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Sent</p>
                 <div className="space-y-2">
                   {pendingSent.map((f, i) => (
-                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-[#111] rounded-2xl border border-gray-800/50">
+                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-200">
                       <Link href={`/profile/${f.userId}`}>
                         <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                       </Link>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-semibold text-sm truncate">
+                        <p className="text-[#15110d] font-semibold text-sm truncate">
                           {f.username ? `@${f.username}` : f.name}
                         </p>
                         <p className="text-gray-600 text-xs">Request pending</p>
                       </div>
                       <button
                         onClick={() => handleRemove(f.friendshipId)}
-                        className="text-xs border border-gray-800 text-gray-600 px-3 py-1.5 rounded-xl transition hover:border-gray-600 hover:text-gray-400"
+                        className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-xl transition hover:border-gray-600 hover:text-black"
                       >
                         Cancel
                       </button>
@@ -421,7 +421,7 @@ export default function FriendsPage() {
             {pendingReceived.length === 0 && pendingSent.length === 0 && (
               <div className="flex flex-col items-center justify-center mt-20 text-center">
                 <div className="text-4xl mb-4">👋</div>
-                <p className="text-white font-bold mb-1">No pending requests</p>
+                <p className="text-[#15110d] font-bold mb-1">No pending requests</p>
                 <p className="text-gray-500 text-sm">Add friends from event attendee lists</p>
               </div>
             )}

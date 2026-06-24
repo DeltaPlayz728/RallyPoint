@@ -42,7 +42,7 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onDone} />
       <div
-        className="relative bg-[#111] border border-gray-800 rounded-3xl w-full max-w-md p-6 z-10"
+        className="relative bg-white border border-gray-200 rounded-3xl w-full max-w-md p-6 z-10"
         style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
@@ -50,13 +50,13 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
         {done ? (
           <div className="text-center py-4">
             <div className="text-4xl mb-3">🙌</div>
-            <p className="text-white font-bold text-lg">Thanks for rating!</p>
+            <p className="text-[#15110d] font-bold text-lg">Thanks for rating!</p>
             <p className="text-gray-500 text-sm mt-1">Your feedback helps hosts improve.</p>
           </div>
         ) : (
           <>
-            <p className="text-gray-400 text-sm text-center mb-1">How was it?</p>
-            <h3 className="text-white font-bold text-lg text-center mb-5 leading-snug">
+            <p className="text-gray-500 text-sm text-center mb-1">How was it?</p>
+            <h3 className="text-[#15110d] font-bold text-lg text-center mb-5 leading-snug">
               {eventTitle}
             </h3>
 
@@ -76,7 +76,7 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
               ))}
             </div>
 
-            <p className="text-center text-sm text-gray-400 mb-5 h-5">
+            <p className="text-center text-sm text-gray-500 mb-5 h-5">
               {label}
             </p>
 
@@ -87,14 +87,14 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
                 onChange={e => setNote(e.target.value)}
                 placeholder="Leave a note for the host (optional)"
                 rows={2}
-                className="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none mb-4"
+                className="w-full bg-white text-[#15110d] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none mb-4"
               />
             )}
 
             <div className="flex gap-2">
               <button
                 onClick={onDone}
-                className="flex-1 border border-gray-800 text-gray-500 py-3 rounded-2xl text-sm transition hover:border-gray-600"
+                className="flex-1 border border-gray-200 text-gray-500 py-3 rounded-2xl text-sm transition hover:border-gray-600"
               >
                 Skip
               </button>

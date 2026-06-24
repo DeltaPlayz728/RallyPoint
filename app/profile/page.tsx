@@ -25,7 +25,7 @@ const VIBE_LABELS: Record<string, string> = {
 }
 
 const BATTERY_LABELS: Record<string, { icon: string; label: string; color: string }> = {
-  full:   { icon: '🔋', label: 'Full battery',   color: 'text-green-400' },
+  full:   { icon: '🔋', label: 'Full battery',   color: 'text-white' },
   medium: { icon: '🪫', label: 'Medium battery', color: 'text-yellow-400' },
   low:    { icon: '🔴', label: 'Low battery',    color: 'text-red-400' },
 }
@@ -60,8 +60,8 @@ type Stats = {
 
 function StatBox({ value, label }: { value: string | number; label: string }) {
   return (
-    <div className="flex-1 bg-[#111] border border-gray-800 rounded-2xl py-3 px-2 text-center">
-      <p className="text-white font-bold text-xl">{value}</p>
+    <div className="flex-1 bg-white border border-gray-200 rounded-2xl py-3 px-2 text-center">
+      <p className="text-[#15110d] font-bold text-xl">{value}</p>
       <p className="text-gray-500 text-[10px] mt-0.5">{label}</p>
     </div>
   )
@@ -154,17 +154,17 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black px-4 pt-8 pb-24">
+      <div className="min-h-screen bg-[#fdf6ec] px-4 pt-8 pb-24">
         <div className="max-w-lg mx-auto space-y-4">
           <div className="flex gap-4 items-center">
-            <div className="w-16 h-16 rounded-full bg-gray-900 animate-pulse" />
+            <div className="w-16 h-16 rounded-full bg-white animate-pulse" />
             <div className="space-y-2 flex-1">
-              <div className="h-5 w-32 bg-gray-900 rounded animate-pulse" />
-              <div className="h-3 w-20 bg-gray-900 rounded animate-pulse" />
+              <div className="h-5 w-32 bg-white rounded animate-pulse" />
+              <div className="h-3 w-20 bg-white rounded animate-pulse" />
             </div>
           </div>
           <div className="flex gap-2">
-            {[0,1,2,3].map(i => <div key={i} className="flex-1 h-16 bg-gray-900 rounded-2xl animate-pulse" />)}
+            {[0,1,2,3].map(i => <div key={i} className="flex-1 h-16 bg-white rounded-2xl animate-pulse" />)}
           </div>
         </div>
       </div>
@@ -172,24 +172,24 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-28">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] pb-28">
 
       {/* Organizer upgrade modal */}
       {showOrganizerModal && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-end justify-center px-4 pb-6">
-          <div className="bg-[#111] border border-gray-800 rounded-3xl w-full max-w-md p-5">
+          <div className="bg-white border border-gray-200 rounded-3xl w-full max-w-md p-5">
             <h3 className="font-bold text-lg mb-1">Become an Organizer</h3>
-            <p className="text-gray-400 text-sm mb-4">Post events to the Events tab, visible to everyone in your city.</p>
-            <label className="block text-sm text-gray-400 mb-1">Venue or Organization Name</label>
+            <p className="text-gray-500 text-sm mb-4">Post events to the Events tab, visible to everyone in your city.</p>
+            <label className="block text-sm text-gray-500 mb-1">Venue or Organization Name</label>
             <input
               type="text"
               value={venueName}
               onChange={e => setVenueName(e.target.value)}
               placeholder="e.g. Lucky Lanes Bowling"
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:border-orange-500"
             />
             <div className="flex gap-2">
-              <button onClick={() => setShowOrganizerModal(false)} className="flex-1 border border-gray-700 text-gray-400 py-3 rounded-2xl text-sm">Cancel</button>
+              <button onClick={() => setShowOrganizerModal(false)} className="flex-1 border border-gray-300 text-gray-500 py-3 rounded-2xl text-sm">Cancel</button>
               <button onClick={handleBecomeOrganizer} disabled={upgradingOrganizer || !venueName.trim()} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-2xl text-sm transition disabled:opacity-50">
                 {upgradingOrganizer ? 'Saving…' : 'Confirm'}
               </button>
@@ -204,7 +204,7 @@ export default function ProfilePage() {
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-gray-800">
+            <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-gray-200">
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
               ) : (
@@ -220,12 +220,12 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-lg font-bold leading-tight">{profile?.full_name}</h1>
                 {isFoundingMember && (
-                  <span className="text-[10px] bg-orange-950/60 text-orange-400 border border-orange-900/50 px-2 py-0.5 rounded-full font-semibold">
+                  <span className="text-[10px] bg-orange-500 text-white border border-black px-2 py-0.5 rounded-full font-semibold">
                     ⚡ Founding Member
                   </span>
                 )}
                 {isOrganizer && (
-                  <span className="text-[10px] bg-blue-950/60 text-blue-400 border border-blue-900/50 px-2 py-0.5 rounded-full font-semibold">
+                  <span className="text-[10px] bg-blue-100 text-blue-700 border border-blue-300 px-2 py-0.5 rounded-full font-semibold">
                     🎯 Organizer
                   </span>
                 )}
@@ -234,21 +234,21 @@ export default function ProfilePage() {
               {profile?.city && <p className="text-gray-600 text-xs mt-0.5">📍 {profile.city}</p>}
             </div>
           </div>
-          <button onClick={handleSignOut} className="text-xs text-gray-600 hover:text-red-400 transition border border-gray-800 px-3 py-1.5 rounded-xl shrink-0">
+          <button onClick={handleSignOut} className="text-xs text-gray-600 hover:text-red-400 transition border border-gray-200 px-3 py-1.5 rounded-xl shrink-0">
             Sign out
           </button>
         </div>
 
         {/* Bio */}
         {profile?.bio && (
-          <p className="text-gray-400 text-sm leading-relaxed mb-4">{profile.bio}</p>
+          <p className="text-gray-500 text-sm leading-relaxed mb-4">{profile.bio}</p>
         )}
 
         {/* Interests */}
         {(profile?.interests?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {profile!.interests.map(i => (
-              <span key={i} className="bg-gray-900 border border-gray-800 text-gray-400 text-xs px-2.5 py-1 rounded-full">
+              <span key={i} className="bg-white border border-gray-200 text-gray-500 text-xs px-2.5 py-1 rounded-full">
                 {i}
               </span>
             ))}
@@ -259,22 +259,22 @@ export default function ProfilePage() {
         {(profile?.vibe || profile?.social_battery) && (
           <div className="flex flex-wrap gap-2 mb-5">
             {profile?.vibe && (
-              <span className="bg-gray-900 border border-gray-800 text-gray-300 text-xs px-2.5 py-1 rounded-full">
+              <span className="bg-white border border-gray-200 text-gray-600 text-xs px-2.5 py-1 rounded-full">
                 {VIBE_LABELS[profile.vibe] ?? profile.vibe}
               </span>
             )}
             {profile?.social_battery && (
-              <span className={`bg-gray-900 border border-gray-800 text-xs px-2.5 py-1 rounded-full ${BATTERY_LABELS[profile.social_battery]?.color ?? 'text-gray-400'}`}>
+              <span className={`bg-white border border-gray-200 text-xs px-2.5 py-1 rounded-full ${BATTERY_LABELS[profile.social_battery]?.color ?? 'text-gray-500'}`}>
                 {BATTERY_LABELS[profile.social_battery]?.icon} {BATTERY_LABELS[profile.social_battery]?.label}
               </span>
             )}
             {profile?.available_this_week && (
-              <span className="bg-green-950/50 border border-green-900/60 text-green-400 text-xs px-2.5 py-1 rounded-full">
+              <span className="bg-purple-500 border border-black text-white text-xs px-2.5 py-1 rounded-full">
                 ✅ Open this week
               </span>
             )}
             {profile?.preferred_time && profile.preferred_time !== 'any' && (
-              <span className="bg-gray-900 border border-gray-800 text-gray-400 text-xs px-2.5 py-1 rounded-full">
+              <span className="bg-white border border-gray-200 text-gray-500 text-xs px-2.5 py-1 rounded-full">
                 {TIME_LABELS[profile.preferred_time]}
               </span>
             )}
@@ -294,14 +294,14 @@ export default function ProfilePage() {
 
         {/* Action buttons */}
         <div className="flex gap-2 mb-6">
-          <Link href="/profile/setup?edit=true" className="flex-1 text-center border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white text-sm py-2.5 rounded-2xl transition">
+          <Link href="/profile/setup?edit=true" className="flex-1 text-center border border-gray-200 text-gray-500 hover:border-gray-600 hover:text-black text-sm py-2.5 rounded-2xl transition">
             Edit Profile
           </Link>
-          <Link href="/friends" className="flex-1 text-center border border-gray-800 text-gray-400 hover:border-orange-500 hover:text-orange-400 text-sm py-2.5 rounded-2xl transition">
+          <Link href="/friends" className="flex-1 text-center border border-gray-200 text-gray-500 hover:border-orange-500 hover:text-orange-600 text-sm py-2.5 rounded-2xl transition">
             🤝 Friends
           </Link>
           {!isOrganizer && (
-            <button onClick={() => setShowOrganizerModal(true)} className="flex-1 text-center border border-orange-500/40 text-orange-400 hover:bg-orange-500/10 text-sm py-2.5 rounded-2xl transition">
+            <button onClick={() => setShowOrganizerModal(true)} className="flex-1 text-center border border-orange-500/40 text-orange-600 hover:bg-orange-100 text-sm py-2.5 rounded-2xl transition">
               🎯 Organizer
             </button>
           )}
@@ -316,7 +316,7 @@ export default function ProfilePage() {
               className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition capitalize ${
                 activeTab === t
                   ? 'bg-orange-500 border-orange-500 text-white'
-                  : 'bg-transparent border-gray-800 text-gray-500'
+                  : 'bg-transparent border-gray-200 text-gray-500'
               }`}
             >
               {t} ({t === 'hosting' ? hosting.length : attending.length})
@@ -327,18 +327,18 @@ export default function ProfilePage() {
         {/* Events list */}
         {activeTab === 'hosting' ? (
           hosting.length === 0 ? (
-            <div className="bg-[#111] border border-gray-800 rounded-2xl p-6 text-center">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
               <p className="text-gray-500 text-sm mb-3">No events hosted yet.</p>
-              <Link href="/events/create" className="text-orange-400 text-sm font-medium">Create your first event →</Link>
+              <Link href="/events/create" className="text-orange-600 text-sm font-medium">Create your first event →</Link>
             </div>
           ) : (
             <div className="space-y-2">
               {hosting.map(event => (
                 <Link key={event.id} href={`/events/${event.id}`}>
-                  <div className="bg-[#111] border border-gray-800 hover:border-orange-500/50 rounded-2xl p-4 transition">
+                  <div className="bg-white border border-gray-200 hover:border-orange-500/50 rounded-2xl p-4 transition">
                     <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-semibold text-white text-sm">{event.title}</h3>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-green-950/60 text-green-400' : 'bg-orange-950/60 text-orange-400'}`}>
+                      <h3 className="font-semibold text-[#15110d] text-sm">{event.title}</h3>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'}`}>
                         {event.type}
                       </span>
                     </div>
@@ -350,18 +350,18 @@ export default function ProfilePage() {
           )
         ) : (
           attending.length === 0 ? (
-            <div className="bg-[#111] border border-gray-800 rounded-2xl p-6 text-center">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
               <p className="text-gray-500 text-sm mb-3">Not attending any events yet.</p>
-              <Link href="/feed" className="text-orange-400 text-sm font-medium">Browse events →</Link>
+              <Link href="/feed" className="text-orange-600 text-sm font-medium">Browse events →</Link>
             </div>
           ) : (
             <div className="space-y-2">
               {attending.map(event => (
                 <Link key={event.id} href={`/events/${event.id}`}>
-                  <div className="bg-[#111] border border-gray-800 hover:border-orange-500/50 rounded-2xl p-4 transition">
+                  <div className="bg-white border border-gray-200 hover:border-orange-500/50 rounded-2xl p-4 transition">
                     <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-semibold text-white text-sm">{event.title}</h3>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-green-950/60 text-green-400' : 'bg-orange-950/60 text-orange-400'}`}>
+                      <h3 className="font-semibold text-[#15110d] text-sm">{event.title}</h3>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'}`}>
                         {event.type}
                       </span>
                     </div>
@@ -377,3 +377,4 @@ export default function ProfilePage() {
     </div>
   )
 }
+      

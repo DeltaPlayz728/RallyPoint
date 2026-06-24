@@ -33,32 +33,32 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
-        <p className="text-gray-400 mb-8">Log in to see what's happening near you.</p>
+        <h1 className="text-3xl font-bold text-[#15110d] mb-2">Welcome back</h1>
+        <p className="text-gray-500 mb-8">Log in to see what's happening near you.</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <label className="block text-sm text-gray-500 mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Password</label>
+            <label className="block text-sm text-gray-500 mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="Your password"
             />
           </div>
@@ -74,7 +74,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-gray-400 text-sm text-center mt-6">
+        <p className="text-gray-500 text-sm text-center mt-6">
           Don&apos;t have an account?{' '}
           <Link href="/auth/signup" className="text-orange-500 hover:underline">
             Sign up

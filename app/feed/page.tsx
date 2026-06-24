@@ -73,24 +73,24 @@ function formatDate(iso: string) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-[#111] border border-gray-800/50 rounded-2xl overflow-hidden">
-      <div className="h-0.5 bg-gray-800 animate-pulse" />
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="h-0.5 bg-gray-200 animate-pulse" />
       <div className="p-4 space-y-3">
         <div className="flex justify-between items-center">
-          <div className="h-5 w-20 bg-gray-800 rounded-full animate-pulse" />
-          <div className="h-4 w-10 bg-gray-800 rounded-full animate-pulse" />
+          <div className="h-5 w-20 bg-gray-200 rounded-full animate-pulse" />
+          <div className="h-4 w-10 bg-gray-200 rounded-full animate-pulse" />
         </div>
-        <div className="h-5 w-3/4 bg-gray-800 rounded-lg animate-pulse" />
-        <div className="h-4 w-1/2 bg-gray-800 rounded-lg animate-pulse" />
-        <div className="h-px bg-gray-800/60" />
+        <div className="h-5 w-3/4 bg-gray-200 rounded-lg animate-pulse" />
+        <div className="h-4 w-1/2 bg-gray-200 rounded-lg animate-pulse" />
+        <div className="h-px bg-gray-200/60" />
         <div className="flex justify-between items-center pt-1">
           <div className="space-y-2">
-            <div className="h-3 w-28 bg-gray-800 rounded animate-pulse" />
-            <div className="h-3 w-20 bg-gray-800 rounded animate-pulse" />
+            <div className="h-3 w-28 bg-gray-200 rounded animate-pulse" />
+            <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
           </div>
           <div className="flex -space-x-1.5">
             {[0, 1, 2].map(i => (
-              <div key={i} className="w-6 h-6 rounded-full bg-gray-800 animate-pulse border-2 border-black" />
+              <div key={i} className="w-6 h-6 rounded-full bg-gray-200 animate-pulse border-2 border-black" />
             ))}
           </div>
         </div>
@@ -108,7 +108,7 @@ function EventCard({ event }: { event: Event }) {
 
   return (
     <Link href={`/events/${event.id}`}>
-      <div className="bg-[#111] border border-gray-800/50 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100 cursor-pointer">
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100 cursor-pointer">
         {/* Type colour strip */}
         <div className={`h-0.5 w-full ${isCasual ? 'bg-green-500' : 'bg-orange-500'}`} />
 
@@ -117,18 +117,18 @@ function EventCard({ event }: { event: Event }) {
           <div className="flex items-center justify-between mb-3">
             <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
               isCasual
-                ? 'bg-green-950/70 text-green-400 border-green-900/80'
-                : 'bg-orange-950/70 text-orange-400 border-orange-900/80'
+                ? 'bg-purple-500 text-white border-black'
+                : 'bg-orange-500 text-white border-black'
             }`}>
               {isCasual ? '😊 Casual' : '🎳 Social'}
             </span>
-            <span className={`text-sm font-bold ${event.price > 0 ? 'text-orange-400' : 'text-green-400'}`}>
+            <span className={`text-sm font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
             </span>
           </div>
 
           {/* Title */}
-          <h3 className="text-white font-bold text-[15px] leading-snug mb-1">
+          <h3 className="text-[#15110d] font-bold text-[15px] leading-snug mb-1">
             {event.title}
           </h3>
 
@@ -140,16 +140,16 @@ function EventCard({ event }: { event: Event }) {
           )}
 
           {/* Divider */}
-          <div className="h-px bg-gray-800/70 mb-3" />
+          <div className="h-px bg-gray-200/70 mb-3" />
 
           {/* Bottom row: location/time left · avatars right */}
           <div className="flex items-end justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-gray-400 text-xs flex items-center gap-1.5">
+              <span className="text-gray-500 text-xs flex items-center gap-1.5">
                 <span className="shrink-0">📍</span>
                 <span className="truncate">{event.location}</span>
               </span>
-              <span className="text-gray-400 text-xs flex items-center gap-1.5">
+              <span className="text-gray-500 text-xs flex items-center gap-1.5">
                 <span className="shrink-0">🕐</span>
                 <span>{formatDate(event.starts_at)}</span>
               </span>
@@ -162,7 +162,7 @@ function EventCard({ event }: { event: Event }) {
                   {[...Array(dotCount)].map((_, i) => (
                     <div
                       key={i}
-                      className="w-5 h-5 rounded-full border-2 border-[#111] flex items-center justify-center text-[8px] font-black text-black"
+                      className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black text-black"
                       style={{
                         background: AVATAR_COLORS[i % AVATAR_COLORS.length],
                         zIndex: dotCount - i,
@@ -186,7 +186,7 @@ function EventCard({ event }: { event: Event }) {
           {/* Capacity bar if max set */}
           {event.max_attendees && event.attendee_count > 0 && (
             <div className="mt-3">
-              <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${
                     event.attendee_count / event.max_attendees > 0.8
@@ -216,6 +216,7 @@ export default function FeedPage() {
   const [username, setUsername]         = useState<string>('')
   const [isMinor, setIsMinor]           = useState(false)
   const [userInterests, setUserInterests] = useState<string[]>([])
+  const [unread, setUnread]             = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -231,6 +232,14 @@ export default function FeedPage() {
       setUsername(profile?.username || profile?.full_name?.split(' ')[0] || '')
       setIsMinor(profile?.is_minor ?? false)
       setUserInterests(profile?.interests ?? [])
+
+      // Notification bell unread state — same check used in TopBar
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
+      setUnread((count ?? 0) > 0)
 
       // If this area looks empty, let the assistant propose a seed event (at most
       // once/day across Map/Feed/Events — see lib/seedCheck.ts).
@@ -294,31 +303,39 @@ export default function FeedPage() {
   })()
 
   return (
-    <div className="min-h-screen bg-black text-white pb-28">
+    <div className="min-h-dvh bg-[#fdf6ec] text-[#15110d] pb-28">
 
       {/* Minor mode banner */}
       {isMinor && (
-        <div className="bg-blue-950/60 border-b border-blue-900/40 px-4 py-2.5 flex items-center gap-2">
-          <span className="text-blue-400 text-xs">🔒</span>
-          <p className="text-blue-300 text-xs">You're browsing the under-18 feed — casual meetups only.</p>
+        <div className="bg-blue-100 border-b border-blue-300 px-4 py-2.5 flex items-center gap-2">
+          <span className="text-blue-600 text-xs">🔒</span>
+          <p className="text-blue-700 text-xs">You're browsing the under-18 feed — casual meetups only.</p>
         </div>
       )}
 
       {/* Header */}
-      <div className="px-4 pt-8 pb-4 sticky top-0 bg-black/95 backdrop-blur-sm z-10 border-b border-gray-900/60">
+      <div className="px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec]/95 backdrop-blur-sm z-10 border-b border-gray-300">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">
               {greeting}{username ? `, ${username}` : ''}
             </p>
-            <h1 className="text-xl font-bold text-white mt-0.5">What's happening</h1>
+            <h1 className="text-xl font-bold text-[#15110d] mt-0.5">What's the move</h1>
           </div>
-          <Link
-            href="/events/create"
-            className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
-          >
-            + Create
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/inbox" className="relative p-1">
+              <span className="text-xl">🔔</span>
+              {unread && (
+                <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-black" />
+              )}
+            </Link>
+            <Link
+              href="/events/create"
+              className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+            >
+              + Create
+            </Link>
+          </div>
         </div>
 
         {/* Filter chips */}
@@ -330,7 +347,7 @@ export default function FeedPage() {
               className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
                 activeFilter === f.id
                   ? 'bg-orange-500 border-orange-500 text-white'
-                  : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600'
+                  : 'bg-transparent border-gray-200 text-gray-500 hover:border-gray-600'
               }`}
             >
               {f.label}
@@ -349,10 +366,10 @@ export default function FeedPage() {
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="w-16 h-16 rounded-2xl bg-gray-900 flex items-center justify-center text-3xl mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-3xl mb-4">
               {activeFilter === 'all' ? '📍' : '🔍'}
             </div>
-            <h2 className="text-white font-bold text-lg mb-1">
+            <h2 className="text-[#15110d] font-bold text-lg mb-1">
               {activeFilter === 'all' ? 'No events yet' : `Nothing ${activeFilter === 'today' ? 'today' : activeFilter === 'tomorrow' ? 'tomorrow' : 'this week'}`}
             </h2>
             <p className="text-gray-500 text-sm mb-6">
@@ -361,26 +378,4 @@ export default function FeedPage() {
                 : 'Try a different filter or create your own.'}
             </p>
             <Link
-              href="/events/create"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition"
-            >
-              Create a Meetup
-            </Link>
-          </div>
-        ) : (
-          <>
-            <p className="text-gray-600 text-xs mb-3">
-              {filteredEvents.length} meetup{filteredEvents.length !== 1 ? 's' : ''}
-              {activeFilter !== 'all' && ` · ${FILTERS.find(f => f.id === activeFilter)?.label}`}
-            </p>
-            <div className="space-y-3">
-              {filteredEvents.map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
+              href="/events/c

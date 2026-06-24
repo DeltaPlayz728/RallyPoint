@@ -44,11 +44,11 @@ export default function EarlyAccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] flex flex-col">
 
       {/* Back link */}
       <div className="px-5 pt-6">
-        <Link href="/" className="text-gray-600 text-sm hover:text-gray-400 transition">← Back</Link>
+        <Link href="/" className="text-gray-600 text-sm hover:text-black transition">← Back</Link>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 max-w-md mx-auto w-full">
@@ -56,20 +56,20 @@ export default function EarlyAccessPage() {
         {done ? (
           /* Success state */
           <div className="text-center">
-            <div className="w-20 h-20 rounded-full bg-orange-950/60 border border-orange-900/50 flex items-center justify-center text-4xl mx-auto mb-6">
+            <div className="w-20 h-20 rounded-full bg-orange-500 border border-black flex items-center justify-center text-4xl mx-auto mb-6">
               ⚡
             </div>
             <h1 className="text-2xl font-bold mb-2">You're on the list</h1>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+            <p className="text-gray-500 text-sm leading-relaxed mb-6">
               We'll email you the moment RallyPoint goes live in your city. You're one of the first — that means something.
             </p>
-            <div className="bg-orange-950/30 border border-orange-900/40 rounded-2xl px-5 py-4 mb-8">
-              <p className="text-orange-400 text-sm font-semibold">⚡ Founding Member status reserved</p>
+            <div className="bg-orange-500 border border-black rounded-2xl px-5 py-4 mb-8">
+              <p className="text-orange-600 text-sm font-semibold">⚡ Founding Member status reserved</p>
               <p className="text-gray-500 text-xs mt-1">Your badge will be waiting when you sign up.</p>
             </div>
             <Link
               href="/"
-              className="text-gray-500 text-sm hover:text-gray-300 transition"
+              className="text-gray-500 text-sm hover:text-black transition"
             >
               Back to home
             </Link>
@@ -78,13 +78,13 @@ export default function EarlyAccessPage() {
           <>
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-1.5 bg-orange-950/40 border border-orange-900/50 text-orange-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              <div className="inline-flex items-center gap-1.5 bg-orange-500 border border-black text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 ⚡ Founding Member — First 50 only
               </div>
               <h1 className="text-3xl font-bold leading-tight mb-3">
                 Get early access<br />to RallyPoint
               </h1>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-500 text-sm leading-relaxed">
                 RallyPoint is the app for meeting people through real experiences — not swiping, not scrolling. Launching in Breda first.
               </p>
             </div>
@@ -92,10 +92,10 @@ export default function EarlyAccessPage() {
             {/* Perks */}
             <div className="w-full space-y-2.5 mb-8">
               {PERKS.map(p => (
-                <div key={p.title} className="flex items-start gap-3 bg-[#111] border border-gray-800 rounded-2xl px-4 py-3.5">
+                <div key={p.title} className="flex items-start gap-3 bg-white border border-gray-200 rounded-2xl px-4 py-3.5">
                   <span className="text-xl shrink-0 mt-0.5">{p.icon}</span>
                   <div>
-                    <p className="text-white text-sm font-semibold">{p.title}</p>
+                    <p className="text-[#15110d] text-sm font-semibold">{p.title}</p>
                     <p className="text-gray-500 text-xs mt-0.5">{p.desc}</p>
                   </div>
                 </div>
@@ -110,17 +110,17 @@ export default function EarlyAccessPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Your email address"
                 required
-                className="w-full bg-[#111] text-white border border-gray-800 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
+                className="w-full bg-white text-[#15110d] border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
               />
               <input
                 type="text"
                 value={city}
                 onChange={e => setCity(e.target.value)}
                 placeholder="Your city (optional)"
-                className="w-full bg-[#111] text-white border border-gray-800 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
+                className="w-full bg-white text-[#15110d] border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
               />
 
-              {error && <p className="text-orange-400 text-sm text-center">{error}</p>}
+              {error && <p className="text-orange-600 text-sm text-center">{error}</p>}
 
               <button
                 type="submit"

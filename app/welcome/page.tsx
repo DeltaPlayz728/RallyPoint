@@ -39,7 +39,7 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] flex flex-col">
 
       {/* Progress dots */}
       <div className="flex justify-center gap-2 pt-14 pb-2">
@@ -47,7 +47,7 @@ export default function WelcomePage() {
           <div
             key={i}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === step ? 'w-8 bg-orange-500' : i < step ? 'w-4 bg-orange-800' : 'w-4 bg-gray-800'
+              i === step ? 'w-8 bg-orange-500' : i < step ? 'w-4 bg-orange-800' : 'w-4 bg-gray-200'
             }`}
           />
         ))}
@@ -63,7 +63,7 @@ export default function WelcomePage() {
                 Stop scrolling.<br />
                 <span className="text-orange-500">Start showing up.</span>
               </h1>
-              <p className="text-gray-400 text-base leading-relaxed">
+              <p className="text-gray-500 text-base leading-relaxed">
                 RallyPoint connects people 18–30 through real events — casual meetups, bowling nights, and everything in between.
               </p>
             </div>
@@ -76,7 +76,7 @@ export default function WelcomePage() {
               ].map(item => (
                 <div key={item.text} className="flex items-center gap-3">
                   <span className="text-2xl">{item.icon}</span>
-                  <span className="text-gray-300 text-sm">{item.text}</span>
+                  <span className="text-gray-600 text-sm">{item.text}</span>
                 </div>
               ))}
             </div>
@@ -90,7 +90,7 @@ export default function WelcomePage() {
               </button>
               <button
                 onClick={() => router.push('/auth/login')}
-                className="w-full text-gray-500 text-sm py-2 hover:text-gray-300 transition"
+                className="w-full text-gray-500 text-sm py-2 hover:text-black transition"
               >
                 Already have an account? Log in
               </button>
@@ -110,8 +110,8 @@ export default function WelcomePage() {
                   onClick={() => toggleInterest(i)}
                   className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
                     selectedInterests.includes(i)
-                      ? 'bg-orange-500/20 border-orange-500 text-orange-400'
-                      : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600'
+                      ? 'bg-orange-100 border-orange-500 text-orange-600'
+                      : 'bg-transparent border-gray-200 text-gray-500 hover:border-gray-600'
                   }`}
                 >
                   {i}
@@ -142,13 +142,13 @@ export default function WelcomePage() {
                   onClick={() => setSelectedVibe(v.id)}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition ${
                     selectedVibe === v.id
-                      ? 'bg-orange-500/10 border-orange-500'
-                      : 'bg-[#111] border-gray-800 hover:border-gray-600'
+                      ? 'bg-orange-100 border-orange-500'
+                      : 'bg-white border-gray-200 hover:border-gray-600'
                   }`}
                 >
                   <span className="text-2xl">{v.emoji}</span>
                   <div>
-                    <p className={`font-semibold text-sm ${selectedVibe === v.id ? 'text-orange-400' : 'text-white'}`}>
+                    <p className={`font-semibold text-sm ${selectedVibe === v.id ? 'text-orange-600' : 'text-[#15110d]'}`}>
                       {v.label}
                     </p>
                     <p className="text-gray-500 text-xs">{v.desc}</p>
@@ -169,7 +169,7 @@ export default function WelcomePage() {
               </button>
               <button
                 onClick={finish}
-                className="w-full text-gray-600 text-sm py-2 hover:text-gray-400 transition"
+                className="w-full text-gray-600 text-sm py-2 hover:text-black transition"
               >
                 Skip
               </button>

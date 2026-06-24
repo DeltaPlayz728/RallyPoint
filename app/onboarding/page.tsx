@@ -28,7 +28,7 @@ function WelcomeSlide() {
       <h1 className="text-3xl font-bold mb-3">
         Welcome to Rally<span className="text-orange-500">Point</span>
       </h1>
-      <p className="text-gray-400 text-lg leading-relaxed max-w-xs">
+      <p className="text-gray-500 text-lg leading-relaxed max-w-xs">
         The app built for people who'd rather be out doing things than scrolling through them.
       </p>
     </div>
@@ -39,7 +39,7 @@ function FeaturesSlide() {
   return (
     <div className="px-6 w-full">
       <h2 className="text-2xl font-bold text-center mb-2">Everything in one place</h2>
-      <p className="text-gray-400 text-sm text-center mb-6">Here's what you can do on RallyPoint.</p>
+      <p className="text-gray-500 text-sm text-center mb-6">Here's what you can do on RallyPoint.</p>
       <div className="grid grid-cols-2 gap-3">
         {[
           { icon: '🏠', label: 'Live Feed',     desc: 'Casual meetups happening now near you' },
@@ -49,9 +49,9 @@ function FeaturesSlide() {
           { icon: '🤝', label: '1:1 Meetups',  desc: 'Request private hangouts after events' },
           { icon: '📸', label: 'Social Links',  desc: 'Share your socials after meeting IRL' },
         ].map(f => (
-          <div key={f.label} className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+          <div key={f.label} className="bg-white border border-gray-200 rounded-xl p-3">
             <div className="text-2xl mb-1">{f.icon}</div>
-            <div className="font-semibold text-sm text-white">{f.label}</div>
+            <div className="font-semibold text-sm text-[#15110d]">{f.label}</div>
             <div className="text-xs text-gray-500 mt-0.5 leading-snug">{f.desc}</div>
           </div>
         ))}
@@ -71,7 +71,7 @@ function PersonalizeSlide({ selectedInterests, onToggleInterest, selectedVibe, o
   return (
     <div className="px-6 w-full">
       <h2 className="text-2xl font-bold text-center mb-1">Personalize your feed</h2>
-      <p className="text-gray-400 text-sm text-center mb-6">Pick what you're into — we'll match you better.</p>
+      <p className="text-gray-500 text-sm text-center mb-6">Pick what you're into — we'll match you better.</p>
 
       {/* Interests */}
       <div className="mb-6">
@@ -87,7 +87,7 @@ function PersonalizeSlide({ selectedInterests, onToggleInterest, selectedVibe, o
               className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 selectedInterests.includes(interest)
                   ? 'bg-orange-500 border-orange-500 text-white'
-                  : 'bg-gray-900 border-gray-700 text-gray-300 hover:border-gray-500'
+                  : 'bg-white border-gray-300 text-gray-600 hover:border-gray-500'
               }`}
             >
               {interest}
@@ -108,7 +108,7 @@ function PersonalizeSlide({ selectedInterests, onToggleInterest, selectedVibe, o
               className={`text-left px-3 py-3 rounded-xl border transition ${
                 selectedVibe === vibe.id
                   ? 'bg-orange-500/15 border-orange-500 text-white'
-                  : 'bg-gray-900 border-gray-800 text-gray-300 hover:border-gray-600'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-600'
               }`}
             >
               <div className="font-semibold text-sm">{vibe.label}</div>
@@ -186,11 +186,11 @@ export default function OnboardingPage() {
     : 'Next'
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] flex flex-col">
 
       {/* Skip */}
       <div className="flex justify-end px-6 pt-6">
-        <button onClick={handleSkip} className="text-sm text-gray-500 hover:text-gray-300 transition">
+        <button onClick={handleSkip} className="text-sm text-gray-500 hover:text-black transition">
           Skip
         </button>
       </div>

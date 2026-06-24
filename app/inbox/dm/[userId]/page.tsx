@@ -185,16 +185,16 @@ export default function DmThreadPage() {
   }
 
   if (loading || !other) return (
-    <div className="min-h-screen bg-black flex items-center justify-center text-gray-400">Loading...</div>
+    <div className="min-h-dvh bg-[#fdf6ec] flex items-center justify-center text-gray-500">Loading...</div>
   )
 
   const displayName = other.username ? `@${other.username}` : other.full_name
 
   return (
-    <div className="flex flex-col h-screen bg-black text-white">
+    <div className="flex flex-col h-dvh bg-[#fdf6ec] text-[#15110d]">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-800 bg-gray-950">
-        <Link href="/friends" className="text-gray-400 hover:text-white">←</Link>
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white">
+        <Link href="/friends" className="text-gray-500 hover:text-black">←</Link>
         {other.avatar_url ? (
           <img src={other.avatar_url} alt={displayName} className="w-8 h-8 rounded-full object-cover" />
         ) : (
@@ -208,7 +208,7 @@ export default function DmThreadPage() {
           <div className="font-semibold text-sm flex items-center gap-1.5">
             {displayName}
             {other.is_bot && (
-              <span className="text-[10px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded-full font-semibold">
+              <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-semibold">
                 AI
               </span>
             )}
@@ -236,7 +236,7 @@ export default function DmThreadPage() {
               <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
                 isMe
                   ? 'bg-orange-500 text-white rounded-br-sm'
-                  : 'bg-gray-800 text-white rounded-bl-sm'
+                  : 'bg-gray-200 text-[#15110d] rounded-bl-sm'
               }`}>
                 {displayContent}
               </div>
@@ -252,7 +252,7 @@ export default function DmThreadPage() {
                   <button
                     onClick={() => respondToProposal(proposalId, false)}
                     disabled={respondingTo === proposalId}
-                    className="text-xs border border-gray-700 text-gray-400 px-3 py-1.5 rounded-xl transition hover:border-gray-500 disabled:opacity-50"
+                    className="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-xl transition hover:border-gray-500 disabled:opacity-50"
                   >
                     No thanks
                   </button>
@@ -269,13 +269,13 @@ export default function DmThreadPage() {
       </div>
 
       {/* Input */}
-      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-800 bg-gray-950 flex gap-2 pb-20">
+      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 bg-white flex gap-2 pb-20">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Send a message..."
-          className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className="flex-1 bg-gray-200 text-[#15110d] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
         />
         <button
           type="submit"
@@ -288,3 +288,4 @@ export default function DmThreadPage() {
     </div>
   )
 }
+      

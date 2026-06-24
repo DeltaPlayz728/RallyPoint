@@ -113,10 +113,10 @@ function CreateEventForm() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 py-6 pb-24">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 py-6 pb-24">
       <div className="max-w-lg mx-auto">
         <h1 className="text-2xl font-bold mb-1">Create an Event</h1>
-        <p className="text-gray-400 mb-6">Get people together.</p>
+        <p className="text-gray-500 mb-6">Get people together.</p>
 
         {/* Event Type Toggle */}
         <div className="flex gap-2 mb-6">
@@ -126,7 +126,7 @@ function CreateEventForm() {
             className={`flex-1 py-3 rounded-lg font-medium border transition ${
               type === 'casual'
                 ? 'bg-orange-500 border-orange-500 text-white'
-                : 'bg-gray-900 border-gray-700 text-gray-400'
+                : 'bg-white border-gray-300 text-gray-500'
             }`}
           >
             😊 Casual Meetup
@@ -138,7 +138,7 @@ function CreateEventForm() {
             className={`flex-1 py-3 rounded-lg font-medium border transition ${
               type === 'social'
                 ? 'bg-orange-500 border-orange-500 text-white'
-                : 'bg-gray-900 border-gray-700 text-gray-400'
+                : 'bg-white border-gray-300 text-gray-500'
             }`}
           >
             🎳 Social Event
@@ -148,71 +148,71 @@ function CreateEventForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Event Title</label>
+            <label className="block text-sm text-gray-500 mb-1">Event Title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder={type === 'casual' ? 'e.g. Grabbing coffee near downtown' : 'e.g. Bowling night at Lucky Lanes'}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Description <span className="text-gray-600">(optional)</span></label>
+            <label className="block text-sm text-gray-500 mb-1">Description <span className="text-gray-600">(optional)</span></label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 resize-none"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 resize-none"
               placeholder="What's the vibe? What should people expect?"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Location</label>
+            <label className="block text-sm text-gray-500 mb-1">Location</label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="e.g. Blue Bottle Coffee, Main St"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">City</label>
+            <label className="block text-sm text-gray-500 mb-1">City</label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="e.g. New York"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Date & Time</label>
+            <label className="block text-sm text-gray-500 mb-1">Date & Time</label>
             <input
               type="datetime-local"
               value={startsAt}
               onChange={(e) => setStartsAt(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Max Attendees <span className="text-gray-600">(optional)</span></label>
+            <label className="block text-sm text-gray-500 mb-1">Max Attendees <span className="text-gray-600">(optional)</span></label>
             <input
               type="number"
               value={maxAttendees}
               onChange={(e) => setMaxAttendees(e.target.value)}
               min="2"
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white text-[#15110d] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
               placeholder="Leave blank for unlimited"
             />
           </div>
@@ -220,7 +220,7 @@ function CreateEventForm() {
           {/* Social event pricing */}
           {type === 'social' && (
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Event Size & Fee</label>
+              <label className="block text-sm text-gray-500 mb-2">Event Size & Fee</label>
               <div className="space-y-2">
                 {[
                   { id: 'small', label: 'Small (1–10 people)', price: '$10' },
@@ -234,7 +234,7 @@ function CreateEventForm() {
                     className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border transition ${
                       sizebracket === option.id
                         ? 'bg-orange-500 border-orange-500 text-white'
-                        : 'bg-gray-900 border-gray-700 text-gray-300'
+                        : 'bg-white border-gray-300 text-gray-600'
                     }`}
                   >
                     <span>{option.label}</span>
@@ -246,8 +246,8 @@ function CreateEventForm() {
           )}
 
           {type === 'casual' && (
-            <div className="bg-gray-900 rounded-lg px-4 py-3 text-sm text-gray-400 border border-gray-700">
-              ✅ Casual meetups are always <span className="text-white font-medium">free</span> for everyone.
+            <div className="bg-white rounded-lg px-4 py-3 text-sm text-gray-500 border border-gray-300">
+              ✅ Casual meetups are always <span className="text-[#15110d] font-medium">free</span> for everyone.
             </div>
           )}
 
