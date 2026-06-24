@@ -6,6 +6,17 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown'
 
+  // API routes handle their own auth (requireMatchingUser / getAdminUser / Stripe
+  // signature verification) and must stay reachable without a Supabase session
+  // cookie — e.g. Stripe's webhook and the public waitlist form never carry one.
+  // Without this bypass, this cookie-based gate below redirects every such
+  // request to /auth/login before the route handler ever runs, which silently
+  // broke the Stripe webhook (payments never get recorded) and the waitlist
+  // signup form (anonymous visitors can't join) since the original app build.
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next({ request })
+  }
+
   // Rate limit auth routes — 10 attempts per IP per 15 minutes
   if (pathname.startsWith('/auth/')) {
     if (isRateLimited(`auth:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 })) {
