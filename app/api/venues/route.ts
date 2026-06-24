@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
 
-const supabase = createClient(
+// Reads use the anon key (public data); writes use the service role key so the
+// overly-permissive "any authenticated user can write venues" RLS policies can be
+// removed without breaking this server-side cache job.
+const supabaseRead = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+const supabaseWrite = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 // Venue types to pull from Google Places
@@ -40,7 +47,7 @@ export async function GET(req: NextRequest) {
     Date.now() - CACHE_HOURS * 60 * 60 * 1000
   ).toISOString()
 
-  const { data: cached } = await supabase
+  const { data: cached } = await supabaseRead
     .from('venues')
     .select('*')
     .eq('city', city)
@@ -99,9 +106,12 @@ export async function GET(req: NextRequest) {
       cached_at: new Date().toISOString(),
     }))
 
-    await supabase
+    const { error: upsertError } = await supabaseWrite
       .from('venues')
       .upsert(toUpsert, { onConflict: 'place_id' })
+    if (upsertError) {
+      console.error('venues upsert failed:', upsertError.message)
+    }
 
     return NextResponse.json({ venues: toUpsert })
   }
