@@ -42,4 +42,15 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-self-center text-xs transition ${
-                isActive ? 'text-orange
+                isActive ? 'text-orange-500' : 'text-gray-500 hover:text-black'
+              }`}
+            >
+              <span className="text-xl mb-0.5">{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
