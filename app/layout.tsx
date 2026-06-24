@@ -63,4 +63,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        {/* Runs before paint so d
+        {/* Runs before paint so dark mode doesn't flash light first */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>
+          {children}
+          <BottomNavWrapper />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
