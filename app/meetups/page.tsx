@@ -184,4 +184,5 @@ export default function MeetupsPage() {
         </section>
       </div>
     </div>
-  
+)
+}
