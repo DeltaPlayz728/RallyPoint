@@ -25,9 +25,9 @@ const VIBE_LABELS: Record<string, string> = {
 }
 
 const BATTERY_LABELS: Record<string, { icon: string; label: string; color: string }> = {
-  full:   { icon: '🔋', label: 'Full battery',   color: 'text-white' },
-  medium: { icon: '🪫', label: 'Medium battery', color: 'text-yellow-400' },
-  low:    { icon: '🔴', label: 'Low battery',    color: 'text-red-400' },
+  full:   { icon: '🔋', label: 'Full battery',   color: 'text-green-600' },
+  medium: { icon: '🪫', label: 'Medium battery', color: 'text-yellow-600' },
+  low:    { icon: '🔴', label: 'Low battery',    color: 'text-red-500' },
 }
 
 const TIME_LABELS: Record<string, string> = {
@@ -375,5 +375,4 @@ export default function ProfilePage() {
 
       </div>
     </div>
-  )
-}
+  

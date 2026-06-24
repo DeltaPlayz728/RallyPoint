@@ -246,7 +246,7 @@ function ProfileSetupForm() {
                 <input
                   type="text"
                   value={username}
-                  onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
+                  onChange={e => setUsername(e.target.value.toLowerCase().replace(/[\s@]/g, ''))}
                   required
                   placeholder="@yourname"
                   className="w-full bg-white text-[#15110d] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500"
@@ -443,4 +443,3 @@ export default function ProfileSetupPage() {
       <ProfileSetupForm />
     </Suspense>
   )
-}

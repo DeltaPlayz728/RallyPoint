@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import TopBar from '@/components/TopBar'
 
 type Request = {
   id: string
@@ -85,12 +86,16 @@ export default function MeetupsPage() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center text-gray-500">Loading...</div>
+    <div className="min-h-screen bg-[#fdf6ec] text-gray-500">
+      <TopBar title="Meetups" />
+      <div className="flex items-center justify-center pt-20">Loading...</div>
+    </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 pt-6 pb-24">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] pb-24">
+      <TopBar title="Meetups" />
+      <div className="max-w-lg mx-auto px-4 pt-6">
         <h1 className="text-2xl font-bold mb-1">1:1 Meetups</h1>
         <p className="text-gray-500 text-sm mb-6">Connect with people from your events.</p>
 
@@ -175,14 +180,4 @@ export default function MeetupsPage() {
                     {statusBadge(req.status)}
                   </div>
                   {req.message && (
-                    <p className="text-sm text-gray-600 mt-2 italic">"{req.message}"</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
-)
-}
+                    <p className="text-sm text-gray-600 mt-2 italic">"{req.message
