@@ -27,22 +27,17 @@ export default function TopBar({ title }: TopBarProps) {
   }, [])
 
   return (
-    <div className="flex items-center justify-between px-4 pt-12 pb-3 bg-[#fdf6ec] border-b border-gray-300 sticky top-0 z-20">
+    <div className="flex items-center justify-between px-4 pt-12 pb-3 bg-[#fdf6ec] dark:bg-[#15110d] border-b border-gray-300 dark:border-gray-700 sticky top-0 z-20">
       {/* Logo */}
       <Link href="/map" className="shrink-0">
         <Logo size={30} />
       </Link>
 
       {/* Page title */}
-      <span className="text-sm font-medium text-gray-500">{title}</span>
+      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</span>
 
       {/* Inbox bell */}
       <Link href="/inbox" className="relative p-1">
         <span className="text-xl">🔔</span>
         {unread && (
-          <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-black" />
-        )}
-      </Link>
-    </div>
-  )
-}
+          <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 b

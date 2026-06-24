@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: toggling `dark` on <html> (see ThemeProvider) flips
+   every `dark:` utility class app-wide instead of following system preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -9,13 +13,4 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-body {
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Fallback for browsers without dvh support: Tailwind's h-dvh/min-h-dvh degrade
-   gracefully to 100vh auto */
+  --font-mono: var(--font-g

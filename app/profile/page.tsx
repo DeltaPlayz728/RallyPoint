@@ -234,9 +234,18 @@ export default function ProfilePage() {
               {profile?.city && <p className="text-gray-600 text-xs mt-0.5">📍 {profile.city}</p>}
             </div>
           </div>
-          <button onClick={handleSignOut} className="text-xs text-gray-600 hover:text-red-400 transition border border-gray-200 px-3 py-1.5 rounded-xl shrink-0">
-            Sign out
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/settings"
+              aria-label="Settings"
+              className="text-gray-600 hover:text-black transition border border-gray-200 p-2 rounded-xl"
+            >
+              ⚙️
+            </Link>
+            <button onClick={handleSignOut} className="text-xs text-gray-600 hover:text-red-400 transition border border-gray-200 px-3 py-1.5 rounded-xl">
+              Sign out
+            </button>
+          </div>
         </div>
 
         {/* Bio */}
@@ -363,17 +372,4 @@ export default function ProfilePage() {
                       <h3 className="font-semibold text-[#15110d] text-sm">{event.title}</h3>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'}`}>
                         {event.type}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 text-xs mt-1">📍 {event.location} · 🕐 {formatDate(event.starts_at)}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )
-        )}
-
-      </div>
-    </div>
-  )
-}
+  
