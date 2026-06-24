@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 const INTERESTS = [
   '🎳 Bowling', '🎵 Music', '🍕 Food', '🎨 Art',
@@ -57,7 +58,7 @@ export default function WelcomePage() {
         {step === 0 && (
           <div className="flex flex-col flex-1">
             <div className="mb-8">
-              <div className="bg-orange-500 text-white text-sm font-bold px-4 py-2 rounded-full inline-block mb-6">RP</div>
+              <div className="mb-6"><Logo size={44} /></div>
               <h1 className="text-3xl font-bold leading-tight mb-3">
                 Stop scrolling.<br />
                 <span className="text-orange-500">Start showing up.</span>

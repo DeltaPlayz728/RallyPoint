@@ -1,8 +1,53 @@
 # RallyPoint — Progress / Handoff
 
-Last updated: 2026-06-19 (autonomous session, while John was away ~3 hrs)
+Last updated: 2026-06-20 (overnight autonomous session, while John slept)
 
 This file is the source of truth for "where things stand." Read this before doing anything else in a new session.
+
+## Update 2026-06-20 (overnight session — read this first)
+
+### 0. Security fixes: confirmed actually live (closed out)
+The 4 commits from earlier (`9c36af8`, `c26cedd`, `9e3d101`, `87531d8`) were pushed to `origin/main` but **Vercel's GitHub auto-deploy never triggered for them** — no deployment appeared for those commits despite the GitHub App integration showing connected. Worked around by manually triggering a deploy: Vercel Deployments page → `...` menu → "Create Deployment" → entered commit `87531d8` → "Deploy to Production". Verified live via an in-browser `fetch()` with `credentials: 'omit'` against `/api/admin/reports` and `/api/admin/suspensions` — both now correctly return `401 {"error":"Unauthorized"}`.
+
+**Heads up for next time:** if a future push doesn't show up on `https://rally-point-eb1q.vercel.app` after a few minutes, don't assume it's deployed just because GitHub shows the commit — check the Vercel Deployments list for an entry matching that commit hash. If it's missing, use the same manual "Create Deployment" trick. Worth checking Vercel's GitHub App installation settings at some point (`github.com/settings/installations`) to see why auto-deploy stopped firing — I didn't dig further since that page wanted a "Verify via email" step I wasn't going to push through without you there.
+
+### 1. Phase 5 (open public web access) — done
+Checked: there was never an actual gate blocking signups (middleware's `publicRoutes` already includes `/welcome`, `/auth/signup`, `/`; the "early access" banner is just a waitlist/marketing page, not a block). Also checked Vercel's Deployment Protection settings directly — Vercel Authentication and Password Protection are both off, so there's no infra-level wall either. The site has genuinely been publicly reachable this whole time.
+
+What I added to round out "ready for public traffic / sharing links":
+- `app/robots.ts` — allows crawling, disallows `/api/`, `/admin`, `/auth/`, `/inbox/`, `/events/create`.
+- `app/sitemap.ts` — lists the public unauthenticated routes.
+- `app/layout.tsx` — proper Open Graph + Twitter card metadata (title template, description) so links shared on social/Discord/etc. render a real preview instead of a bare URL. **Note: no OG image yet** — `openGraph`/`twitter` have no `images` field because there's no branded image asset in `public/`. Worth adding a 1200×630 image (`public/og-image.png`) and wiring it in when you have one — currently shared links will have no preview image, just text.
+
+### 2. Phase 6 & 7 (subscription tiers, revenue share) — drafted, not built
+I did **not** wire real Stripe subscription products or a pricing page tonight. Two reasons: the actual tier pricing/feature-gating and the revenue-share % are product decisions I shouldn't invent unilaterally on a real app, and (see #3 below) I lost the ability to verify TypeScript compiles in this session, which made me unwilling to ship untested payment-flow code.
+
+Instead: wrote `supabase/subscriptions_schema.sql` (additive DB columns for `profiles` — safe to apply any time, not yet applied) and `PHASE_6_7_DRAFT.md` (a concrete proposed tier table with prices/features, plus the open Stripe Connect vs. manual-payout question for Phase 7). **Read `PHASE_6_7_DRAFT.md` and react to it** — once you've picked numbers, the actual pricing page + Stripe subscription checkout + feature gating is maybe an afternoon of work.
+
+### 3. New sandbox bug found: bash mount caches stale file content after edits
+Discovered while trying to `npx tsc --noEmit` after editing `app/layout.tsx`: the Edit/Write tools write the real file correctly (confirmed by reading it back — full, correct content), but this session's bash shell kept seeing an old, truncated cached copy (`stat` showed a modify time from 2026-06-10, i.e. before tonight's edits) even after `sync` and waiting. This means **I could not run `tsc`/`npm run build` to verify anything I touched tonight compiles.** I kept tonight's edits deliberately simple and low-risk for this reason (declarative SQL, a couple of small well-known Next.js metadata patterns), but **please run `npx tsc --noEmit` and `npm run build` yourself before pushing**, just in case.
+
+### Files touched tonight (uncommitted — same situation as before, I can't push from this sandbox)
+```
+app/robots.ts                      (new)
+app/sitemap.ts                     (new)
+app/layout.tsx                     (modified — OG/Twitter metadata)
+supabase/subscriptions_schema.sql  (new — draft, not applied to DB)
+PHASE_6_7_DRAFT.md                 (new — read this)
+```
+Suggested commit from your machine:
+```
+git add app/robots.ts app/sitemap.ts app/layout.tsx supabase/subscriptions_schema.sql PHASE_6_7_DRAFT.md
+git commit -m "Phase 5: SEO/OG metadata, robots.txt, sitemap; draft Phase 6/7 subscription schema + pricing proposal"
+git push
+```
+(Remember: after pushing, double-check the Vercel Deployments list actually picked it up — see item #0 above.)
+
+### Still blocked on you (unchanged + one addition)
+- **#27**: Google Places API key.
+- **#71**: Anthropic API key.
+- **#83**: Register the business + activate live Stripe.
+- **New**: React to `PHASE_6_7_DRAFT.md`'s pricing table so Phase 6/7 can actually be built.
 
 ## What RallyPoint is
 

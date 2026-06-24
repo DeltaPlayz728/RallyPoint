@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import Logo from './Logo'
 
 interface TopBarProps {
   title: string
@@ -28,9 +29,9 @@ export default function TopBar({ title }: TopBarProps) {
   return (
     <div className="flex items-center justify-between px-4 pt-12 pb-3 bg-black border-b border-gray-900/60 sticky top-0 z-20">
       {/* Logo */}
-      <div className="bg-orange-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full tracking-wide">
-        RP
-      </div>
+      <Link href="/map" className="shrink-0">
+        <Logo size={30} />
+      </Link>
 
       {/* Page title */}
       <span className="text-sm font-medium text-gray-400">{title}</span>

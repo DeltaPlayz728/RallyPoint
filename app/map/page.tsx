@@ -360,9 +360,18 @@ export default function MapPage() {
         .gte('starts_at', new Date().toISOString())
         .limit(200)
 
+      // Which of these events has the current user already joined? Drives the
+      // map pin's "planted flag" state (see MapView's createEventIcon).
+      const { data: attendeeRows } = await supabase
+        .from('event_attendees')
+        .select('event_id')
+        .eq('user_id', user.id)
+      const joinedIds = new Set((attendeeRows ?? []).map((r: any) => r.event_id))
+
       const mapped: EventPin[] = (eventData ?? []).map((e: any) => ({
         ...e,
         attendee_count: e.event_attendees?.[0]?.count ?? 0,
+        joined: joinedIds.has(e.id),
       }))
       setEvents(mapped)
       setLoading(false)
@@ -553,17 +562,25 @@ export default function MapPage() {
       </div>
 
       {/* Legend */}
-      <div className="px-4 pb-2 flex items-center gap-4 text-xs text-gray-500 shrink-0">
-        <span className="flex items-center gap-1.5">
+      <div className="px-4 pb-2 flex items-center gap-4 text-xs text-gray-500 shrink-0 overflow-x-auto scrollbar-hide">
+        <span className="flex items-center gap-1.5 shrink-0">
           <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
           Casual
         </span>
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 shrink-0">
           <span className="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block" />
           Social
         </span>
+        <span className="flex items-center gap-1.5 shrink-0">
+          <span className="text-gray-500">🏳️</span>
+          Not joined
+        </span>
+        <span className="flex items-center gap-1.5 shrink-0">
+          <span className="text-orange-500">🚩</span>
+          Joined
+        </span>
         {venues.length > 0 && (
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 shrink-0">
             <span className="text-base leading-none">📍</span>
             Venue
           </span>

@@ -15,6 +15,7 @@ export type EventPin = {
   lat: number
   lng: number
   attendee_count: number
+  joined?: boolean
 }
 
 export type Venue = {
@@ -84,9 +85,11 @@ function createVenueIcon(types: string[], selected: boolean) {
   })
 }
 
-function createEventIcon(type: string, attendeeCount: number, eventId: string) {
+// Event pins — "Pin & Flag" mark (brand concept A). Two states:
+//   • not joined → plain/neutral flag, still drifting (something happening, not yours yet)
+//   • joined     → flag "plants" — pops in colored + solid, comes to rest
+function createEventIcon(type: string, attendeeCount: number, eventId: string, joined: boolean) {
   const color = type === 'casual' ? '#22c55e' : '#f97316'
-  const bg    = type === 'casual' ? '#052e16' : '#1c0a00'
 
   // Deterministic drift variant + timing based on event id
   const hash = eventId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
@@ -94,24 +97,29 @@ function createEventIcon(type: string, attendeeCount: number, eventId: string) {
   const driftDur   = (4.5 + (hash % 30) * 0.1).toFixed(1) + 's'
   const driftDelay = -((hash % 40) * 0.1).toFixed(1) + 's'
 
+  const poleColor  = joined ? color : '#666'
+  const flagFill   = joined ? color : 'rgba(255,255,255,0.05)'
+  const flagStroke = joined ? color : '#888'
+  // Planted flags hold still; unplanted ones keep drifting to draw the eye
+  const motionClass = joined ? 'rp-flag-joined' : driftClass
+
   return L.divIcon({
     className: '',
     html: `
-      <div class="${driftClass}" style="position: relative; width: 36px; height: 44px; --drift-dur:${driftDur}; --drift-delay:${driftDelay};">
-        <div style="
-          width: 36px; height: 36px;
-          background: ${bg};
-          border: 2.5px solid ${color};
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          box-shadow: 0 3px 10px rgba(0,0,0,0.5);
-        "></div>
+      <div class="${motionClass}" style="position: relative; width: 36px; height: 46px; --drift-dur:${driftDur}; --drift-delay:${driftDelay};">
+        <svg width="36" height="46" viewBox="0 0 36 46" style="display:block; overflow: visible;">
+          <ellipse cx="9" cy="44" rx="5" ry="1.6" fill="rgba(0,0,0,0.45)" />
+          <line x1="9" y1="44" x2="9" y2="8" stroke="${poleColor}" stroke-width="2.4" stroke-linecap="round" />
+          <g class="rp-flag-wave" style="transform-origin: 9px 12px;">
+            <path d="M9 8 L9 23 L30 15.5 Z" fill="${flagFill}" stroke="${flagStroke}" stroke-width="1.6" stroke-linejoin="round" />
+          </g>
+        </svg>
         ${attendeeCount > 0 ? `
           <div style="
             position: absolute;
-            top: -6px; right: -8px;
-            background: ${color};
-            color: #000;
+            top: -4px; right: -2px;
+            background: ${joined ? color : '#333'};
+            color: ${joined ? '#000' : '#ccc'};
             border-radius: 999px;
             font-size: 9px;
             font-weight: 800;
@@ -125,8 +133,8 @@ function createEventIcon(type: string, attendeeCount: number, eventId: string) {
         ` : ''}
       </div>
     `,
-    iconSize: [36, 44],
-    iconAnchor: [18, 44],
+    iconSize: [36, 46],
+    iconAnchor: [9, 44],
   })
 }
 
@@ -197,8 +205,24 @@ function useMapAnimations() {
         0%,100% { opacity: 1; }
         50%     { opacity: 0.6; }
       }
+      @keyframes rpFlagWave {
+        0%, 100% { transform: rotate(0deg); }
+        50%      { transform: rotate(5deg); }
+      }
+      @keyframes rpFlagPlant {
+        0%   { transform: scale(0.4) translateY(8px); opacity: 0.4; }
+        55%  { transform: scale(1.18) translateY(-4px); opacity: 1; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+      }
       .rp-venue-pin {
         animation: rpFlagDrop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+      }
+      .rp-flag-wave {
+        animation: rpFlagWave 2.6s ease-in-out infinite;
+      }
+      .rp-flag-joined {
+        animation: rpFlagPlant 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+        transform-origin: 9px 44px;
       }
       .rp-dot-drift-1 { animation: rpDotDrift1 var(--drift-dur, 5s) ease-in-out infinite; animation-delay: var(--drift-delay, 0s); }
       .rp-dot-drift-2 { animation: rpDotDrift2 var(--drift-dur, 5s) ease-in-out infinite; animation-delay: var(--drift-delay, 0s); }
@@ -308,7 +332,7 @@ export default function MapView({
         <Marker
           key={event.id}
           position={[event.lat, event.lng]}
-          icon={createEventIcon(event.type, event.attendee_count, event.id)}
+          icon={createEventIcon(event.type, event.attendee_count, event.id, !!event.joined)}
           eventHandlers={{
             click: () => onEventClick(event),
           }}

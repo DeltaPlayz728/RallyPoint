@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 export default function LandingPage() {
   return (
@@ -6,7 +7,8 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto w-full">
-        <span className="text-xl font-bold tracking-tight">
+        <span className="flex items-center gap-2 text-xl font-bold tracking-tight">
+          <Logo size={28} />
           Rally<span className="text-orange-500">Point</span>
         </span>
         <div className="flex items-center gap-3">
