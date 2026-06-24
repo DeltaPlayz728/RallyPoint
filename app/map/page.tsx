@@ -623,4 +623,16 @@ export default function MapPage() {
           nearbyEvents={nearbyEvents}
           onClose={closeSheets}
         />
-      )
+      )}
+
+      {/* City search results sheet */}
+      {citySheet && (
+        <CitySheet
+          cityName={citySheet.name}
+          events={citySheet.events}
+          onClose={closeSheets}
+        />
+      )}
+    </div>
+  )
+}
