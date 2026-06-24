@@ -443,3 +443,4 @@ export default function ProfileSetupPage() {
       <ProfileSetupForm />
     </Suspense>
   )
+}

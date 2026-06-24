@@ -180,4 +180,14 @@ export default function MeetupsPage() {
                     {statusBadge(req.status)}
                   </div>
                   {req.message && (
-                    <p className="text-sm text-gray-600 mt-2 italic">"{req.message
+                    <p className="text-sm text-gray-600 mt-2 italic">"{req.message}"</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  )
+}
