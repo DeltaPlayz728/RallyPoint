@@ -378,4 +378,26 @@ export default function FeedPage() {
                 : 'Try a different filter or create your own.'}
             </p>
             <Link
-              href="/events/c
+              href="/events/create"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition"
+            >
+              Create a Meetup
+            </Link>
+          </div>
+        ) : (
+          <>
+            <p className="text-gray-600 text-xs mb-3">
+              {filteredEvents.length} meetup{filteredEvents.length !== 1 ? 's' : ''}
+              {activeFilter !== 'all' && ` · ${FILTERS.find(f => f.id === activeFilter)?.label}`}
+            </p>
+            <div className="space-y-3">
+              {filteredEvents.map(event => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
