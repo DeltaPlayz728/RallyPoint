@@ -179,7 +179,7 @@ function ProfileSetupForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 py-8 pb-16">
+    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 py-8 pb-28">
       <div className="max-w-lg mx-auto">
 
         {/* Header */}

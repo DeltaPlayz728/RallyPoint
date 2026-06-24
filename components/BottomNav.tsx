@@ -21,7 +21,11 @@ export default function BottomNav() {
           true horizontal center of the bar, regardless of label/icon width */}
       <div className="max-w-lg mx-auto grid grid-cols-5 items-center py-2 px-2">
         {navItems.map(item => {
-          const isActive = pathname === item.href || (item.href !== '/events/create' && pathname.startsWith(item.href))
+          const isActive = pathname === item.href || (
+            item.href !== '/events/create' &&
+            pathname.startsWith(item.href) &&
+            !pathname.startsWith('/events/create')
+          )
           if (item.special) {
             const isCreateActive = pathname.startsWith(item.href)
             return (
@@ -46,11 +50,4 @@ export default function BottomNav() {
               }`}
             >
               <span className="text-xl mb-0.5">{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
-      </div>
-    </nav>
-  )
-}
+              <span>{ite
