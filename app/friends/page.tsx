@@ -187,15 +187,24 @@ export default function FriendsPage() {
 
       {/* Search bar */}
       <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
-        <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5">
-          <span className="text-gray-600 dark:text-gray-400 text-sm">🔍</span>
-          <input
-            type="text"
-            placeholder="Search friends..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="bg-transparent text-sm text-[#15110d] dark:text-[#fdf6ec] placeholder-gray-600 outline-none flex-1"
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5 flex-1">
+            <span className="text-gray-600 dark:text-gray-400 text-sm">🔍</span>
+            <input
+              type="text"
+              placeholder="Search friends..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="bg-transparent text-sm text-[#15110d] dark:text-[#fdf6ec] placeholder-gray-600 outline-none flex-1"
+            />
+          </div>
+          <Link
+            href="/communities"
+            className="shrink-0 bg-white dark:bg-[#221c16] rounded-2xl px-3 py-2.5 text-sm text-[#15110d] dark:text-[#fdf6ec]"
+            title="Communities"
+          >
+            🏘️
+          </Link>
         </div>
       </div>
 

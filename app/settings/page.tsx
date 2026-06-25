@@ -6,16 +6,29 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { useTheme } from '@/components/ThemeProvider'
+import { effectiveTier, TIER_LABELS, nextTier, SubscriptionTier } from '@/lib/subscription'
 
 export default function SettingsPage() {
   const router = useRouter()
   const { theme, toggleTheme } = useTheme()
   const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [tier, setTier] = useState<SubscriptionTier>('free')
+  const [portalLoading, setPortalLoading] = useState(false)
 
   useEffect(() => {
     const check = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
+      setUserId(user.id)
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_tier, subscription_status')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      setTier(effectiveTier(profile))
       setLoading(false)
     }
     check()
@@ -24,6 +37,26 @@ export default function SettingsPage() {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/auth/login')
+  }
+
+  const handleManageBilling = async () => {
+    if (!userId) return
+    setPortalLoading(true)
+    try {
+      const res = await fetch('/api/create-billing-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        window.location.href = data.url
+      } else {
+        setPortalLoading(false)
+      }
+    } catch {
+      setPortalLoading(false)
+    }
   }
 
   if (loading) return (
@@ -101,10 +134,33 @@ export default function SettingsPage() {
             Subscription
           </h2>
           <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p className="text-[#15110d] dark:text-[#fdf6ec] font-medium">Free plan</p>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">
-              Paid tiers (Go Getter, Extrovert, Planner) are coming soon.
+            <p className="text-[#15110d] dark:text-[#fdf6ec] font-medium">
+              {TIER_LABELS[tier]} plan
             </p>
+            <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5 mb-3">
+              {tier === 'free'
+                ? 'You have access to the full core app. Upgrade to support RallyPoint and unlock a few extra perks.'
+                : 'Thanks for supporting RallyPoint!'}
+            </p>
+            <div className="flex gap-2">
+              {nextTier(tier) && (
+                <Link
+                  href="/upgrade"
+                  className="flex-1 text-center bg-orange-500 text-white rounded-lg py-2 text-sm font-medium"
+                >
+                  {tier === 'free' ? 'Upgrade' : 'Change plan'}
+                </Link>
+              )}
+              {tier !== 'free' && (
+                <button
+                  onClick={handleManageBilling}
+                  disabled={portalLoading}
+                  className="flex-1 text-center bg-gray-100 dark:bg-[#2b241c] text-[#15110d] dark:text-[#fdf6ec] rounded-lg py-2 text-sm font-medium disabled:opacity-60"
+                >
+                  {portalLoading ? 'Loading…' : 'Manage billing'}
+                </button>
+              )}
+            </div>
           </div>
         </section>
 

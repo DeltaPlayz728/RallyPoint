@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { effectiveTier, hasFeature, TIER_LABELS, SubscriptionTier } from '@/lib/subscription'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
+const BANNER_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6', '#ef4444', '#eab308']
 
 type Event = {
   id: string
@@ -48,6 +50,9 @@ type Profile = {
   venue_name: string | null
   avatar_url: string | null
   created_at: string
+  subscription_tier?: string | null
+  subscription_status?: string | null
+  profile_banner_color?: string | null
 }
 
 type Stats = {
@@ -85,6 +90,7 @@ export default function ProfilePage() {
   const [venueName, setVenueName] = useState('')
   const [upgradingOrganizer, setUpgradingOrganizer] = useState(false)
   const [activeTab, setActiveTab] = useState<'hosting' | 'attending'>('hosting')
+  const [savingBanner, setSavingBanner] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -148,6 +154,17 @@ export default function ProfilePage() {
     : false
 
   const isOrganizer = profile?.account_type === 'organizer'
+  const tier = effectiveTier(profile) as SubscriptionTier
+  const isSupporter = hasFeature(tier, 'supporter_badge')
+  const canCustomizeBanner = hasFeature(tier, 'profile_banner_color')
+
+  const handleBannerColor = async (color: string) => {
+    if (!userId) return
+    setSavingBanner(true)
+    await supabase.from('profiles').update({ profile_banner_color: color }).eq('id', userId)
+    setProfile(prev => prev ? { ...prev, profile_banner_color: color } : prev)
+    setSavingBanner(false)
+  }
 
   const avatarInitial = (profile?.full_name ?? profile?.username ?? '?')[0].toUpperCase()
   const avatarColor   = AVATAR_COLORS[0]
@@ -198,6 +215,11 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Supporter banner */}
+      {profile?.profile_banner_color && (
+        <div className="h-14 -mb-6" style={{ background: profile.profile_banner_color }} />
+      )}
+
       <div className="px-4 pt-8 max-w-lg mx-auto">
 
         {/* Header */}
@@ -219,6 +241,11 @@ export default function ProfilePage() {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-lg font-bold leading-tight">{profile?.full_name}</h1>
+                {isSupporter && (
+                  <span className="text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded-full font-semibold">
+                    💛 {TIER_LABELS[tier]}
+                  </span>
+                )}
                 {isFoundingMember && (
                   <span className="text-[10px] bg-orange-500 text-white border border-black px-2 py-0.5 rounded-full font-semibold">
                     ⚡ Founding Member
@@ -300,6 +327,29 @@ export default function ProfilePage() {
             label={stats.totalRatings > 0 ? `${stats.totalRatings} ratings` : 'No ratings'}
           />
         </div>
+
+        {/* Banner color picker — Go Getter+ perk */}
+        {canCustomizeBanner && (
+          <div className="mb-5">
+            <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">Profile banner color</p>
+            <div className="flex gap-2">
+              {BANNER_COLORS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => handleBannerColor(c)}
+                  disabled={savingBanner}
+                  className={`w-7 h-7 rounded-full shrink-0 ${
+                    profile?.profile_banner_color === c
+                      ? 'ring-2 ring-offset-2 ring-orange-500 ring-offset-[#fdf6ec] dark:ring-offset-[#15110d]'
+                      : ''
+                  }`}
+                  style={{ background: c }}
+                  aria-label={c}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Action buttons */}
         <div className="flex gap-2 mb-6">
