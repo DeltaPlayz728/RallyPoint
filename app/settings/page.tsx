@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { useTheme } from '@/components/ThemeProvider'
-import { effectiveTier, TIER_LABELS, nextTier, SubscriptionTier } from '@/lib/subscription'
+import { effectiveTier, TIER_LABELS, nextTier, SubscriptionTier, IS_PLAYTEST } from '@/lib/subscription'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -41,6 +41,7 @@ export default function SettingsPage() {
 
   const handleManageBilling = async () => {
     if (!userId) return
+    if (IS_PLAYTEST) return
     setPortalLoading(true)
     try {
       const res = await fetch('/api/create-billing-portal', {
@@ -142,6 +143,11 @@ export default function SettingsPage() {
                 ? 'You have access to the full core app. Upgrade to support RallyPoint and unlock a few extra perks.'
                 : 'Thanks for supporting RallyPoint!'}
             </p>
+            {IS_PLAYTEST && (
+              <p className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs rounded-lg p-2.5 mb-3">
+                ⚠️ Playtest build — subscriptions aren't active yet, no real money is charged.
+              </p>
+            )}
             <div className="flex gap-2">
               {nextTier(tier) && (
                 <Link
@@ -151,7 +157,7 @@ export default function SettingsPage() {
                   {tier === 'free' ? 'Upgrade' : 'Change plan'}
                 </Link>
               )}
-              {tier !== 'free' && (
+              {tier !== 'free' && !IS_PLAYTEST && (
                 <button
                   onClick={handleManageBilling}
                   disabled={portalLoading}

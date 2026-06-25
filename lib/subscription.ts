@@ -36,6 +36,12 @@ export const TIER_PRICE_ENV: Record<Exclude<SubscriptionTier, 'free'>, string | 
   planner: process.env.NEXT_PUBLIC_STRIPE_PRICE_PLANNER,
 }
 
+// Playtest gate — real money should not change hands until full publish.
+// Defaults to true (safe) so nobody has to remember to set it for the
+// playtest; flip NEXT_PUBLIC_PLAYTEST_MODE=false in Vercel at launch once
+// real Stripe prices are live to re-enable purchasing.
+export const IS_PLAYTEST = process.env.NEXT_PUBLIC_PLAYTEST_MODE !== 'false'
+
 export type Feature =
   | 'supporter_badge'
   | 'profile_banner_color'

@@ -10,6 +10,7 @@ import {
   TIER_LABELS,
   TIER_PRICE_EUR,
   effectiveTier,
+  IS_PLAYTEST,
 } from '@/lib/subscription'
 
 const TIER_BLURB: Record<SubscriptionTier, string> = {
@@ -54,6 +55,10 @@ export default function UpgradePage() {
 
   const handleUpgrade = async (tier: SubscriptionTier) => {
     if (!userId || tier === 'free') return
+    if (IS_PLAYTEST) {
+      setError("This is the playtest build — paid plans aren't active yet. No money will be charged. Check back at full launch!")
+      return
+    }
     setError(null)
     setPendingTier(tier)
     try {
@@ -93,6 +98,14 @@ export default function UpgradePage() {
           about supporting what we're building. Planner also unlocks community
           tools for people organizing groups.
         </p>
+
+        {IS_PLAYTEST && (
+          <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-sm rounded-xl p-3 mb-4">
+            ⚠️ <strong>Playtest build.</strong> Pricing below is a preview — nothing
+            is purchasable yet and no real money will be charged. Subscriptions
+            turn on at full launch.
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm rounded-xl p-3 mb-4">
@@ -151,9 +164,15 @@ export default function UpgradePage() {
                   <button
                     onClick={() => handleUpgrade(tier)}
                     disabled={pendingTier === tier}
-                    className="w-full bg-orange-500 text-white rounded-lg py-2 text-sm font-medium disabled:opacity-60"
+                    className={`w-full rounded-lg py-2 text-sm font-medium disabled:opacity-60 ${
+                      IS_PLAYTEST
+                        ? 'bg-gray-100 dark:bg-[#2b241c] text-gray-500 dark:text-gray-400'
+                        : 'bg-orange-500 text-white'
+                    }`}
                   >
-                    {pendingTier === tier ? 'Redirecting…' : `Upgrade to ${TIER_LABELS[tier]}`}
+                    {IS_PLAYTEST
+                      ? 'Coming at full launch'
+                      : pendingTier === tier ? 'Redirecting…' : `Upgrade to ${TIER_LABELS[tier]}`}
                   </button>
                 )}
               </div>
