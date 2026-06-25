@@ -30,13 +30,29 @@ type Suspension = {
   lifted_at: string | null
 }
 
+type FoundingCandidate = {
+  id: string
+  full_name: string | null
+  username: string | null
+  avatar_url: string | null
+  is_founding_member: boolean
+  subscription_tier: string | null
+}
+
 export default function AdminPage() {
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
   const [reports, setReports]       = useState<Report[]>([])
   const [suspensions, setSuspensions] = useState<Suspension[]>([])
-  const [tab, setTab]               = useState<'reports' | 'suspensions'>('reports')
+  const [tab, setTab]               = useState<'reports' | 'suspensions' | 'founding'>('reports')
   const [loading, setLoading]       = useState(true)
+
+  // Founding members tab state
+  const [foundingMembers, setFoundingMembers] = useState<FoundingCandidate[]>([])
+  const [foundingSearch, setFoundingSearch] = useState('')
+  const [foundingResults, setFoundingResults] = useState<FoundingCandidate[]>([])
+  const [foundingSearching, setFoundingSearching] = useState(false)
+  const [foundingBusyId, setFoundingBusyId] = useState<string | null>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -58,16 +74,52 @@ export default function AdminPage() {
       setAuthorized(true)
 
       // Fetch reports and suspensions via service role API
-      const [rRes, sRes] = await Promise.all([
+      const [rRes, sRes, fRes] = await Promise.all([
         fetch('/api/admin/reports'),
         fetch('/api/admin/suspensions'),
+        fetch('/api/admin/founding-member'),
       ])
       if (rRes.ok) setReports(await rRes.json())
       if (sRes.ok) setSuspensions(await sRes.json())
+      if (fRes.ok) setFoundingMembers(await fRes.json())
       setLoading(false)
     }
     init()
   }, [])
+
+  const searchFounding = async (q: string) => {
+    setFoundingSearch(q)
+    if (!q.trim()) { setFoundingResults([]); return }
+    setFoundingSearching(true)
+    const res = await fetch(`/api/admin/founding-member?q=${encodeURIComponent(q.trim())}`)
+    if (res.ok) setFoundingResults(await res.json())
+    setFoundingSearching(false)
+  }
+
+  const setFounding = async (userId: string, grant: boolean) => {
+    setFoundingBusyId(userId)
+    const res = await fetch('/api/admin/founding-member', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, grant }),
+    })
+    if (!res.ok) {
+      alert('Something went wrong. Please try again.')
+      setFoundingBusyId(null)
+      return
+    }
+    setFoundingResults(prev => prev.map(u => u.id === userId ? { ...u, is_founding_member: grant } : u))
+    if (grant) {
+      setFoundingMembers(prev => {
+        const fromResults = foundingResults.find(u => u.id === userId)
+        if (prev.some(u => u.id === userId)) return prev
+        return fromResults ? [...prev, { ...fromResults, is_founding_member: true }] : prev
+      })
+    } else {
+      setFoundingMembers(prev => prev.filter(u => u.id !== userId))
+    }
+    setFoundingBusyId(null)
+  }
 
   const updateReport = async (id: string, status: string) => {
     const res = await fetch('/api/admin/reports', {
@@ -119,7 +171,7 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6">
-        {(['reports', 'suspensions'] as const).map(t => (
+        {(['reports', 'suspensions', 'founding'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -211,6 +263,96 @@ export default function AdminPage() {
               </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Founding members tab */}
+      {tab === 'founding' && (
+        <div>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+            Founding members get the Planner tier free, forever — no Stripe subscription needed.
+          </p>
+
+          <input
+            value={foundingSearch}
+            onChange={(e) => searchFounding(e.target.value)}
+            placeholder="Search by username or name..."
+            className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm mb-4 outline-none"
+          />
+
+          {foundingSearch.trim() && (
+            <div className="space-y-2 mb-6">
+              {foundingSearching ? (
+                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">Searching…</p>
+              ) : foundingResults.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">No matches</p>
+              ) : (
+                foundingResults.map(u => (
+                  <div key={u.id} className="flex items-center gap-3 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+                    {u.avatar_url ? (
+                      <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                        {(u.username ?? u.full_name ?? '?')[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#15110d] dark:text-[#fdf6ec] truncate">
+                        {u.username ? `@${u.username}` : (u.full_name ?? 'Unknown')}
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs">
+                        Current tier: {u.subscription_tier ?? 'free'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setFounding(u.id, !u.is_founding_member)}
+                      disabled={foundingBusyId === u.id}
+                      className={`shrink-0 text-xs px-3 py-1.5 rounded-lg font-medium transition disabled:opacity-60 ${
+                        u.is_founding_member
+                          ? 'bg-gray-100 dark:bg-[#2b241c] text-gray-600 dark:text-gray-300'
+                          : 'bg-orange-500 text-white'
+                      }`}
+                    >
+                      {foundingBusyId === u.id ? '…' : u.is_founding_member ? 'Revoke' : 'Grant'}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          <p className="text-gray-500 dark:text-gray-400 text-[11px] font-semibold uppercase tracking-wide mb-2">
+            Current founding members ({foundingMembers.length})
+          </p>
+          <div className="space-y-2">
+            {foundingMembers.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">None yet</p>
+            ) : (
+              foundingMembers.map(u => (
+                <div key={u.id} className="flex items-center gap-3 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+                  {u.avatar_url ? (
+                    <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                      {(u.username ?? u.full_name ?? '?')[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#15110d] dark:text-[#fdf6ec] truncate">
+                      {u.username ? `@${u.username}` : (u.full_name ?? 'Unknown')}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setFounding(u.id, false)}
+                    disabled={foundingBusyId === u.id}
+                    className="shrink-0 text-xs bg-gray-100 dark:bg-[#2b241c] text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-lg font-medium transition disabled:opacity-60"
+                  >
+                    {foundingBusyId === u.id ? '…' : 'Revoke'}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>

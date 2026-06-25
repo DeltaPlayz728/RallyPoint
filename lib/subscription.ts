@@ -81,15 +81,33 @@ export function hasFeature(tier: SubscriptionTier | null | undefined, feature: F
 // A subscription is only "live" if Stripe says it's active — a canceled or
 // past_due paid tier should not keep gating open. Free tier has no Stripe
 // status at all, so it's always considered fine.
+//
+// Founding members are the exception: they're granted manually via the
+// admin panel (is_founding_member), not through Stripe, so they always get
+// the top tier for free regardless of subscription_status.
 export function effectiveTier(profile: {
   subscription_tier?: string | null
   subscription_status?: string | null
+  is_founding_member?: boolean | null
 } | null | undefined): SubscriptionTier {
   if (!profile) return 'free'
+  if (profile.is_founding_member) return 'planner'
   const tier = (profile.subscription_tier ?? 'free') as SubscriptionTier
   if (tier === 'free') return 'free'
   if (profile.subscription_status === 'active') return tier
   return 'free'
+}
+
+// Label used for the celebration effect and admin panel — distinguishes a
+// founding-member grant from an actual paid Planner subscription, since
+// they unlock the same features but mean different things to the user.
+export function entitlementLabel(profile: {
+  subscription_tier?: string | null
+  subscription_status?: string | null
+  is_founding_member?: boolean | null
+} | null | undefined): 'founding' | SubscriptionTier {
+  if (profile?.is_founding_member) return 'founding'
+  return effectiveTier(profile)
 }
 
 export function nextTier(tier: SubscriptionTier): SubscriptionTier | null {

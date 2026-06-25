@@ -53,6 +53,7 @@ type Profile = {
   subscription_tier?: string | null
   subscription_status?: string | null
   profile_banner_color?: string | null
+  is_founding_member?: boolean
 }
 
 type Stats = {
@@ -148,10 +149,7 @@ export default function ProfilePage() {
     setUpgradingOrganizer(false)
   }
 
-  // Founding member = signed up in first 50 users (rough check: joined early)
-  const isFoundingMember = profile?.created_at
-    ? new Date(profile.created_at) < new Date('2026-08-01')
-    : false
+  const isFoundingMember = profile?.is_founding_member === true
 
   const isOrganizer = profile?.account_type === 'organizer'
   const tier = effectiveTier(profile) as SubscriptionTier

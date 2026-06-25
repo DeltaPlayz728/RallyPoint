@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import BottomNavWrapper from "@/components/BottomNavWrapper";
+import SubscriptionCelebrationWrapper from "@/components/SubscriptionCelebrationWrapper";
 import { ThemeProvider, THEME_BOOTSTRAP_SCRIPT } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
@@ -70,6 +71,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <BottomNavWrapper />
+          <SubscriptionCelebrationWrapper />
         </ThemeProvider>
       </body>
     </html>
