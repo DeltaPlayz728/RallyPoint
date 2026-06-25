@@ -185,20 +185,20 @@ export default function DmThreadPage() {
   }
 
   if (loading || !other) return (
-    <div className="min-h-dvh bg-[#fdf6ec] flex items-center justify-center text-gray-500">Loading...</div>
+    <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center text-gray-500 dark:text-gray-400">Loading...</div>
   )
 
   const displayName = other.username ? `@${other.username}` : other.full_name
 
   return (
-    <div className="flex flex-col h-dvh bg-[#fdf6ec] text-[#15110d]">
+    <div className="flex flex-col h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec]">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white">
-        <Link href="/friends" className="text-gray-500 hover:text-black">←</Link>
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#221c16]">
+        <Link href="/friends" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white">←</Link>
         {other.avatar_url ? (
           <img src={other.avatar_url} alt={displayName} className="w-8 h-8 rounded-full object-cover" />
         ) : (
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-black ${
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-black dark:text-[#fdf6ec] ${
             other.is_bot ? 'bg-orange-500' : 'bg-gray-700'
           }`}>
             {other.is_bot ? '📍' : displayName[1]?.toUpperCase() ?? displayName[0]?.toUpperCase()}
@@ -213,14 +213,14 @@ export default function DmThreadPage() {
               </span>
             )}
           </div>
-          {other.is_bot && <div className="text-xs text-gray-500">RallyPoint's assistant</div>}
+          {other.is_bot && <div className="text-xs text-gray-500 dark:text-gray-400">RallyPoint's assistant</div>}
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 text-sm mt-10">
+          <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">
             {other.is_bot ? "Say hi — I can help you find or plan something to do. 👋" : 'No messages yet. Say hi! 👋'}
           </div>
         )}
@@ -236,7 +236,7 @@ export default function DmThreadPage() {
               <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
                 isMe
                   ? 'bg-orange-500 text-white rounded-br-sm'
-                  : 'bg-gray-200 text-[#15110d] rounded-bl-sm'
+                  : 'bg-gray-200 dark:bg-gray-700 text-[#15110d] dark:text-[#fdf6ec] rounded-bl-sm'
               }`}>
                 {displayContent}
               </div>
@@ -252,16 +252,16 @@ export default function DmThreadPage() {
                   <button
                     onClick={() => respondToProposal(proposalId, false)}
                     disabled={respondingTo === proposalId}
-                    className="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-xl transition hover:border-gray-500 disabled:opacity-50"
+                    className="text-xs border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-xl transition hover:border-gray-500 disabled:opacity-50"
                   >
                     No thanks
                   </button>
                 </div>
               )}
               {proposalId && resolved && (
-                <span className="text-xs text-gray-500 mt-1">✓ Responded</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">✓ Responded</span>
               )}
-              <span className="text-xs text-gray-600 mt-1">{formatTime(msg.created_at)}</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">{formatTime(msg.created_at)}</span>
             </div>
           )
         })}
@@ -269,13 +269,13 @@ export default function DmThreadPage() {
       </div>
 
       {/* Input */}
-      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 bg-white flex gap-2 pb-20">
+      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#221c16] flex gap-2 pb-20">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Send a message..."
-          className="flex-1 bg-gray-200 text-[#15110d] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className="flex-1 bg-gray-200 dark:bg-gray-700 text-[#15110d] dark:text-[#fdf6ec] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
         />
         <button
           type="submit"

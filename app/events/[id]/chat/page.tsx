@@ -175,24 +175,24 @@ export default function EventChatPage() {
   }
 
   if (loading) return (
-    <div className="min-h-dvh bg-[#fdf6ec] flex items-center justify-center text-gray-500">Loading chat...</div>
+    <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center text-gray-500 dark:text-gray-400">Loading chat...</div>
   )
 
   return (
-    <div className="flex flex-col h-dvh bg-[#fdf6ec] text-[#15110d]">
+    <div className="flex flex-col h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec]">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white">
-        <Link href={`/events/${id}`} className="text-gray-500 hover:text-black">←</Link>
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#221c16]">
+        <Link href={`/events/${id}`} className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white">←</Link>
         <div>
           <div className="font-semibold text-sm">{eventTitle}</div>
-          <div className="text-xs text-gray-500">Group Chat</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Group Chat</div>
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 text-sm mt-10">
+          <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">
             No messages yet. Say hi! 👋
           </div>
         )}
@@ -205,16 +205,16 @@ export default function EventChatPage() {
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               {!isMe && (
-                <span className="text-xs text-gray-500 mb-1 ml-1">{name}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1">{name}</span>
               )}
               <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
                 isMe
                   ? 'bg-orange-500 text-white rounded-br-sm'
-                  : 'bg-gray-200 text-[#15110d] rounded-bl-sm'
+                  : 'bg-gray-200 dark:bg-gray-700 dark:bg-[#2b241c] text-[#15110d] dark:text-[#fdf6ec] rounded-bl-sm'
               }`}>
                 {msg.content}
               </div>
-              <span className="text-xs text-gray-600 mt-1">{formatTime(msg.created_at)}</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">{formatTime(msg.created_at)}</span>
             </div>
           )
         })}
@@ -222,13 +222,13 @@ export default function EventChatPage() {
       </div>
 
       {/* Input */}
-      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 bg-white flex gap-2 pb-20">
+      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#221c16] flex gap-2 pb-20">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Send a message..."
-          className="flex-1 bg-gray-200 text-[#15110d] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className="flex-1 bg-gray-200 dark:bg-gray-700 dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
         />
         <button
           type="submit"

@@ -75,7 +75,7 @@ export default function FriendButton({ currentUserId, targetUserId, size = 'md' 
       <button
         onClick={unfriend}
         disabled={acting}
-        className={`${base} bg-white border-gray-300 text-gray-500`}
+        className={`${base} bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400`}
       >
         Pending…
       </button>
@@ -95,7 +95,7 @@ export default function FriendButton({ currentUserId, targetUserId, size = 'md' 
         <button
           onClick={() => respond('declined')}
           disabled={acting}
-          className={`${base} bg-transparent border-gray-300 text-gray-500 hover:border-gray-500`}
+          className={`${base} bg-transparent border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-500`}
         >
           Decline
         </button>

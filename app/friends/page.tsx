@@ -19,7 +19,7 @@ function Avatar({ name, avatarUrl, index, size = 'md' }: {
   }
   return (
     <div
-      className={`${sizeClass} rounded-full flex items-center justify-center font-black text-black shrink-0`}
+      className={`${sizeClass} rounded-full flex items-center justify-center font-black text-black dark:text-[#fdf6ec] shrink-0`}
       style={{ background: AVATAR_COLORS[index % AVATAR_COLORS.length] }}
     >
       {(name ?? '?')[0].toUpperCase()}
@@ -182,26 +182,26 @@ export default function FriendsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] pb-28">
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
       <TopBar title="Friends" />
 
       {/* Search bar */}
-      <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-[#fdf6ec] z-10">
-        <div className="flex items-center gap-2 bg-white rounded-2xl px-4 py-2.5">
-          <span className="text-gray-600 text-sm">🔍</span>
+      <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
+        <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5">
+          <span className="text-gray-600 dark:text-gray-400 text-sm">🔍</span>
           <input
             type="text"
             placeholder="Search friends..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-transparent text-sm text-[#15110d] placeholder-gray-600 outline-none flex-1"
+            className="bg-transparent text-sm text-[#15110d] dark:text-[#fdf6ec] placeholder-gray-600 outline-none flex-1"
           />
         </div>
       </div>
 
       {/* Friends activity row */}
       {accepted.length > 0 && (
-        <div className="px-4 pt-2 pb-3 border-b border-gray-300">
+        <div className="px-4 pt-2 pb-3 border-b border-gray-300 dark:border-gray-700">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide">
             {accepted.map((f, i) => (
               <Link key={f.friendshipId} href={`/profile/${f.userId}`} className="flex flex-col items-center gap-1.5 shrink-0">
@@ -213,7 +213,7 @@ export default function FriendsPage() {
                     </div>
                   )}
                 </div>
-                <span className="text-[11px] text-gray-500 max-w-[52px] truncate text-center">
+                <span className="text-[11px] text-gray-500 dark:text-gray-400 max-w-[52px] truncate text-center">
                   {f.username ?? f.name.split(' ')[0]}
                 </span>
               </Link>
@@ -231,7 +231,7 @@ export default function FriendsPage() {
             className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition capitalize ${
               view === v
                 ? 'bg-orange-500 border-orange-500 text-white'
-                : 'bg-transparent border-gray-200 text-gray-500'
+                : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
             {v === 'chat' ? 'Messages' : 'Requests'}
@@ -251,7 +251,7 @@ export default function FriendsPage() {
 
             {/* DMs section */}
             <div className="px-4 pt-4 pb-1">
-              <p className="text-gray-600 text-[11px] font-semibold uppercase tracking-widest mb-2">
+              <p className="text-gray-600 dark:text-gray-400 text-[11px] font-semibold uppercase tracking-widest mb-2">
                 💬 Messages &amp; Groups
               </p>
             </div>
@@ -260,21 +260,21 @@ export default function FriendsPage() {
             {botId && !search && (
               <Link
                 href={`/inbox/dm/${botId}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-white active:bg-white transition"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-[#221c16] active:bg-white transition"
               >
                 <div className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center text-lg shrink-0">
                   📍
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[#15110d] font-semibold text-sm truncate flex items-center gap-1.5">
+                  <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate flex items-center gap-1.5">
                     RallyPoint Assistant
                     <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-semibold">
                       AI
                     </span>
                   </p>
-                  <p className="text-gray-600 text-xs truncate">Find something to do, or plan your own</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-xs truncate">Find something to do, or plan your own</p>
                 </div>
-                <span className="text-gray-700 text-lg">›</span>
+                <span className="text-gray-700 dark:text-gray-300 text-lg">›</span>
               </Link>
             )}
 
@@ -282,17 +282,17 @@ export default function FriendsPage() {
               <div className="space-y-1 px-4">
                 {[0, 1].map(i => (
                   <div key={i} className="flex items-center gap-3 py-3">
-                    <div className="w-11 h-11 rounded-full bg-white animate-pulse shrink-0" />
+                    <div className="w-11 h-11 rounded-full bg-white dark:bg-[#221c16] animate-pulse shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-3.5 w-28 bg-white rounded animate-pulse" />
-                      <div className="h-3 w-40 bg-white rounded animate-pulse" />
+                      <div className="h-3.5 w-28 bg-white dark:bg-[#221c16] rounded animate-pulse" />
+                      <div className="h-3 w-40 bg-white dark:bg-[#221c16] rounded animate-pulse" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : filteredFriends.length === 0 ? (
               <div className="px-4 py-4 text-center">
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   {search ? 'No friends match your search' : 'No friends yet — join events to meet people'}
                 </p>
               </div>
@@ -302,16 +302,16 @@ export default function FriendsPage() {
                   <Link
                     key={f.friendshipId}
                     href={`/inbox/dm/${f.userId}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white active:bg-white transition"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-[#221c16] active:bg-white transition"
                   >
                     <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[#15110d] font-semibold text-sm truncate">
+                      <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">
                         {f.username ? `@${f.username}` : f.name}
                       </p>
-                      <p className="text-gray-600 text-xs truncate">Tap to message</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs truncate">Tap to message</p>
                     </div>
-                    <span className="text-gray-700 text-lg">›</span>
+                    <span className="text-gray-700 dark:text-gray-300 text-lg">›</span>
                   </Link>
                 ))}
               </div>
@@ -321,7 +321,7 @@ export default function FriendsPage() {
             {eventChats.length > 0 && (
               <>
                 <div className="px-4 pt-5 pb-1">
-                  <p className="text-gray-600 text-[11px] font-semibold uppercase tracking-widest mb-2">
+                  <p className="text-gray-600 dark:text-gray-400 text-[11px] font-semibold uppercase tracking-widest mb-2">
                     🎳 Event &amp; Venue Chats
                   </p>
                 </div>
@@ -330,14 +330,14 @@ export default function FriendsPage() {
                     <Link
                       key={ec.id}
                       href={`/events/${ec.eventId}/chat`}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-white active:bg-white transition"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-[#221c16] active:bg-white transition"
                     >
                       <div className="w-11 h-11 bg-orange-500 border border-black rounded-2xl flex items-center justify-center text-xl shrink-0">
                         {ec.emoji}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[#15110d] font-semibold text-sm truncate">{ec.eventTitle}</p>
-                        <p className="text-gray-600 text-xs truncate">{ec.lastMessage}</p>
+                        <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{ec.eventTitle}</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs truncate">{ec.lastMessage}</p>
                       </div>
                       {ec.unread && (
                         <div className="w-2 h-2 bg-orange-500 rounded-full shrink-0" />
@@ -355,20 +355,20 @@ export default function FriendsPage() {
             {/* Incoming */}
             {pendingReceived.length > 0 && (
               <div className="mb-6">
-                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Incoming</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">Incoming</p>
                 <div className="space-y-2">
                   {pendingReceived.map((f, i) => (
-                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-200">
+                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-white dark:bg-[#221c16] rounded-2xl border border-gray-200 dark:border-gray-700">
                       <Link href={`/profile/${f.userId}`}>
                         <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                       </Link>
                       <div className="flex-1 min-w-0">
                         <Link href={`/profile/${f.userId}`}>
-                          <p className="text-[#15110d] font-semibold text-sm truncate">
+                          <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">
                             {f.username ? `@${f.username}` : f.name}
                           </p>
                         </Link>
-                        <p className="text-gray-600 text-xs">Wants to connect</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs">Wants to connect</p>
                       </div>
                       <div className="flex gap-1.5 shrink-0">
                         <button
@@ -379,7 +379,7 @@ export default function FriendsPage() {
                         </button>
                         <button
                           onClick={() => handleRespond(f.friendshipId, 'declined')}
-                          className="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-xl transition hover:border-gray-500"
+                          className="text-xs border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-xl transition hover:border-gray-500"
                         >
                           ✕
                         </button>
@@ -393,22 +393,22 @@ export default function FriendsPage() {
             {/* Sent */}
             {pendingSent.length > 0 && (
               <div className="mb-6">
-                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Sent</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">Sent</p>
                 <div className="space-y-2">
                   {pendingSent.map((f, i) => (
-                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-200">
+                    <div key={f.friendshipId} className="flex items-center gap-3 p-4 bg-white dark:bg-[#221c16] rounded-2xl border border-gray-200 dark:border-gray-700">
                       <Link href={`/profile/${f.userId}`}>
                         <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} />
                       </Link>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[#15110d] font-semibold text-sm truncate">
+                        <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">
                           {f.username ? `@${f.username}` : f.name}
                         </p>
-                        <p className="text-gray-600 text-xs">Request pending</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs">Request pending</p>
                       </div>
                       <button
                         onClick={() => handleRemove(f.friendshipId)}
-                        className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-xl transition hover:border-gray-600 hover:text-black"
+                        className="text-xs border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-xl transition hover:border-gray-600 hover:text-black"
                       >
                         Cancel
                       </button>
@@ -421,8 +421,8 @@ export default function FriendsPage() {
             {pendingReceived.length === 0 && pendingSent.length === 0 && (
               <div className="flex flex-col items-center justify-center mt-20 text-center">
                 <div className="text-4xl mb-4">👋</div>
-                <p className="text-[#15110d] font-bold mb-1">No pending requests</p>
-                <p className="text-gray-500 text-sm">Add friends from event attendee lists</p>
+                <p className="text-[#15110d] dark:text-[#fdf6ec] font-bold mb-1">No pending requests</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Add friends from event attendee lists</p>
               </div>
             )}
           </div>

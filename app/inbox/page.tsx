@@ -73,11 +73,11 @@ export default function InboxPage() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center text-gray-500">Loading...</div>
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center text-gray-500 dark:text-gray-400">Loading...</div>
   )
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 pt-6 pb-24">
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] px-4 pt-6 pb-24">
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -91,8 +91,8 @@ export default function InboxPage() {
         {notifications.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-4xl mb-3">🔔</div>
-            <p className="text-[#15110d] font-medium mb-1">All caught up</p>
-            <p className="text-gray-500 text-sm">Notifications will appear here.</p>
+            <p className="text-[#15110d] dark:text-[#fdf6ec] font-medium mb-1">All caught up</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Notifications will appear here.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -101,19 +101,19 @@ export default function InboxPage() {
               const content = (
                 <div className={`flex items-start gap-3 p-4 rounded-xl border transition ${
                   n.read
-                    ? 'bg-white border-gray-200'
-                    : 'bg-white border-orange-500/40'
+                    ? 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700'
+                    : 'bg-white dark:bg-[#221c16] border-orange-500/40'
                 }`}>
                   <span className="text-2xl shrink-0 mt-0.5">{icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={`text-sm font-medium leading-snug ${n.read ? 'text-gray-600' : 'text-[#15110d]'}`}>
+                      <p className={`text-sm font-medium leading-snug ${n.read ? 'text-gray-600 dark:text-gray-400' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                         {n.title}
                       </p>
-                      <span className="text-xs text-gray-600 shrink-0">{formatTime(n.created_at)}</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-400 shrink-0">{formatTime(n.created_at)}</span>
                     </div>
                     {n.body && (
-                      <p className="text-xs text-gray-500 mt-0.5">{n.body}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{n.body}</p>
                     )}
                   </div>
                   {!n.read && (

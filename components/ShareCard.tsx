@@ -67,7 +67,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
         {/* Top brand bar */}
         <div className="absolute top-0 left-0 right-0 flex items-center gap-2 px-6 pt-6">
           <div className="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center shrink-0">
-            <span className="text-black font-black text-xs">RP</span>
+            <span className="text-black dark:text-[#fdf6ec] font-black text-xs">RP</span>
           </div>
           <span className="text-white font-bold text-sm tracking-tight">
             Rally<span className="text-orange-500">Point</span>
@@ -99,7 +99,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
           </div>
 
           {/* Vibe line */}
-          <p className="text-gray-500 text-xs leading-relaxed max-w-[200px]">
+          <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed max-w-[200px]">
             Real places. Real people.<br />No swiping required.
           </p>
         </div>
@@ -107,7 +107,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
         {/* Bottom URL */}
         <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 px-6 pb-6">
           <div className="h-px flex-1 bg-white/10" />
-          <span className="text-gray-500 text-[10px] tracking-widest uppercase">rally-point.app</span>
+          <span className="text-gray-500 dark:text-gray-400 text-[10px] tracking-widest uppercase">rally-point.app</span>
           <div className="h-px flex-1 bg-white/10" />
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
         )}
         <button
           onClick={onClose}
-          className="w-full text-gray-600 hover:text-gray-400 py-2 text-sm transition"
+          className="w-full text-gray-600 dark:text-gray-400 hover:text-gray-400 py-2 text-sm transition"
         >
           {shared ? 'Done' : 'Skip'}
         </button>

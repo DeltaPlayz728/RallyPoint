@@ -44,7 +44,7 @@ function Avatar({ name, index, size = 'md' }: { name: string; index: number; siz
     : 'w-10 h-10 text-xs'
   return (
     <div
-      className={`${cls} rounded-full border-2 border-black flex items-center justify-center font-black text-black shrink-0`}
+      className={`${cls} rounded-full border-2 border-black flex items-center justify-center font-black text-black dark:text-[#fdf6ec] shrink-0`}
       style={{ background: bg }}
     >
       {initial}
@@ -69,24 +69,24 @@ function MeetupModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white border border-gray-200 rounded-3xl w-full max-w-md p-5 z-10"
+      <div className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5 z-10"
         style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}>
-        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
-        <h3 className="font-bold text-lg mb-1 text-[#15110d]">Request a meetup</h3>
-        <p className="text-gray-500 text-sm mb-4">
-          Send a 1:1 request to <span className="text-[#15110d] font-medium">{target.name}</span>
+        <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-5" />
+        <h3 className="font-bold text-lg mb-1 text-[#15110d] dark:text-[#fdf6ec]">Request a meetup</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+          Send a 1:1 request to <span className="text-[#15110d] dark:text-[#fdf6ec] font-medium">{target.name}</span>
         </p>
         <textarea
           value={message}
           onChange={e => setMessage(e.target.value)}
           placeholder="Add a message (optional)"
           rows={3}
-          className="w-full bg-white text-[#15110d] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none mb-4"
+          className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none mb-4"
         />
         <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 border border-gray-300 text-gray-500 font-medium py-3 rounded-xl transition hover:border-gray-500"
+            className="flex-1 border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-medium py-3 rounded-xl transition hover:border-gray-500"
           >
             Cancel
           </button>
@@ -302,13 +302,13 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-[#fdf6ec]">
+      <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d]">
         {/* Hero skeleton */}
-        <div className="h-52 bg-white animate-pulse" />
+        <div className="h-52 bg-white dark:bg-[#221c16] animate-pulse" />
         <div className="px-4 pt-5 space-y-4">
-          <div className="h-4 w-24 bg-gray-200 rounded-full animate-pulse" />
-          <div className="h-7 w-3/4 bg-gray-200 rounded-lg animate-pulse" />
-          <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 dark:bg-[#2b241c] rounded-full animate-pulse" />
+          <div className="h-7 w-3/4 bg-gray-200 dark:bg-gray-700 dark:bg-[#2b241c] rounded-lg animate-pulse" />
+          <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 dark:bg-[#2b241c] rounded animate-pulse" />
         </div>
       </div>
     )
@@ -320,7 +320,7 @@ export default function EventDetailPage() {
   const isCasual = event.type === 'casual'
 
   return (
-    <div className="min-h-dvh bg-[#fdf6ec] text-[#15110d] pb-48">
+    <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-48">
 
       {/* Post-event rating modal */}
       {showRating && event && (
@@ -355,11 +355,11 @@ export default function EventDetailPage() {
       {showCancelConfirm && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-3xl w-full max-w-md p-5 z-10"
+          <div className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5 z-10"
             style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}>
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
-            <h3 className="font-bold text-lg mb-1 text-[#15110d]">Cancel this event?</h3>
-            <p className="text-gray-500 text-sm mb-4">
+            <h3 className="font-bold text-lg mb-1 text-[#15110d] dark:text-[#fdf6ec]">Cancel this event?</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
               {attendees.length > 1
                 ? `${attendees.length - 1} other ${attendees.length - 1 === 1 ? 'person' : 'people'} joined — they'll be notified it's cancelled. This can't be undone.`
                 : "This can't be undone."}
@@ -367,7 +367,7 @@ export default function EventDetailPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setShowCancelConfirm(false)}
-                className="flex-1 border border-gray-300 text-gray-500 font-medium py-3 rounded-xl transition hover:border-gray-500"
+                className="flex-1 border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-medium py-3 rounded-xl transition hover:border-gray-500"
               >
                 Keep event
               </button>
@@ -392,7 +392,7 @@ export default function EventDetailPage() {
         {/* Back button */}
         <button
           onClick={() => router.back()}
-          className="absolute top-4 left-4 w-9 h-9 bg-white/70 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 hover:text-black border border-gray-300 transition"
+          className="absolute top-4 left-4 w-9 h-9 bg-white/70 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white border border-gray-300 dark:border-gray-700 transition"
         >
           ←
         </button>
@@ -427,11 +427,11 @@ export default function EventDetailPage() {
 
         {/* Title + price */}
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-2xl font-bold text-[#15110d] leading-tight flex-1">
+          <h1 className="text-2xl font-bold text-[#15110d] dark:text-[#fdf6ec] leading-tight flex-1">
             {event.title}
           </h1>
           <span className={`text-lg font-black shrink-0 mt-0.5 ${
-            event.price > 0 ? 'text-orange-600' : 'text-[#15110d]'
+            event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'
           }`}>
             {event.price > 0 ? `€${event.price}` : 'Free'}
           </span>
@@ -439,34 +439,34 @@ export default function EventDetailPage() {
 
         {/* Description */}
         {event.description && (
-          <p className="text-gray-500 text-sm mt-2 leading-relaxed">{event.description}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-2 leading-relaxed">{event.description}</p>
         )}
       </div>
 
       {/* ── Info rows ────────────────────────────────────────────────────── */}
-      <div className="px-4 py-5 border-b border-gray-300 space-y-3.5">
+      <div className="px-4 py-5 border-b border-gray-300 dark:border-gray-700 space-y-3.5">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-base shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-base shrink-0">
             📍
           </div>
           <div>
-            <p className="text-[#15110d] text-sm font-medium">{event.location}</p>
-            <p className="text-gray-500 text-xs">{event.city}</p>
+            <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm font-medium">{event.location}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-xs">{event.city}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-base shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-base shrink-0">
             🕐
           </div>
-          <p className="text-[#15110d] text-sm">{formatDate(event.starts_at)}</p>
+          <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm">{formatDate(event.starts_at)}</p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-base shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-base shrink-0">
             👥
           </div>
-          <p className="text-[#15110d] text-sm">
+          <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm">
             {attendees.length} going
             {event.max_attendees
               ? ` · ${Math.max(0, event.max_attendees - attendees.length)} spots left`
@@ -477,11 +477,11 @@ export default function EventDetailPage() {
 
       {/* ── Attendees ────────────────────────────────────────────────────── */}
       {attendees.length > 0 && (
-        <div className="px-4 py-5 border-b border-gray-300">
+        <div className="px-4 py-5 border-b border-gray-300 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[#15110d] font-semibold">Who's going</h2>
+            <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-semibold">Who's going</h2>
             {event.max_attendees && (
-              <span className="text-gray-600 text-xs">
+              <span className="text-gray-600 dark:text-gray-400 text-xs">
                 {attendees.length} / {event.max_attendees}
               </span>
             )}
@@ -498,7 +498,7 @@ export default function EventDetailPage() {
               })}
             </div>
             {attendees.length > 6 && (
-              <span className="text-gray-500 text-sm">+{attendees.length - 6} more</span>
+              <span className="text-gray-500 dark:text-gray-400 text-sm">+{attendees.length - 6} more</span>
             )}
           </div>
 
@@ -519,14 +519,14 @@ export default function EventDetailPage() {
                     className="flex items-center gap-2.5 hover:opacity-75 transition min-w-0"
                   >
                     <Avatar name={a.profiles?.full_name ?? '?'} index={i} size="sm" />
-                    <span className="text-sm text-[#15110d] truncate">
+                    <span className="text-sm text-[#15110d] dark:text-[#fdf6ec] truncate">
                       {name}
                       {isEventHost && (
                         <span className={`ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
                           isCasual ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'
                         }`}>host</span>
                       )}
-                      {isMe && <span className="ml-1.5 text-[10px] text-gray-600">you</span>}
+                      {isMe && <span className="ml-1.5 text-[10px] text-gray-600 dark:text-gray-400">you</span>}
                     </span>
                   </Link>
 
@@ -544,7 +544,7 @@ export default function EventDetailPage() {
                       ) : requestStatus !== 'declined' ? (
                         <button
                           onClick={() => setRequestModal({ userId: a.user_id, name })}
-                          className="text-xs text-gray-500 border border-gray-300 hover:border-orange-500 hover:text-orange-600 px-2 py-1 rounded-full transition"
+                          className="text-xs text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 hover:border-orange-500 hover:text-orange-600 px-2 py-1 rounded-full transition"
                         >
                           Meetup
                         </button>
@@ -560,15 +560,15 @@ export default function EventDetailPage() {
 
       {/* ── Fixed bottom CTA bar — sits above the bottom nav (which is z-50 and
             would otherwise swallow clicks meant for this bar) ──────────────── */}
-      <div className="fixed bottom-20 left-0 right-0 z-50 bg-[#fdf6ec]/95 backdrop-blur-sm border-t border-gray-300 px-4 pt-3 pb-4">
+      <div className="fixed bottom-20 left-0 right-0 z-50 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm border-t border-gray-300 dark:border-gray-700 px-4 pt-3 pb-4">
         {isHost ? (
           <div className="flex gap-2">
-            <div className="flex-1 bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-500 text-center">
+            <div className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
               You're hosting this event
             </div>
             <Link
               href={`/events/${event.id}/chat`}
-              className="flex items-center justify-center gap-1.5 px-4 bg-white border border-gray-300 hover:border-orange-500 text-[#15110d] rounded-2xl transition text-sm font-medium"
+              className="flex items-center justify-center gap-1.5 px-4 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-[#15110d] dark:text-[#fdf6ec] rounded-2xl transition text-sm font-medium"
             >
               💬
             </Link>
@@ -584,13 +584,13 @@ export default function EventDetailPage() {
           <div className="flex gap-2">
             <Link
               href={`/events/${event.id}/chat`}
-              className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 hover:border-orange-500 text-[#15110d] font-semibold py-3.5 rounded-2xl transition text-sm"
+              className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-[#15110d] dark:text-[#fdf6ec] font-semibold py-3.5 rounded-2xl transition text-sm"
             >
               💬 Group Chat
             </Link>
             <button
               onClick={() => setShowShare(true)}
-              className="px-4 border border-gray-300 hover:border-orange-500 text-gray-500 hover:text-orange-600 rounded-2xl transition text-lg"
+              className="px-4 border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-gray-500 dark:text-gray-400 hover:text-orange-600 rounded-2xl transition text-lg"
               title="Share this event"
             >
               📤
@@ -604,7 +604,7 @@ export default function EventDetailPage() {
             </button>
           </div>
         ) : isFull ? (
-          <button disabled className="w-full bg-white border border-gray-200 text-gray-600 font-semibold py-3.5 rounded-2xl cursor-not-allowed">
+          <button disabled className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold py-3.5 rounded-2xl cursor-not-allowed">
             Event Full
           </button>
         ) : (

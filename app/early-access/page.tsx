@@ -44,11 +44,11 @@ export default function EarlyAccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] flex flex-col">
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] flex flex-col">
 
       {/* Back link */}
       <div className="px-5 pt-6">
-        <Link href="/" className="text-gray-600 text-sm hover:text-black transition">← Back</Link>
+        <Link href="/" className="text-gray-600 dark:text-gray-400 text-sm hover:text-black dark:hover:text-white transition">← Back</Link>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 max-w-md mx-auto w-full">
@@ -60,16 +60,16 @@ export default function EarlyAccessPage() {
               ⚡
             </div>
             <h1 className="text-2xl font-bold mb-2">You're on the list</h1>
-            <p className="text-gray-500 text-sm leading-relaxed mb-6">
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6">
               We'll email you the moment RallyPoint goes live in your city. You're one of the first — that means something.
             </p>
             <div className="bg-orange-500 border border-black rounded-2xl px-5 py-4 mb-8">
               <p className="text-orange-600 text-sm font-semibold">⚡ Founding Member status reserved</p>
-              <p className="text-gray-500 text-xs mt-1">Your badge will be waiting when you sign up.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Your badge will be waiting when you sign up.</p>
             </div>
             <Link
               href="/"
-              className="text-gray-500 text-sm hover:text-black transition"
+              className="text-gray-500 dark:text-gray-400 text-sm hover:text-black dark:hover:text-white transition"
             >
               Back to home
             </Link>
@@ -84,7 +84,7 @@ export default function EarlyAccessPage() {
               <h1 className="text-3xl font-bold leading-tight mb-3">
                 Get early access<br />to RallyPoint
               </h1>
-              <p className="text-gray-500 text-sm leading-relaxed">
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                 RallyPoint is the app for meeting people through real experiences — not swiping, not scrolling. Launching in Breda first.
               </p>
             </div>
@@ -92,11 +92,11 @@ export default function EarlyAccessPage() {
             {/* Perks */}
             <div className="w-full space-y-2.5 mb-8">
               {PERKS.map(p => (
-                <div key={p.title} className="flex items-start gap-3 bg-white border border-gray-200 rounded-2xl px-4 py-3.5">
+                <div key={p.title} className="flex items-start gap-3 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5">
                   <span className="text-xl shrink-0 mt-0.5">{p.icon}</span>
                   <div>
-                    <p className="text-[#15110d] text-sm font-semibold">{p.title}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">{p.desc}</p>
+                    <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm font-semibold">{p.title}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{p.desc}</p>
                   </div>
                 </div>
               ))}
@@ -110,14 +110,14 @@ export default function EarlyAccessPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Your email address"
                 required
-                className="w-full bg-white text-[#15110d] border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
+                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
               />
               <input
                 type="text"
                 value={city}
                 onChange={e => setCity(e.target.value)}
                 placeholder="Your city (optional)"
-                className="w-full bg-white text-[#15110d] border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
+                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
               />
 
               {error && <p className="text-orange-600 text-sm text-center">{error}</p>}
@@ -131,7 +131,7 @@ export default function EarlyAccessPage() {
               </button>
             </form>
 
-            <p className="text-gray-700 text-xs text-center mt-4">
+            <p className="text-gray-700 dark:text-gray-300 dark:text-gray-400 text-xs text-center mt-4">
               No spam. No selling your data. Just a heads-up when we launch.
             </p>
           </>

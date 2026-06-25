@@ -97,7 +97,7 @@ export default function AdminPage() {
 
   if (!authorized || loading) {
     return (
-      <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center">
+      <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -106,11 +106,11 @@ export default function AdminPage() {
   const pendingReports = reports.filter(r => r.status === 'pending')
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 py-6 pb-24 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] px-4 py-6 pb-24 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold">Admin Queue</h1>
-          <p className="text-gray-500 text-sm">{pendingReports.length} pending reports</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">{pendingReports.length} pending reports</p>
         </div>
         <span className="text-xs bg-orange-500 text-white border border-black px-3 py-1 rounded-full">
           Admin
@@ -126,7 +126,7 @@ export default function AdminPage() {
             className={`px-4 py-2 rounded-xl text-sm font-medium border transition capitalize ${
               tab === t
                 ? 'bg-orange-500 border-orange-500 text-white'
-                : 'bg-transparent border-gray-200 text-gray-500'
+                : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
             {t}
@@ -143,10 +143,10 @@ export default function AdminPage() {
       {tab === 'reports' && (
         <div className="space-y-3">
           {reports.length === 0 && (
-            <p className="text-gray-600 text-center py-12">No reports</p>
+            <p className="text-gray-600 dark:text-gray-400 text-center py-12">No reports</p>
           )}
           {reports.map(r => (
-            <div key={r.id} className="bg-white border border-gray-200 rounded-2xl p-4">
+            <div key={r.id} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
@@ -154,19 +154,19 @@ export default function AdminPage() {
                       ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
                       : r.status === 'actioned'
                       ? 'bg-red-100 text-red-600 border border-red-300'
-                      : 'bg-white text-gray-500 border border-gray-200'
+                      : 'bg-white dark:bg-[#221c16] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
                   }`}>
                     {r.status}
                   </span>
-                  <span className="ml-2 text-xs text-gray-600">{r.target_type}</span>
+                  <span className="ml-2 text-xs text-gray-600 dark:text-gray-400">{r.target_type}</span>
                 </div>
-                <span className="text-[10px] text-gray-700">
+                <span className="text-[10px] text-gray-700 dark:text-gray-300 dark:text-gray-400">
                   {new Date(r.created_at).toLocaleDateString()}
                 </span>
               </div>
-              <p className="text-[#15110d] text-sm font-medium mb-1">{r.reason}</p>
-              {r.details && <p className="text-gray-500 text-xs mb-3">{r.details}</p>}
-              <p className="text-gray-700 text-[10px] mb-3">
+              <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm font-medium mb-1">{r.reason}</p>
+              {r.details && <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">{r.details}</p>}
+              <p className="text-gray-700 dark:text-gray-300 dark:text-gray-400 text-[10px] mb-3">
                 Target ID: {r.target_id}
               </p>
               {r.status === 'pending' && (
@@ -179,7 +179,7 @@ export default function AdminPage() {
                   </button>
                   <button
                     onClick={() => updateReport(r.id, 'dismissed')}
-                    className="flex-1 text-xs bg-white border border-gray-200 text-gray-500 py-2 rounded-xl hover:border-gray-600 transition"
+                    className="flex-1 text-xs bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 py-2 rounded-xl hover:border-gray-600 transition"
                   >
                     Dismiss
                   </button>
@@ -194,13 +194,13 @@ export default function AdminPage() {
       {tab === 'suspensions' && (
         <div className="space-y-3">
           {suspensions.length === 0 && (
-            <p className="text-gray-600 text-center py-12">No active suspensions</p>
+            <p className="text-gray-600 dark:text-gray-400 text-center py-12">No active suspensions</p>
           )}
           {suspensions.map(s => (
-            <div key={s.id} className="bg-white border border-gray-200 rounded-2xl p-4">
-              <p className="text-[#15110d] text-sm font-medium mb-1">User {s.user_id.slice(0, 8)}…</p>
-              <p className="text-gray-500 text-xs mb-1">{s.reason}</p>
-              <p className="text-gray-700 text-[10px] mb-3">
+            <div key={s.id} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+              <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm font-medium mb-1">User {s.user_id.slice(0, 8)}…</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs mb-1">{s.reason}</p>
+              <p className="text-gray-700 dark:text-gray-300 dark:text-gray-400 text-[10px] mb-3">
                 Suspended {new Date(s.suspended_at).toLocaleDateString()}
               </p>
               <button

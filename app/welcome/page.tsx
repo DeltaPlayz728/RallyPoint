@@ -39,7 +39,7 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] flex flex-col">
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] flex flex-col">
 
       {/* Progress dots */}
       <div className="flex justify-center gap-2 pt-14 pb-2">
@@ -47,7 +47,7 @@ export default function WelcomePage() {
           <div
             key={i}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === step ? 'w-8 bg-orange-500' : i < step ? 'w-4 bg-orange-800' : 'w-4 bg-gray-200'
+              i === step ? 'w-8 bg-orange-500' : i < step ? 'w-4 bg-orange-800' : 'w-4 bg-gray-200 dark:bg-gray-700'
             }`}
           />
         ))}
@@ -63,7 +63,7 @@ export default function WelcomePage() {
                 Stop scrolling.<br />
                 <span className="text-orange-500">Start showing up.</span>
               </h1>
-              <p className="text-gray-500 text-base leading-relaxed">
+              <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed">
                 RallyPoint connects people 18–30 through real events — casual meetups, bowling nights, and everything in between.
               </p>
             </div>
@@ -76,7 +76,7 @@ export default function WelcomePage() {
               ].map(item => (
                 <div key={item.text} className="flex items-center gap-3">
                   <span className="text-2xl">{item.icon}</span>
-                  <span className="text-gray-600 text-sm">{item.text}</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">{item.text}</span>
                 </div>
               ))}
             </div>
@@ -90,7 +90,7 @@ export default function WelcomePage() {
               </button>
               <button
                 onClick={() => router.push('/auth/login')}
-                className="w-full text-gray-500 text-sm py-2 hover:text-black transition"
+                className="w-full text-gray-500 dark:text-gray-400 text-sm py-2 hover:text-black dark:hover:text-white transition"
               >
                 Already have an account? Log in
               </button>
@@ -101,7 +101,7 @@ export default function WelcomePage() {
         {step === 1 && (
           <div className="flex flex-col flex-1">
             <h2 className="text-2xl font-bold mb-1">What's your scene?</h2>
-            <p className="text-gray-500 text-sm mb-6">Pick what excites you — we'll show the right events first.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Pick what excites you — we'll show the right events first.</p>
 
             <div className="flex flex-wrap gap-2 mb-6">
               {INTERESTS.map(i => (
@@ -111,7 +111,7 @@ export default function WelcomePage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
                     selectedInterests.includes(i)
                       ? 'bg-orange-100 border-orange-500 text-orange-600'
-                      : 'bg-transparent border-gray-200 text-gray-500 hover:border-gray-600'
+                      : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
                   }`}
                 >
                   {i}
@@ -133,7 +133,7 @@ export default function WelcomePage() {
         {step === 2 && (
           <div className="flex flex-col flex-1">
             <h2 className="text-2xl font-bold mb-1">What's your vibe?</h2>
-            <p className="text-gray-500 text-sm mb-6">How do you usually show up?</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">How do you usually show up?</p>
 
             <div className="space-y-3 mb-6">
               {VIBES.map(v => (
@@ -143,15 +143,15 @@ export default function WelcomePage() {
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition ${
                     selectedVibe === v.id
                       ? 'bg-orange-100 border-orange-500'
-                      : 'bg-white border-gray-200 hover:border-gray-600'
+                      : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 hover:border-gray-600'
                   }`}
                 >
                   <span className="text-2xl">{v.emoji}</span>
                   <div>
-                    <p className={`font-semibold text-sm ${selectedVibe === v.id ? 'text-orange-600' : 'text-[#15110d]'}`}>
+                    <p className={`font-semibold text-sm ${selectedVibe === v.id ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                       {v.label}
                     </p>
-                    <p className="text-gray-500 text-xs">{v.desc}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">{v.desc}</p>
                   </div>
                   {selectedVibe === v.id && (
                     <span className="ml-auto text-orange-500 font-bold">✓</span>
@@ -169,7 +169,7 @@ export default function WelcomePage() {
               </button>
               <button
                 onClick={finish}
-                className="w-full text-gray-600 text-sm py-2 hover:text-black transition"
+                className="w-full text-gray-600 dark:text-gray-400 text-sm py-2 hover:text-black dark:hover:text-white transition"
               >
                 Skip
               </button>

@@ -37,7 +37,7 @@ export default function UserActionMenu({ targetUserId, targetName }: Props) {
   }
 
   if (blocked) {
-    return <span className="text-xs text-gray-600">Blocked</span>
+    return <span className="text-xs text-gray-600 dark:text-gray-400">Blocked</span>
   }
 
   return (
@@ -53,7 +53,7 @@ export default function UserActionMenu({ targetUserId, targetName }: Props) {
 
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black rounded-full hover:bg-gray-200 transition text-lg"
+        className="w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white rounded-full hover:bg-gray-200 transition text-lg"
       >
         ···
       </button>
@@ -61,17 +61,17 @@ export default function UserActionMenu({ targetUserId, targetName }: Props) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-9 z-50 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-xl w-44">
+          <div className="absolute right-0 top-9 z-50 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-xl w-44">
             <button
               onClick={handleBlock}
               disabled={blocking}
-              className="w-full text-left px-4 py-3 text-sm text-orange-600 hover:bg-gray-100 transition border-b border-gray-200"
+              className="w-full text-left px-4 py-3 text-sm text-orange-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-b border-gray-200 dark:border-gray-700"
             >
               🚫 {blocking ? 'Blocking…' : 'Block user'}
             </button>
             <button
               onClick={() => { setOpen(false); setShowReport(true) }}
-              className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-gray-100 transition"
+              className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
               🚩 Report user
             </button>

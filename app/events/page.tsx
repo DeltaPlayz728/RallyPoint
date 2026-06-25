@@ -58,7 +58,7 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
 
   return (
     <Link href={`/events/${event.id}`}>
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100">
+      <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100">
         <div className="h-0.5 w-full bg-orange-500" />
         <div className="p-4">
           <div className="flex items-start justify-between mb-2">
@@ -70,29 +70,29 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
                   </span>
                 )}
               </div>
-              <h3 className="text-[#15110d] font-bold text-[15px] leading-snug">{event.title}</h3>
+              <h3 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-[15px] leading-snug">{event.title}</h3>
             </div>
-            <span className={`text-sm font-bold shrink-0 ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d]'}`}>
+            <span className={`text-sm font-bold shrink-0 ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
             </span>
           </div>
 
           {event.description && (
-            <p className="text-gray-500 text-sm line-clamp-1 mb-3">{event.description}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-1 mb-3">{event.description}</p>
           )}
 
-          <div className="h-px bg-gray-200/70 mb-3" />
+          <div className="h-px bg-gray-200 dark:bg-gray-700/70 mb-3" />
 
           <div className="flex items-end justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-gray-500 text-xs flex items-center gap-1.5">
+              <span className="text-gray-500 dark:text-gray-400 text-xs flex items-center gap-1.5">
                 <span className="shrink-0">📍</span>
                 <span className="truncate">{event.location}</span>
                 {distKm !== undefined && (
-                  <span className="text-gray-600 shrink-0">· {distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`}</span>
+                  <span className="text-gray-600 dark:text-gray-400 shrink-0">· {distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`}</span>
                 )}
               </span>
-              <span className="text-gray-500 text-xs flex items-center gap-1.5">
+              <span className="text-gray-500 dark:text-gray-400 text-xs flex items-center gap-1.5">
                 <span className="shrink-0">🕐</span>
                 <span>{formatDate(event.starts_at)}</span>
               </span>
@@ -111,7 +111,7 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
                   ))}
                 </div>
               )}
-              <span className="text-gray-500 text-xs">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">
                 {event.attendee_count === 0 ? 'Be first' : `${event.attendee_count} going`}
               </span>
             </div>
@@ -179,11 +179,11 @@ export default function EventsPage() {
   const displayed = slide === 'social' ? socialEvents : nearMeEvents
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] pb-28">
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
       <TopBar title="Events" />
 
       {/* Slide tabs */}
-      <div className="px-4 pt-3 pb-3 border-b border-gray-300 sticky top-[72px] bg-[#fdf6ec] z-10">
+      <div className="px-4 pt-3 pb-3 border-b border-gray-300 dark:border-gray-700 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
         <div className="flex gap-2">
           {([
             { id: 'social', label: '🎳 Social' },
@@ -195,7 +195,7 @@ export default function EventsPage() {
               className={`px-5 py-2 rounded-full text-sm font-semibold border transition ${
                 slide === s.id
                   ? 'bg-orange-500 border-orange-500 text-white'
-                  : 'bg-transparent border-gray-200 text-gray-500 hover:border-gray-600'
+                  : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
               }`}
             >
               {s.label}
@@ -208,25 +208,25 @@ export default function EventsPage() {
         {loading ? (
           <div className="space-y-3">
             {[0, 1, 2].map(i => (
-              <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
-                <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
-                <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
-                <div className="h-px bg-gray-200" />
-                <div className="h-3 w-2/3 bg-gray-200 rounded animate-pulse" />
+              <div key={i} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 space-y-3">
+                <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-px bg-gray-200 dark:bg-gray-700" />
+                <div className="h-3 w-2/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               </div>
             ))}
           </div>
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
             <div className="text-4xl mb-4">🎳</div>
-            <p className="text-[#15110d] font-bold text-lg mb-1">No events yet</p>
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">No events yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
               {slide === 'nearme' ? 'Nothing nearby right now — check back soon.' : 'Venues and organizers will show up here.'}
             </p>
           </div>
         ) : (
           <>
-            <p className="text-gray-600 text-xs mb-3">
+            <p className="text-gray-600 dark:text-gray-400 text-xs mb-3">
               {displayed.length} event{displayed.length !== 1 ? 's' : ''}
               {slide === 'nearme' && !userPos ? ' · enable location for distance sorting' : ''}
             </p>

@@ -114,7 +114,7 @@ function VenueSheet({
 
       {/* Sheet */}
       <div
-        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-white border border-gray-200 rounded-t-3xl px-5 pt-5 pb-6 max-h-[65vh] overflow-y-auto"
+        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-t-3xl px-5 pt-5 pb-6 max-h-[65vh] overflow-y-auto"
         style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         {/* Drag handle */}
@@ -124,17 +124,17 @@ function VenueSheet({
         <div className="flex items-center gap-3 mb-1">
           <span className="text-3xl">{emoji}</span>
           <div>
-            <h2 className="text-[#15110d] font-bold text-lg leading-tight">{venue.name}</h2>
-            <p className="text-gray-500 text-xs mt-0.5">{venueTypeLabel} · {venue.vicinity}</p>
+            <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg leading-tight">{venue.name}</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{venueTypeLabel} · {venue.vicinity}</p>
           </div>
         </div>
 
-        <div className="h-px bg-gray-200 my-4" />
+        <div className="h-px bg-gray-200 dark:bg-gray-700 my-4" />
 
         {/* Events at this venue */}
         {nearbyEvents.length > 0 ? (
           <div>
-            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
+            <p className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">
               {nearbyEvents.length} event{nearbyEvents.length > 1 ? 's' : ''} here
             </p>
             <div className="space-y-2">
@@ -142,18 +142,18 @@ function VenueSheet({
                 <Link
                   key={event.id}
                   href={`/events/${event.id}`}
-                  className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+                  className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-orange-500 transition"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-[#15110d] font-semibold text-sm truncate">{event.title}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">{formatDate(event.starts_at)}</p>
+                    <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{event.title}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{formatDate(event.starts_at)}</p>
                   </div>
                   <div className="ml-3 flex flex-col items-end gap-1 shrink-0">
-                    <span className={`text-xs font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d]'}`}>
+                    <span className={`text-xs font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                       {event.price > 0 ? `€${event.price}` : 'Free'}
                     </span>
                     {event.attendee_count > 0 && (
-                      <span className="text-gray-500 text-xs">👥 {event.attendee_count}</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs">👥 {event.attendee_count}</span>
                     )}
                   </div>
                 </Link>
@@ -162,15 +162,15 @@ function VenueSheet({
 
             <Link
               href={createHref}
-              className="mt-3 flex items-center justify-center gap-2 w-full border border-dashed border-gray-300 text-gray-500 hover:text-orange-600 hover:border-orange-500 rounded-xl py-3 text-sm transition"
+              className="mt-3 flex items-center justify-center gap-2 w-full border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-orange-600 hover:border-orange-500 rounded-xl py-3 text-sm transition"
             >
               + Add another event here
             </Link>
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-[#15110d] font-semibold mb-1">No events here yet</p>
-            <p className="text-gray-500 text-sm mb-5">Be the first to host something at {venue.name}</p>
+            <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold mb-1">No events here yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">Be the first to host something at {venue.name}</p>
             <Link
               href={createHref}
               className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-xl transition"
@@ -199,7 +199,7 @@ function EventSheet({
     <>
       <div className="fixed inset-0 bg-black/40 z-[1000]" onClick={onClose} />
       <div
-        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-white border border-gray-200 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
+        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
         style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
@@ -212,16 +212,16 @@ function EventSheet({
           }`}>
             {event.type === 'casual' ? '😊 Casual' : '🎳 Social'}
           </span>
-          <span className={`font-bold text-sm ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d]'}`}>
+          <span className={`font-bold text-sm ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
             {event.price > 0 ? `€${event.price}` : 'Free'}
           </span>
         </div>
 
-        <h2 className="text-[#15110d] font-bold text-xl mb-1">{event.title}</h2>
-        <p className="text-gray-500 text-sm mb-1">📍 {event.location}</p>
-        <p className="text-gray-500 text-sm mb-1">🕐 {formatDate(event.starts_at)}</p>
+        <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-xl mb-1">{event.title}</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">📍 {event.location}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">🕐 {formatDate(event.starts_at)}</p>
         {event.attendee_count > 0 && (
-          <p className="text-gray-500 text-sm mb-4">👥 {event.attendee_count} going</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">👥 {event.attendee_count} going</p>
         )}
 
         <Link
@@ -234,8 +234,8 @@ function EventSheet({
         {/* Nearby events */}
         {nearbyEvents.length > 0 && (
           <div className="mt-5">
-            <div className="h-px bg-gray-200 mb-4" />
-            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
+            <div className="h-px bg-gray-200 dark:bg-gray-700 mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">
               Also nearby
             </p>
             <div className="space-y-2">
@@ -243,13 +243,13 @@ function EventSheet({
                 <Link
                   key={nearby.id}
                   href={`/events/${nearby.id}`}
-                  className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+                  className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-orange-500 transition"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-[#15110d] font-semibold text-sm truncate">{nearby.title}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">{formatDate(nearby.starts_at)}</p>
+                    <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{nearby.title}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{formatDate(nearby.starts_at)}</p>
                   </div>
-                  <span className={`ml-3 text-xs font-bold shrink-0 ${nearby.price > 0 ? 'text-orange-600' : 'text-[#15110d]'}`}>
+                  <span className={`ml-3 text-xs font-bold shrink-0 ${nearby.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                     {nearby.price > 0 ? `€${nearby.price}` : 'Free'}
                   </span>
                 </Link>
@@ -277,21 +277,21 @@ function CitySheet({
     <>
       <div className="fixed inset-0 bg-black/40 z-[1000]" onClick={onClose} />
       <div
-        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-white border border-gray-200 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
+        className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-t-3xl px-5 pt-5 pb-6 max-h-[70vh] overflow-y-auto"
         style={{ animation: 'rpSheetUp 0.28s cubic-bezier(0.32,0.72,0,1) both' }}
       >
         <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
 
-        <h2 className="text-[#15110d] font-bold text-lg mb-1">
+        <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">
           {cityName}
         </h2>
-        <p className="text-gray-500 text-xs mb-4">
+        <p className="text-gray-500 dark:text-gray-400 text-xs mb-4">
           {events.length} event{events.length !== 1 ? 's' : ''} in this area
         </p>
 
         {events.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500 text-sm">No upcoming events in this area yet.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No upcoming events in this area yet.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -299,20 +299,20 @@ function CitySheet({
               <Link
                 key={event.id}
                 href={`/events/${event.id}`}
-                className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+                className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-orange-500 transition"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-[#15110d] font-semibold text-sm truncate">{event.title}</p>
-                  <p className="text-gray-500 text-xs mt-0.5">
+                  <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{event.title}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">
                     {formatDate(event.starts_at)} · {event.location}
                   </p>
                 </div>
                 <div className="ml-3 flex flex-col items-end gap-1 shrink-0">
-                  <span className={`text-xs font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d]'}`}>
+                  <span className={`text-xs font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                     {event.price > 0 ? `€${event.price}` : 'Free'}
                   </span>
                   {event.attendee_count > 0 && (
-                    <span className="text-gray-500 text-xs">👥 {event.attendee_count}</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs">👥 {event.attendee_count}</span>
                   )}
                 </div>
               </Link>
@@ -501,8 +501,8 @@ export default function MapPage() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-[#fdf6ec] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-gray-500">
+      <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
           <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm">Loading map…</p>
         </div>
@@ -514,27 +514,27 @@ export default function MapPage() {
     // h-dvh (not h-screen/100vh) so this never outgrows the *actual* visible
     // viewport on mobile Safari, which would otherwise push the fixed BottomNav
     // below the screen behind the browser's own toolbar.
-    <div className="flex flex-col h-dvh bg-[#fdf6ec] overflow-hidden">
+    <div className="flex flex-col h-dvh bg-[#fdf6ec] dark:bg-[#15110d] overflow-hidden">
 
       <TopBar title={`${filteredEvents.length} event${filteredEvents.length !== 1 ? 's' : ''}${venues.length > 0 ? ` · ${venues.length} venues` : ''}`} />
 
       {/* City search bar */}
       <form onSubmit={handleCitySearch} className="px-4 pt-2 pb-1 shrink-0 z-10">
-        <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-full px-4 py-2">
-          <span className="text-gray-500 text-sm">🔍</span>
+        <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 rounded-full px-4 py-2">
+          <span className="text-gray-500 dark:text-gray-400 text-sm">🔍</span>
           <input
             ref={searchRef}
             type="text"
             value={cityQuery}
             onChange={(e) => setCityQuery(e.target.value)}
             placeholder="Search a city or area…"
-            className="flex-1 bg-transparent text-[#15110d] text-sm outline-none placeholder-gray-600"
+            className="flex-1 bg-transparent text-[#15110d] dark:text-[#fdf6ec] text-sm outline-none placeholder-gray-600"
           />
           {cityQuery && (
             <button
               type="button"
               onClick={() => setCityQuery('')}
-              className="text-gray-600 hover:text-black text-xs"
+              className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs"
             >
               ✕
             </button>
@@ -555,7 +555,7 @@ export default function MapPage() {
               className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
                 activeFilter === f.id
                   ? 'bg-orange-500 border-orange-500 text-white'
-                  : 'bg-white border-gray-300 text-gray-500 hover:border-gray-500'
+                  : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-500'
               }`}
             >
               {f.label}
@@ -565,7 +565,7 @@ export default function MapPage() {
       </div>
 
       {/* Legend */}
-      <div className="px-4 pb-2 flex items-center gap-4 text-xs text-gray-500 shrink-0 overflow-x-auto scrollbar-hide">
+      <div className="px-4 pb-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 shrink-0 overflow-x-auto scrollbar-hide">
         <span className="flex items-center gap-1.5 shrink-0">
           <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
           Casual
@@ -575,7 +575,7 @@ export default function MapPage() {
           Social
         </span>
         <span className="flex items-center gap-1.5 shrink-0">
-          <span className="text-gray-500">🏳️</span>
+          <span className="text-gray-500 dark:text-gray-400">🏳️</span>
           Not joined
         </span>
         <span className="flex items-center gap-1.5 shrink-0">

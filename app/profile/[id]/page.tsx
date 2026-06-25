@@ -74,7 +74,7 @@ export default function PublicProfilePage() {
   }, [id])
 
   if (loading) return (
-    <div className="min-h-screen bg-[#fdf6ec] flex items-center justify-center text-gray-500">Loading...</div>
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center text-gray-500 dark:text-gray-400">Loading...</div>
   )
 
   if (!profile) return null
@@ -95,22 +95,22 @@ export default function PublicProfilePage() {
   const hasSocials = profile.instagram || profile.tiktok || profile.snapchat
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] text-[#15110d] px-4 pt-6 pb-24">
+    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] px-4 pt-6 pb-24">
       <div className="max-w-lg mx-auto">
         <button
           onClick={() => router.back()}
-          className="text-gray-500 text-sm mb-6 block"
+          className="text-gray-500 dark:text-gray-400 text-sm mb-6 block"
         >
           ← Back
         </button>
 
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-200 shrink-0 border border-gray-300">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-700 dark:bg-[#221c16] shrink-0 border border-gray-300 dark:border-gray-700">
             {profile.avatar_url ? (
               <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-[#15110d] bg-gray-200">
+              <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-[#15110d] dark:text-[#fdf6ec] bg-gray-200 dark:bg-gray-700 dark:bg-[#221c16]">
                 {profile.full_name[0].toUpperCase()}
               </div>
             )}
@@ -124,8 +124,8 @@ export default function PublicProfilePage() {
                 </span>
               )}
             </div>
-            {profile.username && <p className="text-gray-500 text-sm">@{profile.username}</p>}
-            {profile.city && <p className="text-gray-500 text-xs mt-0.5">📍 {profile.city}</p>}
+            {profile.username && <p className="text-gray-500 dark:text-gray-400 text-sm">@{profile.username}</p>}
+            {profile.city && <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">📍 {profile.city}</p>}
             {profile.venue_name && (
               <p className="text-orange-600 text-xs mt-0.5">🏟️ {profile.venue_name}</p>
             )}
@@ -134,19 +134,19 @@ export default function PublicProfilePage() {
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-gray-600 text-sm mb-4">{profile.bio}</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{profile.bio}</p>
         )}
 
         {/* Vibe + availability */}
         {(profile.vibe || profile.social_battery || profile.available_this_week) && (
           <div className="flex flex-wrap gap-2 mb-4">
             {profile.vibe && (
-              <span className="bg-white border border-gray-200 text-gray-600 text-xs px-2.5 py-1 rounded-full">
+              <span className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-xs px-2.5 py-1 rounded-full">
                 {vibeLabels[profile.vibe] ?? profile.vibe}
               </span>
             )}
             {profile.social_battery && (
-              <span className={`bg-white border border-gray-200 text-xs px-2.5 py-1 rounded-full ${batteryLabels[profile.social_battery]?.color ?? 'text-gray-500'}`}>
+              <span className={`bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-xs px-2.5 py-1 rounded-full ${batteryLabels[profile.social_battery]?.color ?? 'text-gray-500 dark:text-gray-400'}`}>
                 {batteryLabels[profile.social_battery]?.icon} {profile.social_battery === 'full' ? 'Full battery' : profile.social_battery === 'medium' ? 'Medium battery' : 'Low battery'}
               </span>
             )}
@@ -162,7 +162,7 @@ export default function PublicProfilePage() {
         {profile.interests?.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {profile.interests.map(i => (
-              <span key={i} className="bg-white border border-gray-300 text-gray-600 text-xs px-3 py-1 rounded-full">
+              <span key={i} className="bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-xs px-3 py-1 rounded-full">
                 {i}
               </span>
             ))}
@@ -171,8 +171,8 @@ export default function PublicProfilePage() {
 
         {/* Social Media — gated */}
         {hasSocials && (
-          <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
-            <h2 className="text-sm font-semibold text-gray-500 mb-3">Socials</h2>
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Socials</h2>
             {sharedEvent ? (
               <div className="space-y-2">
                 {profile.instagram && (
@@ -180,11 +180,11 @@ export default function PublicProfilePage() {
                     href={`https://instagram.com/${profile.instagram}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-[#15110d] hover:text-orange-600 transition"
+                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-orange-600 transition"
                   >
                     <span className="text-lg">📸</span>
                     <span>@{profile.instagram}</span>
-                    <span className="text-gray-500 text-xs ml-auto">Instagram →</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs ml-auto">Instagram →</span>
                   </a>
                 )}
                 {profile.tiktok && (
@@ -192,11 +192,11 @@ export default function PublicProfilePage() {
                     href={`https://tiktok.com/@${profile.tiktok}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-[#15110d] hover:text-orange-600 transition"
+                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-orange-600 transition"
                   >
                     <span className="text-lg">🎵</span>
                     <span>@{profile.tiktok}</span>
-                    <span className="text-gray-500 text-xs ml-auto">TikTok →</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs ml-auto">TikTok →</span>
                   </a>
                 )}
                 {profile.snapchat && (
@@ -204,17 +204,17 @@ export default function PublicProfilePage() {
                     href={`https://snapchat.com/add/${profile.snapchat}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-[#15110d] hover:text-orange-600 transition"
+                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-orange-600 transition"
                   >
                     <span className="text-lg">👻</span>
                     <span>{profile.snapchat}</span>
-                    <span className="text-gray-500 text-xs ml-auto">Snapchat →</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs ml-auto">Snapchat →</span>
                   </a>
                 )}
               </div>
             ) : (
               <div className="text-center py-3">
-                <p className="text-gray-500 text-sm">🔒 Attend an event together to see their socials.</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">🔒 Attend an event together to see their socials.</p>
               </div>
             )}
           </div>
