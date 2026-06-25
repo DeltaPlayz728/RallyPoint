@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -184,11 +185,14 @@ function ProfileSetupForm() {
 
         {/* Header */}
         <div className="mb-8">
-          {isEditing && (
-            <button onClick={() => router.push('/profile')} className="text-gray-500 dark:text-gray-400 text-sm mb-4 block hover:text-black dark:hover:text-white transition">
-              ← Back
-            </button>
-          )}
+          <div className="flex items-center justify-between mb-4">
+            {isEditing ? (
+              <button onClick={() => router.push('/profile')} className="text-gray-500 dark:text-gray-400 text-sm hover:text-black dark:hover:text-white transition">
+                ← Back
+              </button>
+            ) : <span />}
+            <Logo size={24} />
+          </div>
           <h1 className="text-2xl font-bold mb-1">
             {isEditing ? 'Edit your profile' : 'Set up your profile'}
           </h1>

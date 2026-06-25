@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 type Message = {
   id: string
@@ -215,6 +216,7 @@ export default function DmThreadPage() {
           </div>
           {other.is_bot && <div className="text-xs text-gray-500 dark:text-gray-400">RallyPoint's assistant</div>}
         </div>
+        <Logo size={22} className="ml-auto" />
       </div>
 
       {/* Messages */}

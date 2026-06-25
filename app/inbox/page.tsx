@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 type Notification = {
   id: string
@@ -86,6 +87,7 @@ export default function InboxPage() {
               <p className="text-orange-600 text-sm">{unreadCount} new</p>
             )}
           </div>
+          <Logo size={28} />
         </div>
 
         {notifications.length === 0 ? (

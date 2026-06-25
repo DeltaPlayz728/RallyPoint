@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { effectiveTier, hasFeature, TIER_LABELS, SubscriptionTier } from '@/lib/subscription'
+import TopBar from '@/components/TopBar'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 const BANNER_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6', '#ef4444', '#eab308']
@@ -169,8 +170,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] px-4 pt-8 pb-24">
-        <div className="max-w-lg mx-auto space-y-4">
+      <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] pb-24">
+        <TopBar title="Profile" />
+        <div className="max-w-lg mx-auto space-y-4 px-4 pt-8">
           <div className="flex gap-4 items-center">
             <div className="w-16 h-16 rounded-full bg-white dark:bg-[#221c16] animate-pulse" />
             <div className="space-y-2 flex-1">
@@ -188,10 +190,11 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
+      <TopBar title="Profile" />
 
       {/* Organizer upgrade modal */}
       {showOrganizerModal && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-end justify-center px-4 pb-6">
+        <div className="fixed inset-0 bg-black/80 z-[60] flex items-end justify-center px-4 pb-6">
           <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5">
             <h3 className="font-bold text-lg mb-1">Become an Organizer</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Post events to the Events tab, visible to everyone in your city.</p>

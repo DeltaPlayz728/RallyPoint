@@ -7,6 +7,7 @@ import Link from 'next/link'
 import FriendButton from '@/components/FriendButton'
 import RatingModal from '@/components/RatingModal'
 import ShareCard from '@/components/ShareCard'
+import Logo from '@/components/Logo'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -396,6 +397,11 @@ export default function EventDetailPage() {
         >
           ←
         </button>
+
+        {/* Logo */}
+        <div className="absolute top-4 right-4">
+          <Logo size={26} />
+        </div>
 
         {/* Payment banners */}
         {paymentStatus === 'success' && (

@@ -32,11 +32,20 @@ export const metadata: Metadata = {
     url: appUrl,
     siteName: "RallyPoint",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "RallyPoint — Real places. Real people. No swiping required.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "RallyPoint — Stop scrolling. Start showing up.",
     description: "Find casual meetups and real-life events near you.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,

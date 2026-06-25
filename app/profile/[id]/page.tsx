@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 type Profile = {
   id: string
@@ -97,12 +98,15 @@ export default function PublicProfilePage() {
   return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] px-4 pt-6 pb-24">
       <div className="max-w-lg mx-auto">
-        <button
-          onClick={() => router.back()}
-          className="text-gray-500 dark:text-gray-400 text-sm mb-6 block"
-        >
-          ← Back
-        </button>
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => router.back()}
+            className="text-gray-500 dark:text-gray-400 text-sm"
+          >
+            ← Back
+          </button>
+          <Logo size={24} />
+        </div>
 
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">

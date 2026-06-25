@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 // Admin-only page — uses service role on client only for this page.
 // In production, this should be a server component or behind a separate admin auth.
@@ -164,9 +165,12 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold">Admin Queue</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm">{pendingReports.length} pending reports</p>
         </div>
-        <span className="text-xs bg-orange-500 text-white border border-black px-3 py-1 rounded-full">
-          Admin
-        </span>
+        <div className="flex items-center gap-2">
+          <Logo size={26} />
+          <span className="text-xs bg-orange-500 text-white border border-black px-3 py-1 rounded-full">
+            Admin
+          </span>
+        </div>
       </div>
 
       {/* Tabs */}

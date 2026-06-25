@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { moderateEvent } from '@/lib/contentModeration'
+import Logo from '@/components/Logo'
 
 const PRICE_MAP: Record<string, number> = {
   small: 10,
@@ -115,7 +116,10 @@ function CreateEventForm() {
   return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] px-4 py-6 pb-24">
       <div className="max-w-lg mx-auto">
-        <h1 className="text-2xl font-bold mb-1">Create an Event</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-bold">Create an Event</h1>
+          <Logo size={26} />
+        </div>
         <p className="text-gray-500 dark:text-gray-400 mb-6">Get people together.</p>
 
         {/* Event Type Toggle */}
