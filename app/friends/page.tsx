@@ -74,7 +74,7 @@ export default function FriendsPage() {
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) { setLoading(false); return }
       setUserId(user.id)
 
       // Load friendships
