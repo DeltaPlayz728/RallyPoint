@@ -68,11 +68,10 @@ function MeetupModal({
 }) {
   const [message, setMessage] = useState('')
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5 z-10"
-        style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}>
-        <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-5" />
+        style={{ animation: 'rpModalIn 0.2s cubic-bezier(0.32,0.72,0,1) both' }}>
         <h3 className="font-bold text-lg mb-1 text-[#15110d] dark:text-[#fdf6ec]">Request a meetup</h3>
         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
           Send a 1:1 request to <span className="text-[#15110d] dark:text-[#fdf6ec] font-medium">{target.name}</span>
@@ -136,6 +135,10 @@ export default function EventDetailPage() {
       @keyframes rpSheetUp {
         from { transform: translateY(100%); opacity: 0.6; }
         to   { transform: translateY(0);    opacity: 1;   }
+      }
+      @keyframes rpModalIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to   { transform: scale(1);    opacity: 1; }
       }
     `
     document.head.appendChild(style)
@@ -354,11 +357,10 @@ export default function EventDetailPage() {
 
       {/* Cancel event confirmation */}
       {showCancelConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
           <div className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5 z-10"
-            style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}>
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
+            style={{ animation: 'rpModalIn 0.2s cubic-bezier(0.32,0.72,0,1) both' }}>
             <h3 className="font-bold text-lg mb-1 text-[#15110d] dark:text-[#fdf6ec]">Cancel this event?</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
               {attendees.length > 1

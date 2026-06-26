@@ -50,14 +50,12 @@ export default function ReportModal({ targetType, targetId, targetName, onClose 
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div
         className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5 z-10"
-        style={{ animation: 'rpSheetUp 0.25s cubic-bezier(0.32,0.72,0,1) both' }}
+        style={{ animation: 'rpModalIn 0.2s cubic-bezier(0.32,0.72,0,1) both' }}
       >
-        <div className="w-10 h-1 bg-gray-700 dark:bg-gray-600 rounded-full mx-auto mb-5" />
-
         {done ? (
           <div className="text-center py-6">
             <div className="text-3xl mb-3">✅</div>

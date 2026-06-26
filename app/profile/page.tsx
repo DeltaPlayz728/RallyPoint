@@ -194,7 +194,7 @@ export default function ProfilePage() {
 
       {/* Organizer upgrade modal */}
       {showOrganizerModal && (
-        <div className="fixed inset-0 bg-black/80 z-[60] flex items-end justify-center px-4 pb-6">
+        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center px-4">
           <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5">
             <h3 className="font-bold text-lg mb-1">Become an Organizer</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Post events to the Events tab, visible to everyone in your city.</p>
