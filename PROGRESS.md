@@ -1,10 +1,23 @@
 # RallyPoint — Progress / Handoff
 
-Last updated: 2026-06-20 (overnight autonomous session, while John slept)
+Last updated: 2026-06-26 (playtest-prep bug pass)
 
 This file is the source of truth for "where things stand." Read this before doing anything else in a new session.
 
-## Update 2026-06-20 (overnight session — read this first)
+## Update 2026-06-26 (playtest-prep bug pass — read this first)
+
+Four items closed out, in order, per John's request:
+
+1. **Fixed: "Become an Organizer" modal hidden behind BottomNav.** Same bug class as the earlier cancel-event/meetup/report modals (`app/profile/page.tsx`'s bottom sheet was `z-50`, tied with `BottomNav`'s own `z-50`, and `BottomNav` mounts after `{children}` so it won stacking ties and ate taps). Bumped to `z-[60]`. Grepped the whole codebase afterward — confirmed no other instance of this bug class remains.
+2. **Logo rolled out beyond the 5 main tabs.** John chose "sub-pages with back buttons" scope (not auth/legal/onboarding). Added `Logo` to: `app/profile/[id]/page.tsx`, `app/profile/setup/page.tsx`, `app/inbox/page.tsx`, `app/inbox/dm/[userId]/page.tsx`, `app/events/create/page.tsx`, `app/admin/page.tsx`, `app/events/[id]/chat/page.tsx`, `app/events/[id]/page.tsx`. Also fixed a real gap: `/profile` (one of the 5 main bottom-nav tabs) was the only main tab missing `TopBar`/logo entirely — added it.
+3. **OG share image added.** Generated `public/og-image.png` (1200×630, branded — logo mark + wordmark + tagline on the cream theme) and wired it into `app/layout.tsx`'s `openGraph.images` / `twitter.images`. This closes the gap flagged in the 2026-06-20 update below ("no OG image yet").
+4. **Mobile safe-area padding — turned out already done.** The gap flagged in item #8 of the 2026-06-20 update (`BottomNav` missing `env(safe-area-inset-bottom)`) was already fixed in a later session before tonight — `components/BottomNav.tsx` already has `pb-[max(0.25rem,env(safe-area-inset-bottom))]` and `app/layout.tsx`'s viewport already sets `viewportFit: "cover"`. No action needed; verified and closed.
+
+Committed as `1718fdd`, pushed to `main`, confirmed live: fetched `https://rally-point-eb1q.vercel.app` post-deploy and verified the `og:image`/`twitter:image` meta tags resolve to the new image.
+
+**Still open from before, unchanged:** #27 (Google Places API key), #71 (Anthropic API key), #83 (register business + activate live Stripe), #151 (Extrovert perks + profile view count), reacting to `PHASE_6_7_DRAFT.md` pricing.
+
+## Update 2026-06-20 (overnight session)
 
 ### 0. Security fixes: confirmed actually live (closed out)
 The 4 commits from earlier (`9c36af8`, `c26cedd`, `9e3d101`, `87531d8`) were pushed to `origin/main` but **Vercel's GitHub auto-deploy never triggered for them** — no deployment appeared for those commits despite the GitHub App integration showing connected. Worked around by manually triggering a deploy: Vercel Deployments page → `...` menu → "Create Deployment" → entered commit `87531d8` → "Deploy to Production". Verified live via an in-browser `fetch()` with `credentials: 'omit'` against `/api/admin/reports` and `/api/admin/suspensions` — both now correctly return `401 {"error":"Unauthorized"}`.
@@ -133,7 +146,7 @@ What the code review did check, and came back clean:
 - Form inputs use the browser default 16px font (no `text-xs`/`text-sm` on `<input>`/`<textarea>` elements) — avoids the classic iOS Safari auto-zoom-on-focus bug.
 - Bottom-sheet modals (cancel-event, meetup request, report) already fixed at `z-[60]` above `BottomNav`'s `z-50` from an earlier session (#85) — checked this didn't regress.
 
-One real gap found, not fixed (low priority, cosmetic): `components/BottomNav.tsx` is `fixed bottom-0` with `py-2` padding but no `padding-bottom: env(safe-area-inset-bottom)`. On notched/home-indicator iPhones this means the nav icons sit close to the gesture bar instead of being padded above it. Worth a small follow-up — add `pb-[env(safe-area-inset-bottom)]` (or Tailwind's `pb-safe` with a plugin) to the nav's outer div.
+One real gap found at the time, not fixed yet in this session: `components/BottomNav.tsx` was `fixed bottom-0` with `py-2` padding but no `padding-bottom: env(safe-area-inset-bottom)`. **Fixed 2026-06-26** — see the update at the top of this file; `BottomNav.tsx` now has `pb-[max(0.25rem,env(safe-area-inset-bottom))]`.
 
 ### 9. Bot seed-event reliability + autonomy (#82) — bugs fixed, both product decisions made and implemented
 
