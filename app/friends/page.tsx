@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import TopBar from '@/components/TopBar'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
@@ -68,6 +69,7 @@ type JoinedCommunityRow = {
 type View = 'chat' | 'requests'
 
 export default function FriendsPage() {
+  const router = useRouter()
   const [userId, setUserId] = useState<string | null>(null)
   const [friends, setFriends] = useState<FriendRow[]>([])
   const [dms, setDms] = useState<DmRow[]>([])
@@ -81,7 +83,7 @@ export default function FriendsPage() {
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setLoading(false); return }
+      if (!user) { router.push('/auth/login'); return }
       setUserId(user.id)
 
       // Load friendships
@@ -159,7 +161,7 @@ export default function FriendsPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router])
 
   const accepted = friends.filter(f => f.status === 'accepted')
   const pendingReceived = friends.filter(f => f.status === 'pending' && !f.iRequested)
