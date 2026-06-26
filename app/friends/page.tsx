@@ -59,6 +59,12 @@ type EventChatRow = {
   emoji: string
 }
 
+type JoinedCommunityRow = {
+  id: string
+  name: string
+  bannerColor: string
+}
+
 type View = 'chat' | 'requests'
 
 export default function FriendsPage() {
@@ -66,6 +72,7 @@ export default function FriendsPage() {
   const [friends, setFriends] = useState<FriendRow[]>([])
   const [dms, setDms] = useState<DmRow[]>([])
   const [eventChats, setEventChats] = useState<EventChatRow[]>([])
+  const [joinedCommunities, setJoinedCommunities] = useState<JoinedCommunityRow[]>([])
   const [botId, setBotId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<View>('chat')
@@ -133,6 +140,22 @@ export default function FriendsPage() {
       }))
       setEventChats(chatRows)
 
+      // Load communities the user has joined — shown as a row above the search bar
+      const { data: membershipData } = await supabase
+        .from('community_members')
+        .select('community_id, communities(id, name, banner_color)')
+        .eq('user_id', user.id)
+
+      const communityRows: JoinedCommunityRow[] = (membershipData ?? [])
+        .map((m: any) => m.communities)
+        .filter(Boolean)
+        .map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          bannerColor: c.banner_color ?? '#f97316',
+        }))
+      setJoinedCommunities(communityRows)
+
       setLoading(false)
     }
     load()
@@ -185,10 +208,31 @@ export default function FriendsPage() {
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
       <TopBar title="Friends" />
 
+      {/* Joined communities — horizontal bubble row, Instagram Notes style */}
+      {joinedCommunities.length > 0 && (
+        <div className="px-4 pt-3 pb-1">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+            {joinedCommunities.map((c) => (
+              <Link key={c.id} href={`/communities/${c.id}`} className="flex flex-col items-center gap-1.5 shrink-0">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center font-black text-white text-lg shrink-0 border-2 border-white dark:border-[#221c16] shadow-sm"
+                  style={{ background: c.bannerColor }}
+                >
+                  {c.name[0]?.toUpperCase() ?? '?'}
+                </div>
+                <span className="text-[11px] text-gray-500 dark:text-gray-400 max-w-[60px] truncate text-center">
+                  {c.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search bar */}
       <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5 flex-1">
+          <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5" style={{ width: '80%' }}>
             <span className="text-gray-600 dark:text-gray-400 text-sm">🔍</span>
             <input
               type="text"
@@ -200,7 +244,8 @@ export default function FriendsPage() {
           </div>
           <Link
             href="/communities"
-            className="shrink-0 bg-white dark:bg-[#221c16] rounded-2xl px-3 py-2.5 text-sm text-[#15110d] dark:text-[#fdf6ec]"
+            className="flex items-center justify-center gap-1 bg-white dark:bg-[#221c16] rounded-2xl py-2.5 text-sm text-[#15110d] dark:text-[#fdf6ec] font-medium"
+            style={{ width: '20%' }}
             title="Communities"
           >
             🏘️
