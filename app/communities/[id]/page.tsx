@@ -258,8 +258,9 @@ export default function CommunityDetailPage() {
       <div
         className="relative h-24 shrink-0 flex items-end"
         style={{
-          background: community.banner_url ? undefined : `linear-gradient(135deg, ${community.banner_color}, #fb923c)`,
-          backgroundImage: community.banner_url ? `url(${community.banner_url})` : undefined,
+          backgroundImage: community.banner_url
+            ? `url(${community.banner_url})`
+            : `linear-gradient(135deg, ${community.banner_color}, #fb923c)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -502,9 +503,10 @@ export default function CommunityDetailPage() {
 
       {/* Members sheet */}
       {showMembers && (
-        <div className="fixed inset-0 bg-black/40 flex items-end z-30" onClick={() => setShowMembers(false)}>
+        <>
+          <div className="fixed inset-0 bg-black/40 z-[1000]" onClick={() => setShowMembers(false)} />
           <div
-            className="bg-[#fdf6ec] dark:bg-[#15110d] w-full max-h-[70vh] rounded-t-3xl overflow-y-auto p-4"
+            className="fixed left-0 right-0 bottom-[72px] z-[1001] bg-[#fdf6ec] dark:bg-[#15110d] w-full max-h-[70vh] rounded-t-3xl overflow-y-auto p-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
@@ -526,7 +528,7 @@ export default function CommunityDetailPage() {
               ))}
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
