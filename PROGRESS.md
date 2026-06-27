@@ -1,10 +1,24 @@
 # RallyPoint — Progress / Handoff
 
-Last updated: 2026-06-26 (playtest-prep bug pass)
+Last updated: 2026-06-27 (Map Events QA + bug-fix pass, ahead of 2026-06-28 playtest)
 
 This file is the source of truth for "where things stand." Read this before doing anything else in a new session.
 
-## Update 2026-06-26 (playtest-prep bug pass — read this first)
+## Update 2026-06-27 (Map Events adversarial QA + fixes — read this first)
+
+Ran a full adversarial QA pass on Map Events (create → discover → join → chat → cancel) using two disposable test accounts plus direct Supabase REST calls to probe auth boundaries. Full report: `QA_Bug_Report_2026-06-27.md`. Good news first: Supabase RLS correctly blocked every forged cross-account attack tried (event cancellation, chat impersonation, RSVP impersonation), and duplicate RSVPs are blocked by a unique constraint. No auth bypass found. Then fixed everything that needed fixing:
+
+1. **Fixed: no validation on `max_attendees`/`starts_at`.** Found via direct API bypass that the `events` table accepted `max_attendees: -5` and a `starts_at` of 2020. Added two DB constraints: `events_max_attendees_positive` (CHECK, validated against all existing rows — passed clean) and `events_starts_at_after_created` (CHECK, applied `NOT VALID` since one legacy real event predates this rule — new/edited rows are enforced, old data untouched). Also added matching client-side guards in `app/events/create/page.tsx` (rejects past dates and `max_attendees < 2` with a visible error instead of relying solely on native browser validation).
+2. **Fixed: event chat had no live sync.** The realtime subscription code in `app/events/[id]/chat/page.tsx` was already correct — the actual bug was that Supabase's `messages` table was never added to the `supabase_realtime` publication, so the subscription never received anything. Added it (`alter publication supabase_realtime add table public.messages`). Re-tested live: a message sent from one account now appears on a second account's open chat tab with no reload.
+3. **Fixed: empty event-creation form failed silently.** Added an explicit check + visible error message in `app/events/create/page.tsx` for blank title/location/city/date instead of relying only on native HTML `required` tooltips (which didn't render in headless testing and could read as a dead button).
+4. **Investigated, not changed: auth session cookie isn't httpOnly.** This is inherent to the `@supabase/ssr` `createBrowserClient` pattern used in `lib/supabase.ts` — the client-side SDK needs `document.cookie` access to read/refresh the session, which is mutually exclusive with httpOnly. Making it httpOnly would require a bigger refactor (server-side BFF auth pattern) and would break every page's client-side `supabase.auth.getUser()` calls. No exploit was found that uses this gap; flagging as a known tradeoff rather than an open bug.
+5. **Not a bug, re-verified:** an earlier note about a "triple avatar" rendering glitch on the attendee list turned out to be both test accounts' names starting with the same letter ("TestBot1"/"TestBot2") rendering correctly in both the avatar stack and the individual rows — not a duplicate-render bug. Did fix one real small inconsistency while in that file: the per-row `Avatar` in `app/events/[id]/page.tsx` fell back straight to `'?'` if `full_name` was null instead of trying `username` first like the avatar stack above it does — made it consistent.
+
+All disposable test data (test events, attendees, chat messages) created during testing has been deleted from production. The original QA test event is still live and can be cancelled or left for the playtest.
+
+**Still open from before, unchanged:** #27 (Google Places API key), #71 (Anthropic API key), #83 (register business + activate live Stripe), #151 (Extrovert perks + profile view count), reacting to `PHASE_6_7_DRAFT.md` pricing.
+
+## Update 2026-06-26 (playtest-prep bug pass)
 
 Four items closed out, in order, per John's request:
 

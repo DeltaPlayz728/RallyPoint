@@ -526,7 +526,7 @@ export default function EventDetailPage() {
                     href={isMe ? '/profile' : `/profile/${a.user_id}`}
                     className="flex items-center gap-2.5 hover:opacity-75 transition min-w-0"
                   >
-                    <Avatar name={a.profiles?.full_name ?? '?'} index={i} size="sm" />
+                    <Avatar name={a.profiles?.full_name ?? a.profiles?.username ?? '?'} index={i} size="sm" />
                     <span className="text-sm text-[#15110d] dark:text-[#fdf6ec] truncate">
                       {name}
                       {isEventHost && (

@@ -45,6 +45,12 @@ function CreateEventForm() {
     setLoading(true)
     setError('')
 
+    if (!title.trim() || !location.trim() || !city.trim() || !startsAt) {
+      setError('Please fill in title, location, city, and date/time before creating the event.')
+      setLoading(false)
+      return
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
@@ -59,7 +65,18 @@ function CreateEventForm() {
       // 'hold' — create event but mark as pending_review
     }
 
+    if (new Date(startsAt).getTime() <= Date.now()) {
+      setError('Please choose a date and time in the future.')
+      setLoading(false)
+      return
+    }
+
     const max = maxAttendees ? parseInt(maxAttendees) : null
+    if (max !== null && max < 2) {
+      setError('Max attendees must be at least 2.')
+      setLoading(false)
+      return
+    }
 
     // Use pre-filled coords from map venue pin if available, otherwise geocode
     let lat: number | null = prefillLat
@@ -204,6 +221,7 @@ function CreateEventForm() {
               type="datetime-local"
               value={startsAt}
               onChange={(e) => setStartsAt(e.target.value)}
+              min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
               required
               className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
             />
