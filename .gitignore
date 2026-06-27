@@ -42,3 +42,6 @@ next-env.d.ts
 
 # scratch/one-off scripts — never committed
 scripts/_tmp-*
+
+# editor/filesystem temp artifacts — never real source
+.fuse_hidden*
