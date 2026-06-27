@@ -1,10 +1,22 @@
 # RallyPoint — Progress / Handoff
 
-Last updated: 2026-06-27 (Map Events QA + bug-fix pass, ahead of 2026-06-28 playtest)
+Last updated: 2026-06-27 (Communities adversarial QA + bug-fix pass, ahead of 2026-06-28 playtest)
 
 This file is the source of truth for "where things stand." Read this before doing anything else in a new session.
 
-## Update 2026-06-27 (Map Events adversarial QA + fixes — read this first)
+## Update 2026-06-27 (Communities/Group Chat adversarial QA + fixes — READ THIS FIRST, action needed)
+
+Ran the same adversarial QA pass on Communities/Group Chat that was done on Map Events and Friends, using TestBot1/Testbot2 plus direct Supabase REST calls. Full report: `QA_Bug_Report_Communities_2026-06-27.md`. Found and fixed **one critical, playtest-blocking bug**, found and fixed **a second critical bug that still needs a `git push` to go live**, and confirmed every authorization/impersonation attack was blocked.
+
+1. **FIXED (live in Supabase now): joining any community was completely broken.** `INSERT` into `community_members` always failed with Postgres error `42P17` ("infinite recursion detected in policy"). Root cause: combining an `INSERT` policy's correlated subquery against `community_bans` with another policy's correlated subquery against `communities` on the same table tripped Postgres's RLS recursion guard, even with no direct self-reference. Fixed by replacing the inline subqueries with three new `SECURITY DEFINER` helper functions (`is_community_owner`, `is_banned_from_community`, `is_community_moderator`) and rewriting all four `community_members` policies to use them. Applied directly via Supabase migration and verified — joining now works.
+2. **FIXED IN CODE, NOT YET LIVE — needs your `git push`: the "Join community" button was unreachable.** The Communities detail page (`app/communities/[id]/page.tsx`) has its own in-flow bottom tab bar (Home/Chat/Events/You), but the global fixed-position `BottomNav` (z-50) sits on top of it and eats every tap, so the "You" tab — and therefore "Join community"/"Leave community" — could never actually be clicked by a real user. Root cause: `components/BottomNavWrapper.tsx` only hides the global nav via an exact-match list (`NO_NAV_ROUTES.includes(pathname)`), which can structurally never match a dynamic route like `/communities/[id]`. **Fix applied**: added a `NO_NAV_PREFIXES` check (`/communities/`) alongside the exact-match list. **This is sitting uncommitted in your working tree — you need to `git add`, `commit`, and `push` this before the playtest, or the Join button will still be broken in production.**
+3. **Confirmed blocked, no fix needed:** non-members posting into a community's chat (403), chat-message sender impersonation by a real member (403), self role-escalation to moderator (silently filtered, 0 rows), a non-mod forging a ban on another member (403), a non-mod forging a kick/removal of another member (silently filtered, 0 rows), and a banned user attempting to rejoin (403, correctly caught by the new `is_banned_from_community` check). No auth bypass found anywhere in Communities.
+
+All test data created during this pass (test ban row, membership churn) has been cleaned up — production community state is back to just John (owner) + Testbot2 (member).
+
+**Action needed from you:** `git add -A && git commit -m "fix: hide global bottom nav on community detail pages" && git push` — that's the one uncommitted change from tonight.
+
+## Update 2026-06-27 (Map Events adversarial QA + fixes)
 
 Ran a full adversarial QA pass on Map Events (create → discover → join → chat → cancel) using two disposable test accounts plus direct Supabase REST calls to probe auth boundaries. Full report: `QA_Bug_Report_2026-06-27.md`. Good news first: Supabase RLS correctly blocked every forged cross-account attack tried (event cancellation, chat impersonation, RSVP impersonation), and duplicate RSVPs are blocked by a unique constraint. No auth bypass found. Then fixed everything that needed fixing:
 
