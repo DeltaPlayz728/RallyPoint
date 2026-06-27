@@ -9,6 +9,7 @@ type Community = {
   owner_id: string
   name: string
   description: string | null
+  rules: string | null
   banner_color: string
   banner_url: string | null
 }
@@ -18,6 +19,7 @@ type Message = {
   sender_id: string
   content: string
   created_at: string
+  channel_id: string | null
   senderName: string
 }
 
@@ -33,9 +35,21 @@ type Member = {
   user_id: string
   name: string
   avatar_url: string | null
+  role: 'member' | 'moderator'
 }
 
-type MainTab = 'home' | 'chat' | 'events' | 'you'
+type BannedUser = {
+  user_id: string
+  name: string
+  reason: string | null
+}
+
+type Channel = {
+  id: string
+  name: string
+}
+
+type MainTab = 'home' | 'chat' | 'events' | 'you' | 'settings'
 type HomeView = 'list' | 'announcements' | 'about'
 
 export default function CommunityDetailPage() {
@@ -56,10 +70,19 @@ export default function CommunityDetailPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [members, setMembers] = useState<Member[]>([])
+  const [bans, setBans] = useState<BannedUser[]>([])
+  const [channels, setChannels] = useState<Channel[]>([])
+  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null)
+  const [newChannelName, setNewChannelName] = useState('')
   const [draft, setDraft] = useState('')
   const [announcementDraft, setAnnouncementDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [uploadingBanner, setUploadingBanner] = useState(false)
+
+  const [nameDraft, setNameDraft] = useState('')
+  const [descDraft, setDescDraft] = useState('')
+  const [rulesDraft, setRulesDraft] = useState('')
+  const [savingInfo, setSavingInfo] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -69,16 +92,19 @@ export default function CommunityDetailPage() {
 
       const { data: c } = await supabase
         .from('communities')
-        .select('id, owner_id, name, description, banner_color, banner_url')
+        .select('id, owner_id, name, description, rules, banner_color, banner_url')
         .eq('id', communityId)
         .maybeSingle()
 
       if (!c) { router.push('/communities'); return }
       setCommunity(c)
+      setNameDraft(c.name ?? '')
+      setDescDraft(c.description ?? '')
+      setRulesDraft(c.rules ?? '')
 
       const { data: membership } = await supabase
         .from('community_members')
-        .select('user_id')
+        .select('user_id, role')
         .eq('community_id', communityId)
         .eq('user_id', user.id)
         .maybeSingle()
@@ -89,13 +115,13 @@ export default function CommunityDetailPage() {
     }
 
     const refreshAll = async () => {
-      const [{ data: msgs }, { data: ann }, { data: mem }] = await Promise.all([
+      const [{ data: msgs }, { data: ann }, { data: mem }, { data: chans }, { data: banned }] = await Promise.all([
         supabase
           .from('community_messages')
-          .select('id, sender_id, content, created_at, profiles(full_name, username)')
+          .select('id, sender_id, content, created_at, channel_id, profiles(full_name, username)')
           .eq('community_id', communityId)
           .order('created_at', { ascending: true })
-          .limit(200),
+          .limit(300),
         supabase
           .from('community_announcements')
           .select('id, author_id, content, created_at, profiles(full_name, username)')
@@ -103,7 +129,16 @@ export default function CommunityDetailPage() {
           .order('created_at', { ascending: false }),
         supabase
           .from('community_members')
-          .select('user_id, profiles(full_name, username, avatar_url)')
+          .select('user_id, role, profiles(full_name, username, avatar_url)')
+          .eq('community_id', communityId),
+        supabase
+          .from('community_channels')
+          .select('id, name')
+          .eq('community_id', communityId)
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('community_bans')
+          .select('user_id, reason, profiles(full_name, username)')
           .eq('community_id', communityId),
       ])
 
@@ -112,6 +147,7 @@ export default function CommunityDetailPage() {
         sender_id: m.sender_id,
         content: m.content,
         created_at: m.created_at,
+        channel_id: m.channel_id,
         senderName: m.profiles?.username ? `@${m.profiles.username}` : (m.profiles?.full_name ?? 'Someone'),
       })))
 
@@ -127,6 +163,15 @@ export default function CommunityDetailPage() {
         user_id: m.user_id,
         name: m.profiles?.username ? `@${m.profiles.username}` : (m.profiles?.full_name ?? 'Member'),
         avatar_url: m.profiles?.avatar_url ?? null,
+        role: m.role ?? 'member',
+      })))
+
+      setChannels((chans ?? []).map((c: any) => ({ id: c.id, name: c.name })))
+
+      setBans((banned ?? []).map((b: any) => ({
+        user_id: b.user_id,
+        name: b.profiles?.username ? `@${b.profiles.username}` : (b.profiles?.full_name ?? 'User'),
+        reason: b.reason ?? null,
       })))
     }
 
@@ -136,18 +181,28 @@ export default function CommunityDetailPage() {
       .channel(`community-${communityId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_messages', filter: `community_id=eq.${communityId}` }, () => refreshAll())
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_announcements', filter: `community_id=eq.${communityId}` }, () => refreshAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'community_channels', filter: `community_id=eq.${communityId}` }, () => refreshAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'community_members', filter: `community_id=eq.${communityId}` }, () => refreshAll())
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [communityId, router])
 
+  // Default the active channel to "general" (or the first available channel) until the user picks one explicitly
+  const activeChannelId = selectedChannelId ?? (channels.find((c) => c.name === 'general') ?? channels[0])?.id ?? null
+
   useEffect(() => {
     if (mainTab === 'chat') bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, mainTab])
+  }, [messages, mainTab, activeChannelId])
+
+  const isOwner = community?.owner_id === userId
+  const currentMember = members.find((m) => m.user_id === userId)
+  const canModerate = isOwner || currentMember?.role === 'moderator'
 
   const handleJoin = async () => {
     if (!userId) return
-    await supabase.from('community_members').insert({ community_id: communityId, user_id: userId })
+    const { error } = await supabase.from('community_members').insert({ community_id: communityId, user_id: userId })
+    if (error) { alert('Could not join — you may have been removed from this community.'); return }
     setIsMember(true)
   }
 
@@ -158,11 +213,12 @@ export default function CommunityDetailPage() {
   }
 
   const handleSend = async () => {
-    if (!userId || !draft.trim()) return
+    if (!userId || !draft.trim() || !activeChannelId) return
     setSending(true)
     await supabase.from('community_messages').insert({
       community_id: communityId,
       sender_id: userId,
+      channel_id: activeChannelId,
       content: draft.trim(),
     })
     setDraft('')
@@ -204,6 +260,67 @@ export default function CommunityDetailPage() {
     setUploadingBanner(false)
   }
 
+  const handleSaveInfo = async () => {
+    if (!community || !isOwner) return
+    setSavingInfo(true)
+    const { error } = await supabase
+      .from('communities')
+      .update({ name: nameDraft.trim() || community.name, description: descDraft.trim() || null, rules: rulesDraft.trim() || null })
+      .eq('id', community.id)
+    if (!error) {
+      setCommunity({ ...community, name: nameDraft.trim() || community.name, description: descDraft.trim() || null, rules: rulesDraft.trim() || null })
+    } else {
+      alert('Could not save changes.')
+    }
+    setSavingInfo(false)
+  }
+
+  const handleCreateChannel = async () => {
+    if (!userId || !newChannelName.trim()) return
+    const { error } = await supabase.from('community_channels').insert({
+      community_id: communityId,
+      name: newChannelName.trim().toLowerCase().replace(/\s+/g, '-'),
+      created_by: userId,
+    })
+    if (error) {
+      alert('Could not create channel — name may already be taken.')
+    } else {
+      setNewChannelName('')
+    }
+  }
+
+  const handleDeleteChannel = async (channelId: string, name: string) => {
+    if (name === 'general') return
+    if (!confirm(`Delete the #${name} channel? Its messages will be deleted too.`)) return
+    await supabase.from('community_channels').delete().eq('id', channelId)
+    if (activeChannelId === channelId) {
+      const general = channels.find((c) => c.name === 'general')
+      setSelectedChannelId(general?.id ?? null)
+    }
+  }
+
+  const handleKick = async (memberId: string) => {
+    if (memberId === community?.owner_id) return
+    if (!confirm('Remove this member from the community?')) return
+    await supabase.from('community_members').delete().eq('community_id', communityId).eq('user_id', memberId)
+  }
+
+  const handleBan = async (memberId: string) => {
+    if (!userId || memberId === community?.owner_id) return
+    if (!confirm('Ban this user? They will be removed and unable to rejoin.')) return
+    await supabase.from('community_bans').insert({ community_id: communityId, user_id: memberId, banned_by: userId })
+    await supabase.from('community_members').delete().eq('community_id', communityId).eq('user_id', memberId)
+  }
+
+  const handleUnban = async (memberId: string) => {
+    await supabase.from('community_bans').delete().eq('community_id', communityId).eq('user_id', memberId)
+  }
+
+  const handleSetRole = async (memberId: string, role: 'member' | 'moderator') => {
+    if (!isOwner) return
+    await supabase.from('community_members').update({ role }).eq('community_id', communityId).eq('user_id', memberId)
+  }
+
   if (loading || !community) return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex flex-col">
       <div className="h-12 bg-orange-500 flex items-center px-4">
@@ -213,9 +330,13 @@ export default function CommunityDetailPage() {
     </div>
   )
 
-  const isOwner = community.owner_id === userId
-  const generalPreview = messages[messages.length - 1]
+  const activeChannel = channels.find((c) => c.id === activeChannelId)
+  const channelMessages = messages.filter((m) => m.channel_id === activeChannelId)
   const latestAnnouncement = announcements[0]
+  const lastMessageByChannel = (channelId: string) => {
+    const msgs = messages.filter((m) => m.channel_id === channelId)
+    return msgs[msgs.length - 1]
+  }
 
   return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] flex flex-col pb-0">
@@ -244,12 +365,14 @@ export default function CommunityDetailPage() {
                 Join community
               </button>
             )}
-            <button
-              onClick={() => { setShowMenu(false); setMainTab('you') }}
-              className="block w-full text-left px-4 py-2.5 text-[#15110d] dark:text-[#fdf6ec] hover:bg-gray-50 dark:hover:bg-[#2b241c]"
-            >
-              Community settings
-            </button>
+            {canModerate && (
+              <button
+                onClick={() => { setShowMenu(false); setMainTab('settings') }}
+                className="block w-full text-left px-4 py-2.5 text-[#15110d] dark:text-[#fdf6ec] hover:bg-gray-50 dark:hover:bg-[#2b241c]"
+              >
+                Community settings
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -323,22 +446,38 @@ export default function CommunityDetailPage() {
               <span className="text-gray-300 dark:text-gray-600">›</span>
             </button>
 
-            <p className="px-4 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-              Chat
-            </p>
-            <button
-              onClick={() => setMainTab('chat')}
-              className="flex items-center gap-3 mx-2 px-3 py-2.5 bg-orange-50 dark:bg-[#2b241c] rounded-2xl w-[calc(100%-1rem)] text-left"
-            >
-              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-sm shrink-0">💬</div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">general</p>
-                <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
-                  {generalPreview ? `${generalPreview.senderName}: ${generalPreview.content}` : 'No messages yet'}
-                </p>
-              </div>
-              <span className="text-gray-300 dark:text-gray-600">›</span>
-            </button>
+            <div className="flex items-center justify-between px-4 pt-5 pb-1.5">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                Chat
+              </p>
+              {canModerate && (
+                <button
+                  onClick={() => setMainTab('settings')}
+                  className="text-[11px] font-semibold text-orange-500"
+                >
+                  + New channel
+                </button>
+              )}
+            </div>
+            {channels.map((ch) => {
+              const preview = lastMessageByChannel(ch.id)
+              return (
+                <button
+                  key={ch.id}
+                  onClick={() => { setSelectedChannelId(ch.id); setMainTab('chat') }}
+                  className="flex items-center gap-3 mx-2 mb-1.5 px-3 py-2.5 bg-orange-50 dark:bg-[#2b241c] rounded-2xl w-[calc(100%-1rem)] text-left"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-sm shrink-0">💬</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">#{ch.name}</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
+                      {preview ? `${preview.senderName}: ${preview.content}` : 'No messages yet'}
+                    </p>
+                  </div>
+                  <span className="text-gray-300 dark:text-gray-600">›</span>
+                </button>
+              )
+            })}
 
             <p className="px-4 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
               Upcoming events
@@ -399,19 +538,41 @@ export default function CommunityDetailPage() {
         {mainTab === 'home' && homeView === 'about' && (
           <div className="px-4 pt-4">
             <button onClick={() => setHomeView('list')} className="text-sm text-orange-500 mb-3">‹ Back</button>
-            <p className="text-sm text-[#15110d] dark:text-[#fdf6ec] whitespace-pre-wrap">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">About</p>
+            <p className="text-sm text-[#15110d] dark:text-[#fdf6ec] whitespace-pre-wrap mb-5">
               {community.description || 'No description set for this community yet.'}
+            </p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">Rules</p>
+            <p className="text-sm text-[#15110d] dark:text-[#fdf6ec] whitespace-pre-wrap">
+              {community.rules || 'No rules set for this community yet.'}
             </p>
           </div>
         )}
 
         {mainTab === 'chat' && (
           <div className="flex flex-col px-4 pt-3">
+            {channels.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto mb-3 pb-1">
+                {channels.map((ch) => (
+                  <button
+                    key={ch.id}
+                    onClick={() => setSelectedChannelId(ch.id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
+                      ch.id === activeChannelId
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white dark:bg-[#221c16] text-gray-500 border border-gray-200 dark:border-gray-700'
+                    }`}
+                  >
+                    #{ch.name}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="space-y-3 mb-3">
-              {messages.length === 0 && (
-                <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-6">No messages yet.</p>
+              {channelMessages.length === 0 && (
+                <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-6">No messages yet in #{activeChannel?.name ?? 'general'}.</p>
               )}
-              {messages.map((m) => (
+              {channelMessages.map((m) => (
                 <div key={m.id} className={`flex flex-col ${m.sender_id === userId ? 'items-end' : 'items-start'}`}>
                   <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">{m.senderName}</span>
                   <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
@@ -439,7 +600,7 @@ export default function CommunityDetailPage() {
             <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Your membership</p>
             <div className="bg-white dark:bg-[#221c16] rounded-2xl p-4 mb-4">
               <p className="text-sm text-[#15110d] dark:text-[#fdf6ec] font-medium mb-1">
-                {isOwner ? "You're the owner of this community" : isMember ? "You're a member of this community" : "You haven't joined yet"}
+                {isOwner ? "You're the owner of this community" : isMember ? `You're a member of this community${currentMember?.role === 'moderator' ? ' (moderator)' : ''}` : "You haven't joined yet"}
               </p>
               {!isMember ? (
                 <button onClick={handleJoin} className="mt-2 bg-orange-500 text-white rounded-xl px-4 py-2 text-sm font-medium">
@@ -451,6 +612,141 @@ export default function CommunityDetailPage() {
                 </button>
               ) : null}
             </div>
+            {canModerate && (
+              <button
+                onClick={() => setMainTab('settings')}
+                className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-left text-sm font-medium text-[#15110d] dark:text-[#fdf6ec]"
+              >
+                ⚙️ Community settings
+              </button>
+            )}
+          </div>
+        )}
+
+        {mainTab === 'settings' && canModerate && (
+          <div className="px-4 pt-4 pb-8">
+            <button onClick={() => setMainTab('home')} className="text-sm text-orange-500 mb-4">‹ Back</button>
+
+            {isOwner && (
+              <>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Community info</p>
+                <div className="bg-white dark:bg-[#221c16] rounded-2xl p-4 mb-5 space-y-3">
+                  <div>
+                    <label className="text-xs text-gray-400 dark:text-gray-500">Name</label>
+                    <input
+                      value={nameDraft}
+                      onChange={(e) => setNameDraft(e.target.value)}
+                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 dark:text-gray-500">Description</label>
+                    <textarea
+                      value={descDraft}
+                      onChange={(e) => setDescDraft(e.target.value)}
+                      rows={3}
+                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 dark:text-gray-500">Rules</label>
+                    <textarea
+                      value={rulesDraft}
+                      onChange={(e) => setRulesDraft(e.target.value)}
+                      rows={4}
+                      placeholder="e.g. 1. Be respectful  2. No spam  3. Stay on topic"
+                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSaveInfo}
+                    disabled={savingInfo}
+                    className="bg-orange-500 text-white rounded-xl px-4 py-2 text-sm font-medium disabled:opacity-60"
+                  >
+                    {savingInfo ? 'Saving…' : 'Save changes'}
+                  </button>
+                </div>
+              </>
+            )}
+
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Channels</p>
+            <div className="bg-white dark:bg-[#221c16] rounded-2xl p-4 mb-5">
+              <div className="space-y-2 mb-3">
+                {channels.map((ch) => (
+                  <div key={ch.id} className="flex items-center justify-between bg-[#fdf6ec] dark:bg-[#15110d] rounded-xl px-3 py-2">
+                    <span className="text-sm text-[#15110d] dark:text-[#fdf6ec]">#{ch.name}</span>
+                    {ch.name !== 'general' && (
+                      <button onClick={() => handleDeleteChannel(ch.id, ch.name)} className="text-red-500 text-xs font-medium">
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  value={newChannelName}
+                  onChange={(e) => setNewChannelName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleCreateChannel() }}
+                  placeholder="e.g. photography"
+                  className="flex-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm outline-none"
+                />
+                <button
+                  onClick={handleCreateChannel}
+                  disabled={!newChannelName.trim()}
+                  className="bg-orange-500 text-white rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Members</p>
+            <div className="bg-white dark:bg-[#221c16] rounded-2xl p-4 mb-5 space-y-2">
+              {members.map((m) => (
+                <div key={m.user_id} className="flex items-center justify-between bg-[#fdf6ec] dark:bg-[#15110d] rounded-xl px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-sm text-[#15110d] dark:text-[#fdf6ec] truncate">
+                      {m.name}{m.user_id === community.owner_id ? ' · Owner' : m.role === 'moderator' ? ' · Mod' : ''}
+                    </p>
+                  </div>
+                  {m.user_id !== community.owner_id && (
+                    <div className="flex gap-2 shrink-0">
+                      {isOwner && (
+                        <button
+                          onClick={() => handleSetRole(m.user_id, m.role === 'moderator' ? 'member' : 'moderator')}
+                          className="text-orange-500 text-xs font-medium"
+                        >
+                          {m.role === 'moderator' ? 'Demote' : 'Make mod'}
+                        </button>
+                      )}
+                      <button onClick={() => handleKick(m.user_id)} className="text-gray-500 text-xs font-medium">
+                        Kick
+                      </button>
+                      <button onClick={() => handleBan(m.user_id)} className="text-red-500 text-xs font-medium">
+                        Ban
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {bans.length > 0 && (
+              <>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Banned users</p>
+                <div className="bg-white dark:bg-[#221c16] rounded-2xl p-4 space-y-2">
+                  {bans.map((b) => (
+                    <div key={b.user_id} className="flex items-center justify-between bg-[#fdf6ec] dark:bg-[#15110d] rounded-xl px-3 py-2.5">
+                      <span className="text-sm text-[#15110d] dark:text-[#fdf6ec]">{b.name}</span>
+                      <button onClick={() => handleUnban(b.user_id)} className="text-orange-500 text-xs font-medium">
+                        Unban
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -462,7 +758,7 @@ export default function CommunityDetailPage() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
-            placeholder="Message the community..."
+            placeholder={`Message #${activeChannel?.name ?? 'general'}...`}
             className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 text-sm outline-none"
           />
           <button
@@ -522,7 +818,7 @@ export default function CommunityDetailPage() {
                     </div>
                   )}
                   <span className="text-sm text-[#15110d] dark:text-[#fdf6ec]">
-                    {m.name}{m.user_id === community.owner_id ? ' · Owner' : ''}
+                    {m.name}{m.user_id === community.owner_id ? ' · Owner' : m.role === 'moderator' ? ' · Mod' : ''}
                   </span>
                 </div>
               ))}
