@@ -40,12 +40,24 @@ type FoundingCandidate = {
   subscription_tier: string | null
 }
 
+type Feedback = {
+  id: string
+  user_id: string
+  message: string
+  page_url: string | null
+  status: string
+  created_at: string
+  profiles: { username: string | null; full_name: string | null } | null
+}
+
 export default function AdminPage() {
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
   const [reports, setReports]       = useState<Report[]>([])
   const [suspensions, setSuspensions] = useState<Suspension[]>([])
-  const [tab, setTab]               = useState<'reports' | 'suspensions' | 'founding'>('reports')
+  const [feedback, setFeedback]     = useState<Feedback[]>([])
+  const [feedbackLoading, setFeedbackLoading] = useState(false)
+  const [tab, setTab]               = useState<'reports' | 'suspensions' | 'founding' | 'feedback'>('reports')
   const [loading, setLoading]       = useState(true)
 
   // Founding members tab state
@@ -75,18 +87,40 @@ export default function AdminPage() {
       setAuthorized(true)
 
       // Fetch reports and suspensions via service role API
-      const [rRes, sRes, fRes] = await Promise.all([
+      const [rRes, sRes, fRes, fbRes] = await Promise.all([
         fetch('/api/admin/reports'),
         fetch('/api/admin/suspensions'),
         fetch('/api/admin/founding-member'),
+        fetch('/api/feedback'),
       ])
       if (rRes.ok) setReports(await rRes.json())
       if (sRes.ok) setSuspensions(await sRes.json())
       if (fRes.ok) setFoundingMembers(await fRes.json())
+      if (fbRes.ok) setFeedback(await fbRes.json())
       setLoading(false)
     }
     init()
   }, [])
+
+  const refreshFeedback = async () => {
+    setFeedbackLoading(true)
+    const res = await fetch('/api/feedback')
+    if (res.ok) setFeedback(await res.json())
+    setFeedbackLoading(false)
+  }
+
+  const markFeedback = async (id: string, status: 'new' | 'reviewed') => {
+    const res = await fetch('/api/feedback', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    })
+    if (!res.ok) {
+      alert('Failed to update feedback. Please try again.')
+      return
+    }
+    setFeedback(prev => prev.map(f => f.id === id ? { ...f, status } : f))
+  }
 
   const searchFounding = async (q: string) => {
     setFoundingSearch(q)
@@ -157,6 +191,7 @@ export default function AdminPage() {
   }
 
   const pendingReports = reports.filter(r => r.status === 'pending')
+  const newFeedback = feedback.filter(f => f.status === 'new')
 
   return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] px-4 py-6 pb-24 max-w-2xl mx-auto">
@@ -174,8 +209,8 @@ export default function AdminPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        {(['reports', 'suspensions', 'founding'] as const).map(t => (
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {(['reports', 'suspensions', 'founding', 'feedback'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -189,6 +224,11 @@ export default function AdminPage() {
             {t === 'reports' && pendingReports.length > 0 && (
               <span className="ml-1.5 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
                 {pendingReports.length}
+              </span>
+            )}
+            {t === 'feedback' && newFeedback.length > 0 && (
+              <span className="ml-1.5 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                {newFeedback.length}
               </span>
             )}
           </button>
@@ -356,6 +396,64 @@ export default function AdminPage() {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Feedback tab */}
+      {tab === 'feedback' && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              {newFeedback.length} new · {feedback.length} total
+            </p>
+            <button
+              onClick={refreshFeedback}
+              disabled={feedbackLoading}
+              className="text-xs border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-lg disabled:opacity-60"
+            >
+              {feedbackLoading ? 'Refreshing…' : 'Refresh'}
+            </button>
+          </div>
+          <div className="space-y-3">
+            {feedback.length === 0 && (
+              <p className="text-gray-600 dark:text-gray-400 text-center py-12">No feedback yet</p>
+            )}
+            {feedback.map(f => (
+              <div key={f.id} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                      f.status === 'new'
+                        ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+                        : 'bg-white dark:bg-[#221c16] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+                    }`}>
+                      {f.status}
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {f.profiles?.username ? `@${f.profiles.username}` : (f.profiles?.full_name ?? 'Unknown user')}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-gray-700 dark:text-gray-300 dark:text-gray-400 shrink-0">
+                    {new Date(f.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm mb-2 whitespace-pre-wrap">{f.message}</p>
+                {f.page_url && (
+                  <p className="text-gray-700 dark:text-gray-300 dark:text-gray-400 text-[10px] mb-3">
+                    Page: {f.page_url}
+                  </p>
+                )}
+                {f.status === 'new' && (
+                  <button
+                    onClick={() => markFeedback(f.id, 'reviewed')}
+                    className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg font-medium transition"
+                  >
+                    Mark reviewed
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

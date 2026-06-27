@@ -4,6 +4,17 @@ Last updated: 2026-06-27 (Communities adversarial QA + bug-fix pass, ahead of 20
 
 This file is the source of truth for "where things stand." Read this before doing anything else in a new session.
 
+## Update 2026-06-27 (Live feedback form for tomorrow's playtest — needs git push)
+
+Added a way for playtesters to report bugs/feedback in-app, with you able to see submissions live in the admin panel — you asked for this ahead of the 2026-06-28 playtest.
+
+- **DB**: new `feedback` table (live in Supabase already) — `user_id`, `message`, `page_url`, `status` (`new`/`reviewed`), `created_at`. RLS: users can only insert their own; only the admin API (service role) can read/update.
+- **API**: `app/api/feedback/route.ts` — `POST` to submit (rate-limited 10/hour/IP, enforces the caller can only submit as themselves — same impersonation guard as the existing report endpoint), `GET`/`PATCH` admin-only for the queue.
+- **UI**: `components/FeedbackButton.tsx` — a small orange floating button, bottom-right, visible on every screen for logged-in users (hidden on auth/onboarding/legal pages). Tapping it opens a modal with a text box; submitting shows a confirmation. Deliberately positioned at `bottom-24` (well clear of the global `BottomNav`'s footprint) to avoid the exact click-overlap bug class fixed earlier today on the Communities page.
+- **Admin**: new "Feedback" tab in `/admin` (`app/admin/page.tsx`), with an unread-count badge, showing who sent each item, their message, what page they were on, and a "Mark reviewed" button. Refresh button to pull in new submissions — no auto-polling, so refresh the tab when you want the latest.
+
+Tested the RLS/impersonation logic directly against Supabase (self-submit allowed, submitting "as" another user blocked) — confirmed correct. **The UI itself is not live yet** — it's all in your working tree uncommitted. **Action needed:** `git add -A && git commit -m "feat: add live feedback form for playtest" && git push` before tomorrow.
+
 ## Update 2026-06-27 (Communities/Group Chat adversarial QA + fixes — READ THIS FIRST, action needed)
 
 Ran the same adversarial QA pass on Communities/Group Chat that was done on Map Events and Friends, using TestBot1/Testbot2 plus direct Supabase REST calls. Full report: `QA_Bug_Report_Communities_2026-06-27.md`. Found and fixed **one critical, playtest-blocking bug**, found and fixed **a second critical bug that still needs a `git push` to go live**, and confirmed every authorization/impersonation attack was blocked.
