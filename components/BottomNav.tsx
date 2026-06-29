@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Map, Calendar, Users, User } from 'lucide-react'
 import Logo from './Logo'
 
 const navItems = [
-  { href: '/map',           label: 'Map',     icon: '🗺️' },
-  { href: '/events',        label: 'Events',  icon: '🎳' },
+  { href: '/map',           label: 'Map',     Icon: Map },
+  { href: '/events',        label: 'Events',  Icon: Calendar },
   { href: '/events/create', label: 'Rally',   special: true },
-  { href: '/friends',       label: 'Friends', icon: '🤝' },
-  { href: '/profile',       label: 'Profile', icon: '👤' },
+  { href: '/friends',       label: 'Friends', Icon: Users },
+  { href: '/profile',       label: 'Profile', Icon: User },
 ]
 
 export default function BottomNav() {
@@ -54,7 +55,7 @@ export default function BottomNav() {
               }`}
               style={isActive ? { color: 'var(--accent, #f97316)' } : undefined}
             >
-              <span className="text-xl mb-0.5">{item.icon}</span>
+              <item.Icon size={22} strokeWidth={isActive ? 2.5 : 2} className="mb-0.5" />
               <span>{item.label}</span>
             </Link>
           )
