@@ -109,14 +109,14 @@ function EventCard({ event }: { event: Event }) {
 
   return (
     <Link href={`/events/${event.id}`}>
-      <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100 cursor-pointer">
+      <div className="bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 rounded-3xl overflow-hidden active:scale-[0.985] transition-transform duration-100 cursor-pointer">
         {/* Type colour strip */}
-        <div className={`h-0.5 w-full ${isCasual ? 'bg-green-500' : 'bg-accent'}`} />
+        <div className={`h-1 w-full ${isCasual ? 'bg-green-500' : 'bg-accent'}`} />
 
         <div className="p-4">
           {/* Badges row */}
           <div className="flex items-center justify-between mb-3">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border flex items-center gap-1 ${
+            <span className={`text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full font-bold border-2 flex items-center gap-1 ${
               isCasual
                 ? 'bg-purple-500 text-white border-black'
                 : 'bg-accent text-white border-black'
@@ -124,7 +124,7 @@ function EventCard({ event }: { event: Event }) {
               {isCasual ? <Coffee size={12} strokeWidth={2.5} /> : <Users size={12} strokeWidth={2.5} />}
               {isCasual ? 'Casual' : 'Social'}
             </span>
-            <span className={`text-sm font-bold ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+            <span className={`text-base font-black ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
             </span>
           </div>
@@ -214,7 +214,7 @@ function EventCard({ event }: { event: Event }) {
 export default function FeedPage() {
   const [events, setEvents]             = useState<Event[]>([])
   const [loading, setLoading]           = useState(true)
-  const [activeFilter, setActiveFilter] = useState<Filter>('all')
+  const [activeFilter, setActiveFilter] = useState<Filter>('foryou')
   const [username, setUsername]         = useState<string>('')
   const [isMinor, setIsMinor]           = useState(false)
   const [userInterests, setUserInterests] = useState<string[]>([])
@@ -316,37 +316,45 @@ export default function FeedPage() {
       )}
 
       {/* Header */}
-      <div className="px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-4">
+      <div className="relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
+        {/* Decorative accent blob — bold & expressive flourish behind the headline */}
+        <div className="absolute -top-14 -right-12 w-52 h-52 rounded-full bg-accent/25 blur-2xl pointer-events-none" aria-hidden="true" />
+
+        <div className="relative flex items-center justify-between mb-4">
           <div>
             <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">
               {greeting}{username ? `, ${username}` : ''}
             </p>
-            <h1 className="text-xl font-bold text-[#15110d] dark:text-[#fdf6ec] mt-0.5">What's the move</h1>
+            <h1 className="text-2xl font-black text-[#15110d] dark:text-[#fdf6ec] mt-1 leading-tight">
+              What's the{' '}
+              <span className="inline-block bg-accent text-white px-2 py-0.5 rounded-lg -rotate-2 border-2 border-black">
+                move
+              </span>
+            </h1>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/inbox"
-              className="relative w-10 h-10 rounded-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center active:scale-95 transition"
+              className="relative w-11 h-11 rounded-full bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 flex items-center justify-center active:scale-95 transition"
             >
               <Bell size={18} className="text-[#15110d] dark:text-[#fdf6ec]" />
               {unread && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white dark:border-[#221c16]" />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white dark:border-[#221c16]" />
               )}
             </Link>
           </div>
         </div>
 
         {/* Filter chips */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+        <div className="relative flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
           {FILTERS.map(f => (
             <button
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
-              className={`shrink-0 flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
+              className={`shrink-0 flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold border-2 border-black transition ${
                 activeFilter === f.id
-                  ? 'bg-accent border-accent text-white'
-                  : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
+                  ? 'bg-accent text-white'
+                  : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec]'
               }`}
             >
               {f.id === 'foryou' && <Sparkles size={12} strokeWidth={2.5} />}
@@ -366,7 +374,7 @@ export default function FeedPage() {
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 flex items-center justify-center mb-4">
               {activeFilter === 'all'
                 ? <MapPin size={28} className="text-gray-400" />
                 : <Search size={28} className="text-gray-400" />}
