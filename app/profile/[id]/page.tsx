@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
 import {
-  MapPin, Trophy, Check, Instagram, Music, Ghost, Lock, Handshake,
+  MapPin, Trophy, Check, Camera, Music, Ghost, Lock, Handshake,
   BatteryFull, BatteryMedium, BatteryLow,
   type LucideIcon,
 } from 'lucide-react'
@@ -201,7 +201,7 @@ export default function PublicProfilePage() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-accent transition"
                   >
-                    <Instagram size={18} />
+                    <Camera size={18} />
                     <span>@{profile.instagram}</span>
                     <span className="text-gray-500 dark:text-gray-400 text-xs ml-auto">Instagram →</span>
                   </a>
