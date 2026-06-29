@@ -18,7 +18,7 @@ export default function SuspendedPage() {
       <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm leading-relaxed mb-8">
         Your account has been temporarily suspended following reports from other users.
         If you believe this is a mistake, contact us at{' '}
-        <a href="mailto:support@rallypoint.app" className="text-orange-600 underline">
+        <a href="mailto:support@rallypoint.app" className="text-accent underline">
           support@rallypoint.app
         </a>
         .

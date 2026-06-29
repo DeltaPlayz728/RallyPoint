@@ -117,7 +117,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
         {!shared ? (
           <button
             onClick={handleShare}
-            className="w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold py-4 rounded-2xl text-sm transition"
+            className="w-full bg-accent hover:brightness-90 active:scale-95 text-white font-bold py-4 rounded-2xl text-sm transition"
           >
             Share to story →
           </button>

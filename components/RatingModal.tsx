@@ -87,7 +87,7 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
                 onChange={e => setNote(e.target.value)}
                 placeholder="Leave a note for the host (optional)"
                 rows={2}
-                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none mb-4 dark:placeholder-gray-500"
+                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent resize-none mb-4 dark:placeholder-gray-500"
               />
             )}
 
@@ -101,7 +101,7 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
               <button
                 onClick={handleSubmit}
                 disabled={!rating || loading}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-2xl text-sm transition disabled:opacity-40"
+                className="flex-1 bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-2xl text-sm transition disabled:opacity-40"
               >
                 {loading ? 'Submitting…' : 'Submit Rating'}
               </button>

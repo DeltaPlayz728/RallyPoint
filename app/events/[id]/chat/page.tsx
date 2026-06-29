@@ -211,7 +211,7 @@ export default function EventChatPage() {
               )}
               <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
                 isMe
-                  ? 'bg-orange-500 text-white rounded-br-sm'
+                  ? 'bg-accent text-white rounded-br-sm'
                   : 'bg-gray-200 dark:bg-gray-700 dark:bg-[#2b241c] text-[#15110d] dark:text-[#fdf6ec] rounded-bl-sm'
               }`}>
                 {msg.content}
@@ -230,12 +230,12 @@ export default function EventChatPage() {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Send a message..."
-          className="flex-1 bg-gray-200 dark:bg-gray-700 dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className="flex-1 bg-gray-200 dark:bg-gray-700 dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
         />
         <button
           type="submit"
           disabled={sending || !newMessage.trim()}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-40"
+          className="bg-accent hover:brightness-90 text-white px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-40"
         >
           Send
         </button>

@@ -146,7 +146,7 @@ function CreateEventForm() {
             onClick={() => setType('casual')}
             className={`flex-1 py-3 rounded-lg font-medium border transition ${
               type === 'casual'
-                ? 'bg-orange-500 border-orange-500 text-white'
+                ? 'bg-accent border-accent text-white'
                 : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
@@ -158,7 +158,7 @@ function CreateEventForm() {
             onClick={() => setType('social')}
             className={`flex-1 py-3 rounded-lg font-medium border transition ${
               type === 'social'
-                ? 'bg-orange-500 border-orange-500 text-white'
+                ? 'bg-accent border-accent text-white'
                 : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
@@ -175,7 +175,7 @@ function CreateEventForm() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent"
               placeholder={type === 'casual' ? 'e.g. Grabbing coffee near downtown' : 'e.g. Bowling night at Lucky Lanes'}
             />
           </div>
@@ -186,7 +186,7 @@ function CreateEventForm() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 resize-none"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent resize-none"
               placeholder="What's the vibe? What should people expect?"
             />
           </div>
@@ -198,7 +198,7 @@ function CreateEventForm() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               required
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent"
               placeholder="e.g. Blue Bottle Coffee, Main St"
             />
           </div>
@@ -210,7 +210,7 @@ function CreateEventForm() {
               value={city}
               onChange={(e) => setCity(e.target.value)}
               required
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent"
               placeholder="e.g. New York"
             />
           </div>
@@ -223,7 +223,7 @@ function CreateEventForm() {
               onChange={(e) => setStartsAt(e.target.value)}
               min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
               required
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent"
             />
           </div>
 
@@ -234,7 +234,7 @@ function CreateEventForm() {
               value={maxAttendees}
               onChange={(e) => setMaxAttendees(e.target.value)}
               min="2"
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent"
               placeholder="Leave blank for unlimited"
             />
           </div>
@@ -255,7 +255,7 @@ function CreateEventForm() {
                     onClick={() => setSizeBracket(option.id)}
                     className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border transition ${
                       sizebracket === option.id
-                        ? 'bg-orange-500 border-orange-500 text-white'
+                        ? 'bg-accent border-accent text-white'
                         : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400'
                     }`}
                   >
@@ -278,7 +278,7 @@ function CreateEventForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 mt-2"
+            className="w-full bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 mt-2"
           >
             {loading ? 'Creating...' : `Create ${type === 'casual' ? 'Meetup' : 'Event'} →`}
           </button>

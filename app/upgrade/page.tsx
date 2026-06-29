@@ -122,7 +122,7 @@ export default function UpgradePage() {
                 key={tier}
                 className={`bg-white dark:bg-[#221c16] rounded-xl p-4 ${
                   isPlanner
-                    ? 'border-2 border-orange-400'
+                    ? 'border-2 border-accent'
                     : 'border border-gray-200 dark:border-gray-700'
                 }`}
               >
@@ -132,7 +132,7 @@ export default function UpgradePage() {
                       {TIER_LABELS[tier]}
                     </h2>
                     {isPlanner && (
-                      <span className="text-[10px] uppercase tracking-wide bg-orange-400 text-white px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] uppercase tracking-wide bg-accent text-white px-2 py-0.5 rounded-full">
                         Community tier
                       </span>
                     )}
@@ -154,7 +154,7 @@ export default function UpgradePage() {
                 <ul className="text-sm text-[#15110d] dark:text-[#fdf6ec] space-y-1 mb-3">
                   {TIER_FEATURES[tier].map((f) => (
                     <li key={f} className="flex items-start gap-1.5">
-                      <span className="text-orange-500 mt-0.5">✓</span>
+                      <span className="text-accent mt-0.5">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -167,7 +167,7 @@ export default function UpgradePage() {
                     className={`w-full rounded-lg py-2 text-sm font-medium disabled:opacity-60 ${
                       IS_PLAYTEST
                         ? 'bg-gray-100 dark:bg-[#2b241c] text-gray-500 dark:text-gray-400'
-                        : 'bg-orange-500 text-white'
+                        : 'bg-accent text-white'
                     }`}
                   >
                     {IS_PLAYTEST

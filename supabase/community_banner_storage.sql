@@ -14,12 +14,19 @@ on conflict (id) do nothing;
 create policy if not exists "community_banners_select" on storage.objects
   for select using (bucket_id = 'community-banners');
 
+-- NOTE: `objects.name` is qualified explicitly here (not bare `name`) because
+-- `communities` also has a column called `name` (the display name). An
+-- unqualified `name` in this subquery resolves to `communities.name` instead
+-- of `storage.objects.name` (the uploaded file's path) — a column-shadowing
+-- bug that silently makes the ownership check always false, blocking every
+-- owner's banner upload. Found and fixed live in prod on 2026-06-29 while
+-- testing the community-icon feature, which had copied this same bug.
 create policy if not exists "community_banners_insert" on storage.objects
   for insert with check (
     bucket_id = 'community-banners'
     and exists (
       select 1 from public.communities c
-      where c.id::text = split_part(name, '.', 1)
+      where c.id::text = split_part(objects.name, '.', 1)
         and c.owner_id = auth.uid()
     )
   );
@@ -29,7 +36,7 @@ create policy if not exists "community_banners_update" on storage.objects
     bucket_id = 'community-banners'
     and exists (
       select 1 from public.communities c
-      where c.id::text = split_part(name, '.', 1)
+      where c.id::text = split_part(objects.name, '.', 1)
         and c.owner_id = auth.uid()
     )
   );
@@ -39,7 +46,7 @@ create policy if not exists "community_banners_delete" on storage.objects
     bucket_id = 'community-banners'
     and exists (
       select 1 from public.communities c
-      where c.id::text = split_part(name, '.', 1)
+      where c.id::text = split_part(objects.name, '.', 1)
         and c.owner_id = auth.uid()
     )
   );

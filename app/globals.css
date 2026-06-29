@@ -7,6 +7,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Fallback for the brief window before ThemeProvider's bootstrap script
+     runs (see THEME_BOOTSTRAP_SCRIPT) — same hex as the "Rally (default)"
+     accent preset, so nothing flashes a different color on first paint. */
+  --accent: #f97316;
 }
 
 @theme inline {
@@ -14,4 +18,11 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Registers `accent` as a real Tailwind color token, so bg-accent,
+     text-accent, border-accent, ring-accent, etc. are all generated
+     automatically and stay in sync with the user's --accent CSS variable
+     (set by ThemeProvider / the per-community theme picker). This is what
+     lets the accent picker actually reach buttons, chips, and badges
+     instead of only the handful of spots that had bespoke inline styles. */
+  --color-accent: var(--accent);
 }

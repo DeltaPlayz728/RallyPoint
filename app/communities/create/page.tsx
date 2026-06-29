@@ -92,7 +92,7 @@ export default function CreateCommunityPage() {
           </p>
           <button
             onClick={() => router.push('/upgrade')}
-            className="bg-orange-500 text-white rounded-lg py-2.5 px-6 text-sm font-medium"
+            className="bg-accent text-white rounded-lg py-2.5 px-6 text-sm font-medium"
           >
             See plans
           </button>
@@ -144,7 +144,7 @@ export default function CreateCommunityPage() {
               type="button"
               key={c}
               onClick={() => setBannerColor(c)}
-              className={`w-9 h-9 rounded-full shrink-0 ${bannerColor === c ? 'ring-2 ring-offset-2 ring-orange-500 ring-offset-[#fdf6ec] dark:ring-offset-[#15110d]' : ''}`}
+              className={`w-9 h-9 rounded-full shrink-0 ${bannerColor === c ? 'ring-2 ring-offset-2 ring-accent ring-offset-[#fdf6ec] dark:ring-offset-[#15110d]' : ''}`}
               style={{ background: c }}
               aria-label={c}
             />
@@ -154,7 +154,7 @@ export default function CreateCommunityPage() {
         <button
           type="submit"
           disabled={submitting || !name.trim()}
-          className="w-full bg-orange-500 text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-60"
+          className="w-full bg-accent text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-60"
         >
           {submitting ? 'Creating…' : 'Create community'}
         </button>

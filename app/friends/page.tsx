@@ -270,7 +270,7 @@ export default function FriendsPage() {
                 <div className="relative">
                   <Avatar name={f.name} avatarUrl={f.avatarUrl} index={i} size="lg" />
                   {f.recentEvent && (
-                    <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full text-[10px] px-1.5 py-0.5 border-2 border-black">
+                    <div className="absolute -bottom-1 -right-1 bg-accent rounded-full text-[10px] px-1.5 py-0.5 border-2 border-black">
                       {f.recentEvent}
                     </div>
                   )}
@@ -292,7 +292,7 @@ export default function FriendsPage() {
             onClick={() => setView(v)}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition capitalize ${
               view === v
-                ? 'bg-orange-500 border-orange-500 text-white'
+                ? 'bg-accent border-accent text-white'
                 : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
@@ -324,13 +324,13 @@ export default function FriendsPage() {
                 href={`/inbox/dm/${botId}`}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-[#221c16] active:bg-white transition"
               >
-                <div className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center text-lg shrink-0">
+                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-lg shrink-0">
                   📍
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate flex items-center gap-1.5">
                     RallyPoint Assistant
-                    <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] bg-orange-100 text-accent px-1.5 py-0.5 rounded-full font-semibold">
                       AI
                     </span>
                   </p>
@@ -394,7 +394,7 @@ export default function FriendsPage() {
                       href={`/events/${ec.eventId}/chat`}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-[#221c16] active:bg-white transition"
                     >
-                      <div className="w-11 h-11 bg-orange-500 border border-black rounded-2xl flex items-center justify-center text-xl shrink-0">
+                      <div className="w-11 h-11 bg-accent border border-black rounded-2xl flex items-center justify-center text-xl shrink-0">
                         {ec.emoji}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -402,7 +402,7 @@ export default function FriendsPage() {
                         <p className="text-gray-600 dark:text-gray-400 text-xs truncate">{ec.lastMessage}</p>
                       </div>
                       {ec.unread && (
-                        <div className="w-2 h-2 bg-orange-500 rounded-full shrink-0" />
+                        <div className="w-2 h-2 bg-accent rounded-full shrink-0" />
                       )}
                     </Link>
                   ))}
@@ -435,7 +435,7 @@ export default function FriendsPage() {
                       <div className="flex gap-1.5 shrink-0">
                         <button
                           onClick={() => handleRespond(f.friendshipId, 'accepted')}
-                          className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-xl font-semibold transition"
+                          className="text-xs bg-accent hover:brightness-90 text-white px-3 py-1.5 rounded-xl font-semibold transition"
                         >
                           Accept
                         </button>

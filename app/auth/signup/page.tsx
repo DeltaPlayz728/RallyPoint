@@ -88,7 +88,7 @@ export default function SignupPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Your name"
             />
           </div>
@@ -100,7 +100,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="you@example.com"
             />
           </div>
@@ -113,7 +113,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Min 6 characters"
             />
           </div>
@@ -125,7 +125,7 @@ export default function SignupPage() {
               value={dob}
               onChange={(e) => setDob(e.target.value)}
               required
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent"
             />
           </div>
 
@@ -134,7 +134,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
@@ -142,7 +142,7 @@ export default function SignupPage() {
 
         <p className="text-gray-500 dark:text-gray-400 text-sm text-center mt-6">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-orange-500 hover:underline">
+          <Link href="/auth/login" className="text-accent hover:underline">
             Log in
           </Link>
         </p>

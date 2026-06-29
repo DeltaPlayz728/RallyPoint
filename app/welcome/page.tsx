@@ -47,7 +47,7 @@ export default function WelcomePage() {
           <div
             key={i}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === step ? 'w-8 bg-orange-500' : i < step ? 'w-4 bg-orange-800' : 'w-4 bg-gray-200 dark:bg-gray-700'
+              i === step ? 'w-8 bg-accent' : i < step ? 'w-4 bg-orange-800' : 'w-4 bg-gray-200 dark:bg-gray-700'
             }`}
           />
         ))}
@@ -61,7 +61,7 @@ export default function WelcomePage() {
               <div className="mb-6"><Logo size={44} /></div>
               <h1 className="text-3xl font-bold leading-tight mb-3">
                 Stop scrolling.<br />
-                <span className="text-orange-500">Start showing up.</span>
+                <span className="text-accent">Start showing up.</span>
               </h1>
               <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed">
                 RallyPoint connects people 18–30 through real events — casual meetups, bowling nights, and everything in between.
@@ -84,7 +84,7 @@ export default function WelcomePage() {
             <div className="mt-auto space-y-3">
               <button
                 onClick={() => setStep(1)}
-                className="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition text-base"
+                className="w-full bg-accent hover:brightness-90 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition text-base"
               >
                 Get started →
               </button>
@@ -110,7 +110,7 @@ export default function WelcomePage() {
                   onClick={() => toggleInterest(i)}
                   className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
                     selectedInterests.includes(i)
-                      ? 'bg-orange-100 border-orange-500 text-orange-600'
+                      ? 'bg-orange-100 border-accent text-accent'
                       : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
                   }`}
                 >
@@ -122,7 +122,7 @@ export default function WelcomePage() {
             <div className="mt-auto space-y-3">
               <button
                 onClick={() => setStep(2)}
-                className="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition text-base"
+                className="w-full bg-accent hover:brightness-90 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition text-base"
               >
                 {selectedInterests.length > 0 ? `Nice! Next →` : 'Skip for now →'}
               </button>
@@ -142,19 +142,19 @@ export default function WelcomePage() {
                   onClick={() => setSelectedVibe(v.id)}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition ${
                     selectedVibe === v.id
-                      ? 'bg-orange-100 border-orange-500'
+                      ? 'bg-orange-100 border-accent'
                       : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 hover:border-gray-600'
                   }`}
                 >
                   <span className="text-2xl">{v.emoji}</span>
                   <div>
-                    <p className={`font-semibold text-sm ${selectedVibe === v.id ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+                    <p className={`font-semibold text-sm ${selectedVibe === v.id ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                       {v.label}
                     </p>
                     <p className="text-gray-500 dark:text-gray-400 text-xs">{v.desc}</p>
                   </div>
                   {selectedVibe === v.id && (
-                    <span className="ml-auto text-orange-500 font-bold">✓</span>
+                    <span className="ml-auto text-accent font-bold">✓</span>
                   )}
                 </button>
               ))}
@@ -163,7 +163,7 @@ export default function WelcomePage() {
             <div className="mt-auto space-y-3">
               <button
                 onClick={finish}
-                className="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition text-base"
+                className="w-full bg-accent hover:brightness-90 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition text-base"
               >
                 Create my account →
               </button>

@@ -185,7 +185,7 @@ export default function AdminPage() {
   if (!authorized || loading) {
     return (
       <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -202,7 +202,7 @@ export default function AdminPage() {
         </div>
         <div className="flex items-center gap-2">
           <Logo size={26} />
-          <span className="text-xs bg-orange-500 text-white border border-black px-3 py-1 rounded-full">
+          <span className="text-xs bg-accent text-white border border-black px-3 py-1 rounded-full">
             Admin
           </span>
         </div>
@@ -216,7 +216,7 @@ export default function AdminPage() {
             onClick={() => setTab(t)}
             className={`px-4 py-2 rounded-xl text-sm font-medium border transition capitalize ${
               tab === t
-                ? 'bg-orange-500 border-orange-500 text-white'
+                ? 'bg-accent border-accent text-white'
                 : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
@@ -336,7 +336,7 @@ export default function AdminPage() {
                     {u.avatar_url ? (
                       <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
                     ) : (
-                      <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                      <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
                         {(u.username ?? u.full_name ?? '?')[0]?.toUpperCase()}
                       </div>
                     )}
@@ -354,7 +354,7 @@ export default function AdminPage() {
                       className={`shrink-0 text-xs px-3 py-1.5 rounded-lg font-medium transition disabled:opacity-60 ${
                         u.is_founding_member
                           ? 'bg-gray-100 dark:bg-[#2b241c] text-gray-600 dark:text-gray-300'
-                          : 'bg-orange-500 text-white'
+                          : 'bg-accent text-white'
                       }`}
                     >
                       {foundingBusyId === u.id ? '…' : u.is_founding_member ? 'Revoke' : 'Grant'}
@@ -377,7 +377,7 @@ export default function AdminPage() {
                   {u.avatar_url ? (
                     <img src={u.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
                       {(u.username ?? u.full_name ?? '?')[0]?.toUpperCase()}
                     </div>
                   )}
@@ -447,7 +447,7 @@ export default function AdminPage() {
                 {f.status === 'new' && (
                   <button
                     onClick={() => markFeedback(f.id, 'reviewed')}
-                    className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg font-medium transition"
+                    className="text-xs bg-accent hover:brightness-90 text-white px-3 py-1.5 rounded-lg font-medium transition"
                   >
                     Mark reviewed
                   </button>

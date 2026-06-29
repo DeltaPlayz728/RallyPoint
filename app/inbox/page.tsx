@@ -84,7 +84,7 @@ export default function InboxPage() {
           <div>
             <h1 className="text-2xl font-bold">Inbox</h1>
             {unreadCount > 0 && (
-              <p className="text-orange-600 text-sm">{unreadCount} new</p>
+              <p className="text-accent text-sm">{unreadCount} new</p>
             )}
           </div>
           <Logo size={28} />
@@ -104,7 +104,7 @@ export default function InboxPage() {
                 <div className={`flex items-start gap-3 p-4 rounded-xl border transition ${
                   n.read
                     ? 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700'
-                    : 'bg-white dark:bg-[#221c16] border-orange-500/40'
+                    : 'bg-white dark:bg-[#221c16] border-accent/40'
                 }`}>
                   <span className="text-2xl shrink-0 mt-0.5">{icon}</span>
                   <div className="flex-1 min-w-0">
@@ -119,7 +119,7 @@ export default function InboxPage() {
                     )}
                   </div>
                   {!n.read && (
-                    <div className="w-2 h-2 rounded-full bg-orange-500 shrink-0 mt-1.5" />
+                    <div className="w-2 h-2 rounded-full bg-accent shrink-0 mt-1.5" />
                   )}
                 </div>
               )

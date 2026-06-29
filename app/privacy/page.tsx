@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-base mb-2">1. Who We Are</h2>
-            <p>RallyPoint ("we", "us", "our") is a social experience platform operated by a sole trader registered in the Netherlands. For GDPR purposes, we are the data controller. You can reach us at <a href="mailto:2023ford.john@gmail.com" className="text-orange-600 hover:underline">2023ford.john@gmail.com</a>.</p>
+            <p>RallyPoint ("we", "us", "our") is a social experience platform operated by a sole trader registered in the Netherlands. For GDPR purposes, we are the data controller. You can reach us at <a href="mailto:2023ford.john@gmail.com" className="text-accent hover:underline">2023ford.john@gmail.com</a>.</p>
           </section>
 
           <section>
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
               <li><strong className="text-gray-600 dark:text-gray-400">Restriction</strong> — limit how we process your data</li>
               <li><strong className="text-gray-600 dark:text-gray-400">Objection</strong> — object to processing based on legitimate interests</li>
             </ul>
-            <p className="mt-2">To exercise any of these rights, email us at <a href="mailto:2023ford.john@gmail.com" className="text-orange-600 hover:underline">2023ford.john@gmail.com</a>. We will respond within 30 days. You also have the right to lodge a complaint with the Dutch data protection authority (<a href="https://autoriteitpersoonsgegevens.nl" className="text-orange-600 hover:underline" target="_blank" rel="noopener noreferrer">Autoriteit Persoonsgegevens</a>).</p>
+            <p className="mt-2">To exercise any of these rights, email us at <a href="mailto:2023ford.john@gmail.com" className="text-accent hover:underline">2023ford.john@gmail.com</a>. We will respond within 30 days. You also have the right to lodge a complaint with the Dutch data protection authority (<a href="https://autoriteitpersoonsgegevens.nl" className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">Autoriteit Persoonsgegevens</a>).</p>
           </section>
 
           <section>
@@ -103,7 +103,7 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-base mb-2">12. Contact</h2>
-            <p>For privacy questions or to exercise your rights: <a href="mailto:2023ford.john@gmail.com" className="text-orange-600 hover:underline">2023ford.john@gmail.com</a></p>
+            <p>For privacy questions or to exercise your rights: <a href="mailto:2023ford.john@gmail.com" className="text-accent hover:underline">2023ford.john@gmail.com</a></p>
           </section>
 
         </div>

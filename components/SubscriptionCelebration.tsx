@@ -114,7 +114,7 @@ export default function SubscriptionCelebration() {
         <h2 className="text-xl font-bold text-[#15110d] dark:text-[#fdf6ec] mb-1">
           {copy.title}
         </h2>
-        <span className="inline-block text-[10px] uppercase tracking-wide bg-orange-500 text-white px-2 py-0.5 rounded-full mb-3">
+        <span className="inline-block text-[10px] uppercase tracking-wide bg-accent text-white px-2 py-0.5 rounded-full mb-3">
           {tierLabel}
         </span>
         <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">
@@ -122,7 +122,7 @@ export default function SubscriptionCelebration() {
         </p>
         <button
           onClick={() => setVisible(false)}
-          className="w-full bg-orange-500 text-white rounded-lg py-2.5 text-sm font-medium"
+          className="w-full bg-accent text-white rounded-lg py-2.5 text-sm font-medium"
         >
           Let's go
         </button>

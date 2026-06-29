@@ -81,7 +81,7 @@ function MeetupModal({
           onChange={e => setMessage(e.target.value)}
           placeholder="Add a message (optional)"
           rows={3}
-          className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none mb-4"
+          className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent resize-none mb-4"
         />
         <div className="flex gap-2">
           <button
@@ -93,7 +93,7 @@ function MeetupModal({
           <button
             onClick={() => onSend(message)}
             disabled={sending}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50"
+            className="flex-1 bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50"
           >
             {sending ? 'Sending…' : 'Send Request'}
           </button>
@@ -422,12 +422,12 @@ export default function EventDetailPage() {
           <span className={`text-xs px-3 py-1.5 rounded-full font-semibold border ${
             isCasual
               ? 'bg-purple-500 text-white border-black'
-              : 'bg-orange-500 text-white border-black'
+              : 'bg-accent text-white border-black'
           }`}>
             {isCasual ? '😊 Casual Meetup' : '🎳 Social Event'}
           </span>
           {event.is_suggested && (
-            <span className="ml-2 text-xs px-3 py-1.5 rounded-full font-semibold border bg-orange-100 text-orange-600 border-orange-300">
+            <span className="ml-2 text-xs px-3 py-1.5 rounded-full font-semibold border bg-orange-100 text-accent border-orange-300">
               ✨ Suggested by RallyPoint
             </span>
           )}
@@ -439,7 +439,7 @@ export default function EventDetailPage() {
             {event.title}
           </h1>
           <span className={`text-lg font-black shrink-0 mt-0.5 ${
-            event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'
+            event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'
           }`}>
             {event.price > 0 ? `€${event.price}` : 'Free'}
           </span>
@@ -531,7 +531,7 @@ export default function EventDetailPage() {
                       {name}
                       {isEventHost && (
                         <span className={`ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                          isCasual ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'
+                          isCasual ? 'bg-purple-500 text-white' : 'bg-accent text-white'
                         }`}>host</span>
                       )}
                       {isMe && <span className="ml-1.5 text-[10px] text-gray-600 dark:text-gray-400">you</span>}
@@ -552,7 +552,7 @@ export default function EventDetailPage() {
                       ) : requestStatus !== 'declined' ? (
                         <button
                           onClick={() => setRequestModal({ userId: a.user_id, name })}
-                          className="text-xs text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 hover:border-orange-500 hover:text-orange-600 px-2 py-1 rounded-full transition"
+                          className="text-xs text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 hover:border-accent hover:text-accent px-2 py-1 rounded-full transition"
                         >
                           Meetup
                         </button>
@@ -576,7 +576,7 @@ export default function EventDetailPage() {
             </div>
             <Link
               href={`/events/${event.id}/chat`}
-              className="flex items-center justify-center gap-1.5 px-4 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-[#15110d] dark:text-[#fdf6ec] rounded-2xl transition text-sm font-medium"
+              className="flex items-center justify-center gap-1.5 px-4 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec] rounded-2xl transition text-sm font-medium"
             >
               💬
             </Link>
@@ -592,13 +592,13 @@ export default function EventDetailPage() {
           <div className="flex gap-2">
             <Link
               href={`/events/${event.id}/chat`}
-              className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-[#15110d] dark:text-[#fdf6ec] font-semibold py-3.5 rounded-2xl transition text-sm"
+              className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec] font-semibold py-3.5 rounded-2xl transition text-sm"
             >
               💬 Group Chat
             </Link>
             <button
               onClick={() => setShowShare(true)}
-              className="px-4 border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-gray-500 dark:text-gray-400 hover:text-orange-600 rounded-2xl transition text-lg"
+              className="px-4 border border-gray-300 dark:border-gray-700 hover:border-accent text-gray-500 dark:text-gray-400 hover:text-accent rounded-2xl transition text-lg"
               title="Share this event"
             >
               📤
@@ -622,7 +622,7 @@ export default function EventDetailPage() {
             className={`w-full font-bold py-3.5 rounded-2xl transition active:scale-[0.98] disabled:opacity-50 ${
               isCasual
                 ? 'bg-green-600 hover:bg-green-500 text-white'
-                : 'bg-orange-500 hover:bg-orange-400 text-white'
+                : 'bg-accent hover:brightness-110 text-white'
             }`}
           >
             {actionLoading

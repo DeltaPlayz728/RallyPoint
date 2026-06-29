@@ -59,20 +59,20 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
   return (
     <Link href={`/events/${event.id}`}>
       <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100">
-        <div className="h-0.5 w-full bg-orange-500" />
+        <div className="h-0.5 w-full bg-accent" />
         <div className="p-4">
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1 pr-2">
               <div className="flex items-center gap-1.5 mb-1">
                 {isVenue && (
-                  <span className="text-[10px] bg-orange-500 text-white border border-black px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-[10px] bg-accent text-white border border-black px-2 py-0.5 rounded-full font-medium">
                     🏟️ {event.organizer?.venue_name}
                   </span>
                 )}
               </div>
               <h3 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-[15px] leading-snug">{event.title}</h3>
             </div>
-            <span className={`text-sm font-bold shrink-0 ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+            <span className={`text-sm font-bold shrink-0 ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
             </span>
           </div>
@@ -194,7 +194,7 @@ export default function EventsPage() {
               onClick={() => setSlide(s.id)}
               className={`px-5 py-2 rounded-full text-sm font-semibold border transition ${
                 slide === s.id
-                  ? 'bg-orange-500 border-orange-500 text-white'
+                  ? 'bg-accent border-accent text-white'
                   : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
               }`}
             >

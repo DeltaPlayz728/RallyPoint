@@ -77,7 +77,7 @@ export default function FeedbackButton() {
               <>
                 <h3 className="font-bold text-lg mb-1">Thanks!</h3>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Your feedback was sent — we'll take a look.</p>
-                <button onClick={close} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-2xl text-sm transition">
+                <button onClick={close} className="w-full bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-2xl text-sm transition">
                   Close
                 </button>
               </>
@@ -91,7 +91,7 @@ export default function FeedbackButton() {
                   placeholder="What happened, and where?"
                   rows={4}
                   maxLength={2000}
-                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-orange-500 resize-none"
+                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:border-accent resize-none"
                 />
                 {error && <p className="text-red-600 text-xs mb-3">{error}</p>}
                 <div className="flex gap-2">
@@ -101,7 +101,7 @@ export default function FeedbackButton() {
                   <button
                     onClick={submit}
                     disabled={submitting || !message.trim()}
-                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-2xl text-sm transition disabled:opacity-50"
+                    className="flex-1 bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-2xl text-sm transition disabled:opacity-50"
                   >
                     {submitting ? 'Sending…' : 'Send'}
                   </button>

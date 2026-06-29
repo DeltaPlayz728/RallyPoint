@@ -204,11 +204,11 @@ export default function ProfilePage() {
               value={venueName}
               onChange={e => setVenueName(e.target.value)}
               placeholder="e.g. Lucky Lanes Bowling"
-              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:border-orange-500"
+              className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:border-accent"
             />
             <div className="flex gap-2">
               <button onClick={() => setShowOrganizerModal(false)} className="flex-1 border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 py-3 rounded-2xl text-sm">Cancel</button>
-              <button onClick={handleBecomeOrganizer} disabled={upgradingOrganizer || !venueName.trim()} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-2xl text-sm transition disabled:opacity-50">
+              <button onClick={handleBecomeOrganizer} disabled={upgradingOrganizer || !venueName.trim()} className="flex-1 bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-2xl text-sm transition disabled:opacity-50">
                 {upgradingOrganizer ? 'Saving…' : 'Confirm'}
               </button>
             </div>
@@ -243,12 +243,12 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-lg font-bold leading-tight">{profile?.full_name}</h1>
                 {isSupporter && (
-                  <span className="text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded-full font-semibold">
+                  <span className="text-[10px] bg-accent text-white px-2 py-0.5 rounded-full font-semibold">
                     💛 {TIER_LABELS[tier]}
                   </span>
                 )}
                 {isFoundingMember && (
-                  <span className="text-[10px] bg-orange-500 text-white border border-black px-2 py-0.5 rounded-full font-semibold">
+                  <span className="text-[10px] bg-accent text-white border border-black px-2 py-0.5 rounded-full font-semibold">
                     ⚡ Founding Member
                   </span>
                 )}
@@ -341,7 +341,7 @@ export default function ProfilePage() {
                   disabled={savingBanner}
                   className={`w-7 h-7 rounded-full shrink-0 ${
                     profile?.profile_banner_color === c
-                      ? 'ring-2 ring-offset-2 ring-orange-500 ring-offset-[#fdf6ec] dark:ring-offset-[#15110d]'
+                      ? 'ring-2 ring-offset-2 ring-accent ring-offset-[#fdf6ec] dark:ring-offset-[#15110d]'
                       : ''
                   }`}
                   style={{ background: c }}
@@ -357,11 +357,11 @@ export default function ProfilePage() {
           <Link href="/profile/setup?edit=true" className="flex-1 text-center border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600 hover:text-black dark:hover:text-white text-sm py-2.5 rounded-2xl transition">
             Edit Profile
           </Link>
-          <Link href="/friends" className="flex-1 text-center border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-orange-500 hover:text-orange-600 text-sm py-2.5 rounded-2xl transition">
+          <Link href="/friends" className="flex-1 text-center border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-accent hover:text-accent text-sm py-2.5 rounded-2xl transition">
             🤝 Friends
           </Link>
           {!isOrganizer && (
-            <button onClick={() => setShowOrganizerModal(true)} className="flex-1 text-center border border-orange-500/40 text-orange-600 hover:bg-orange-100 text-sm py-2.5 rounded-2xl transition">
+            <button onClick={() => setShowOrganizerModal(true)} className="flex-1 text-center border border-accent/40 text-accent hover:bg-orange-100 text-sm py-2.5 rounded-2xl transition">
               🎯 Organizer
             </button>
           )}
@@ -375,7 +375,7 @@ export default function ProfilePage() {
               onClick={() => setActiveTab(t)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition capitalize ${
                 activeTab === t
-                  ? 'bg-orange-500 border-orange-500 text-white'
+                  ? 'bg-accent border-accent text-white'
                   : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
               }`}
             >
@@ -389,16 +389,16 @@ export default function ProfilePage() {
           hosting.length === 0 ? (
             <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center">
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">No events hosted yet.</p>
-              <Link href="/events/create" className="text-orange-600 text-sm font-medium">Create your first event →</Link>
+              <Link href="/events/create" className="text-accent text-sm font-medium">Create your first event →</Link>
             </div>
           ) : (
             <div className="space-y-2">
               {hosting.map(event => (
                 <Link key={event.id} href={`/events/${event.id}`}>
-                  <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 hover:border-orange-500/50 rounded-2xl p-4 transition">
+                  <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 hover:border-accent/50 rounded-2xl p-4 transition">
                     <div className="flex justify-between items-start gap-2">
                       <h3 className="font-semibold text-[#15110d] dark:text-[#fdf6ec] text-sm">{event.title}</h3>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-purple-500 text-white' : 'bg-accent text-white'}`}>
                         {event.type}
                       </span>
                     </div>
@@ -412,16 +412,16 @@ export default function ProfilePage() {
           attending.length === 0 ? (
             <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center">
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">Not attending any events yet.</p>
-              <Link href="/feed" className="text-orange-600 text-sm font-medium">Browse events →</Link>
+              <Link href="/feed" className="text-accent text-sm font-medium">Browse events →</Link>
             </div>
           ) : (
             <div className="space-y-2">
               {attending.map(event => (
                 <Link key={event.id} href={`/events/${event.id}`}>
-                  <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 hover:border-orange-500/50 rounded-2xl p-4 transition">
+                  <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 hover:border-accent/50 rounded-2xl p-4 transition">
                     <div className="flex justify-between items-start gap-2">
                       <h3 className="font-semibold text-[#15110d] dark:text-[#fdf6ec] text-sm">{event.title}</h3>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${event.type === 'casual' ? 'bg-purple-500 text-white' : 'bg-accent text-white'}`}>
                         {event.type}
                       </span>
                     </div>

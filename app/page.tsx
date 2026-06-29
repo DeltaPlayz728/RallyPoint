@@ -9,7 +9,7 @@ export default function LandingPage() {
       <nav className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto w-full">
         <span className="flex items-center gap-2 text-xl font-bold tracking-tight">
           <Logo size={28} />
-          Rally<span className="text-orange-500">Point</span>
+          Rally<span className="text-accent">Point</span>
         </span>
         <div className="flex items-center gap-3">
           <Link
@@ -20,7 +20,7 @@ export default function LandingPage() {
           </Link>
           <Link
             href="/welcome"
-            className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+            className="bg-accent hover:brightness-90 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
           >
             Sign up free
           </Link>
@@ -31,14 +31,14 @@ export default function LandingPage() {
       <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20">
         <Link
           href="/early-access"
-          className="inline-block bg-orange-100 border border-orange-300 text-orange-600 text-xs font-medium px-3 py-1 rounded-full mb-6 hover:bg-orange-200 transition"
+          className="inline-block bg-orange-100 border border-orange-300 text-accent text-xs font-medium px-3 py-1 rounded-full mb-6 hover:bg-orange-200 transition"
         >
           ⚡ Founding Member spots open — claim yours →
         </Link>
 
         <h1 className="text-5xl sm:text-6xl font-bold leading-tight max-w-2xl mb-6">
           Stop scrolling.<br />
-          <span className="text-orange-500">Start showing up.</span>
+          <span className="text-accent">Start showing up.</span>
         </h1>
 
         <p className="text-gray-500 dark:text-gray-400 text-lg max-w-md mb-10 leading-relaxed">
@@ -49,7 +49,7 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/welcome"
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl text-lg transition"
+            className="bg-accent hover:brightness-90 text-white font-bold px-8 py-4 rounded-xl text-lg transition"
           >
             Find events near me →
           </Link>
@@ -75,7 +75,7 @@ export default function LandingPage() {
           ].map(item => (
             <div key={item.step} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
               <div className="text-3xl mb-3">{item.icon}</div>
-              <div className="text-xs text-orange-500 font-semibold mb-1">{item.step}</div>
+              <div className="text-xs text-accent font-semibold mb-1">{item.step}</div>
               <h3 className="font-bold text-[#15110d] dark:text-[#fdf6ec] mb-2">{item.title}</h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{item.desc}</p>
             </div>
@@ -116,7 +116,7 @@ export default function LandingPage() {
         </p>
         <Link
           href="/welcome"
-          className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-4 rounded-xl text-lg transition"
+          className="inline-block bg-accent hover:brightness-90 text-white font-bold px-10 py-4 rounded-xl text-lg transition"
         >
           Create your free account →
         </Link>

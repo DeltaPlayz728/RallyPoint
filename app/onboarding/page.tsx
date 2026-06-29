@@ -26,7 +26,7 @@ function WelcomeSlide() {
     <div className="flex flex-col items-center text-center px-6">
       <div className="text-6xl mb-6">🟠</div>
       <h1 className="text-3xl font-bold mb-3">
-        Welcome to Rally<span className="text-orange-500">Point</span>
+        Welcome to Rally<span className="text-accent">Point</span>
       </h1>
       <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed max-w-xs">
         The app built for people who'd rather be out doing things than scrolling through them.
@@ -75,7 +75,7 @@ function PersonalizeSlide({ selectedInterests, onToggleInterest, selectedVibe, o
 
       {/* Interests */}
       <div className="mb-6">
-        <p className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-2">
+        <p className="text-xs text-accent font-semibold uppercase tracking-wider mb-2">
           Your interests <span className="text-gray-500 dark:text-gray-400 normal-case font-normal">({selectedInterests.length}/8)</span>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -86,7 +86,7 @@ function PersonalizeSlide({ selectedInterests, onToggleInterest, selectedVibe, o
               onClick={() => onToggleInterest(interest)}
               className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 selectedInterests.includes(interest)
-                  ? 'bg-orange-500 border-orange-500 text-white'
+                  ? 'bg-accent border-accent text-white'
                   : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-500'
               }`}
             >
@@ -98,7 +98,7 @@ function PersonalizeSlide({ selectedInterests, onToggleInterest, selectedVibe, o
 
       {/* Vibe */}
       <div>
-        <p className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-2">Your social vibe</p>
+        <p className="text-xs text-accent font-semibold uppercase tracking-wider mb-2">Your social vibe</p>
         <div className="grid grid-cols-2 gap-2">
           {VIBES.map(vibe => (
             <button
@@ -107,7 +107,7 @@ function PersonalizeSlide({ selectedInterests, onToggleInterest, selectedVibe, o
               onClick={() => onSelectVibe(vibe.id)}
               className={`text-left px-3 py-3 rounded-xl border transition ${
                 selectedVibe === vibe.id
-                  ? 'bg-orange-500/15 border-orange-500 text-white'
+                  ? 'bg-accent/15 border-accent text-white'
                   : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'
               }`}
             >
@@ -207,7 +207,7 @@ export default function OnboardingPage() {
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === current ? 'w-6 bg-orange-500' : 'w-1.5 bg-gray-700'
+                i === current ? 'w-6 bg-accent' : 'w-1.5 bg-gray-700'
               }`}
             />
           ))}
@@ -216,7 +216,7 @@ export default function OnboardingPage() {
         <button
           onClick={handleNext}
           disabled={finishing}
-          className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl text-lg transition disabled:opacity-50"
+          className="w-full max-w-sm bg-accent hover:brightness-90 text-white font-bold py-4 rounded-xl text-lg transition disabled:opacity-50"
         >
           {buttonLabel}
         </button>

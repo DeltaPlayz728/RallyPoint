@@ -65,7 +65,7 @@ export default function UserActionMenu({ targetUserId, targetName }: Props) {
             <button
               onClick={handleBlock}
               disabled={blocking}
-              className="w-full text-left px-4 py-3 text-sm text-orange-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-b border-gray-200 dark:border-gray-700"
+              className="w-full text-left px-4 py-3 text-sm text-accent hover:bg-gray-100 dark:hover:bg-gray-700 transition border-b border-gray-200 dark:border-gray-700"
             >
               🚫 {blocking ? 'Blocking…' : 'Block user'}
             </button>

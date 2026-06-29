@@ -88,7 +88,7 @@ export default function FriendButton({ currentUserId, targetUserId, size = 'md' 
         <button
           onClick={() => respond('accepted')}
           disabled={acting}
-          className={`${base} bg-orange-500 border-orange-500 text-white hover:bg-orange-600`}
+          className={`${base} bg-accent border-accent text-white hover:brightness-90`}
         >
           Accept
         </button>
@@ -108,7 +108,7 @@ export default function FriendButton({ currentUserId, targetUserId, size = 'md' 
     <button
       onClick={sendRequest}
       disabled={acting}
-      className={`${base} bg-transparent border-orange-500/40 text-orange-600 hover:bg-orange-50`}
+      className={`${base} bg-transparent border-accent/40 text-accent hover:bg-orange-50`}
     >
       + Add Friend
     </button>

@@ -110,7 +110,7 @@ function EventCard({ event }: { event: Event }) {
     <Link href={`/events/${event.id}`}>
       <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100 cursor-pointer">
         {/* Type colour strip */}
-        <div className={`h-0.5 w-full ${isCasual ? 'bg-green-500' : 'bg-orange-500'}`} />
+        <div className={`h-0.5 w-full ${isCasual ? 'bg-green-500' : 'bg-accent'}`} />
 
         <div className="p-4">
           {/* Badges row */}
@@ -118,11 +118,11 @@ function EventCard({ event }: { event: Event }) {
             <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
               isCasual
                 ? 'bg-purple-500 text-white border-black'
-                : 'bg-orange-500 text-white border-black'
+                : 'bg-accent text-white border-black'
             }`}>
               {isCasual ? '😊 Casual' : '🎳 Social'}
             </span>
-            <span className={`text-sm font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+            <span className={`text-sm font-bold ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
             </span>
           </div>
@@ -191,7 +191,7 @@ function EventCard({ event }: { event: Event }) {
                   className={`h-full rounded-full transition-all ${
                     event.attendee_count / event.max_attendees > 0.8
                       ? 'bg-red-500'
-                      : isCasual ? 'bg-green-500' : 'bg-orange-500'
+                      : isCasual ? 'bg-green-500' : 'bg-accent'
                   }`}
                   style={{ width: `${Math.min(100, (event.attendee_count / event.max_attendees) * 100)}%` }}
                 />
@@ -326,12 +326,12 @@ export default function FeedPage() {
             <Link href="/inbox" className="relative p-1">
               <span className="text-xl">🔔</span>
               {unread && (
-                <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-black" />
+                <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-black" />
               )}
             </Link>
             <Link
               href="/events/create"
-              className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+              className="bg-accent hover:brightness-90 active:scale-95 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
             >
               + Create
             </Link>
@@ -346,7 +346,7 @@ export default function FeedPage() {
               onClick={() => setActiveFilter(f.id)}
               className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
                 activeFilter === f.id
-                  ? 'bg-orange-500 border-orange-500 text-white'
+                  ? 'bg-accent border-accent text-white'
                   : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
               }`}
             >
@@ -379,7 +379,7 @@ export default function FeedPage() {
             </p>
             <Link
               href="/events/create"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition"
+              className="bg-accent hover:brightness-90 text-white px-6 py-3 rounded-xl font-semibold text-sm transition"
             >
               Create a Meetup
             </Link>

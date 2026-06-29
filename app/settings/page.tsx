@@ -94,7 +94,7 @@ export default function SettingsPage() {
               aria-checked={theme === 'dark'}
               onClick={toggleTheme}
               className={`relative w-12 h-7 rounded-full transition shrink-0 ${
-                theme === 'dark' ? 'bg-orange-500' : 'bg-gray-300'
+                theme === 'dark' ? 'bg-accent' : 'bg-gray-300'
               }`}
             >
               <span
@@ -178,7 +178,7 @@ export default function SettingsPage() {
               {nextTier(tier) && (
                 <Link
                   href="/upgrade"
-                  className="flex-1 text-center bg-orange-500 text-white rounded-lg py-2 text-sm font-medium"
+                  className="flex-1 text-center bg-accent text-white rounded-lg py-2 text-sm font-medium"
                 >
                   {tier === 'free' ? 'Upgrade' : 'Change plan'}
                 </Link>

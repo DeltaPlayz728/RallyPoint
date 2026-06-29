@@ -174,7 +174,7 @@ function ProfileSetupForm() {
   if (hydrating) {
     return (
       <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -209,7 +209,7 @@ function ProfileSetupForm() {
           <div className="flex flex-col items-center">
             <label className="cursor-pointer group relative" htmlFor="avatar-input">
               {/* Circle */}
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-white dark:bg-[#221c16] border-2 border-gray-300 dark:border-gray-700 group-hover:border-orange-500 transition relative">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-white dark:bg-[#221c16] border-2 border-gray-300 dark:border-gray-700 group-hover:border-accent transition relative">
                 {(avatarPreview ?? avatarUrl) ? (
                   <img
                     src={avatarPreview ?? avatarUrl!}
@@ -217,7 +217,7 @@ function ProfileSetupForm() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl font-black text-black dark:text-[#fdf6ec] bg-orange-500">
+                  <div className="w-full h-full flex items-center justify-center text-3xl font-black text-black dark:text-[#fdf6ec] bg-accent">
                     {(username || '?')[0].toUpperCase()}
                   </div>
                 )}
@@ -227,7 +227,7 @@ function ProfileSetupForm() {
                 </div>
               </div>
               {/* Camera badge */}
-              <div className="absolute bottom-0 right-0 w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center border-2 border-black text-sm">
+              <div className="absolute bottom-0 right-0 w-7 h-7 bg-accent rounded-full flex items-center justify-center border-2 border-black text-sm">
                 📷
               </div>
             </label>
@@ -243,7 +243,7 @@ function ProfileSetupForm() {
 
           {/* ── Layer 1: Basics ── */}
           <section>
-            <h2 className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-4">01 · Basics</h2>
+            <h2 className="text-xs text-accent font-semibold uppercase tracking-wider mb-4">01 · Basics</h2>
             <div className="space-y-3">
               <div>
                 <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Username</label>
@@ -253,7 +253,7 @@ function ProfileSetupForm() {
                   onChange={e => setUsername(e.target.value.toLowerCase().replace(/[\s@]/g, ''))}
                   required
                   placeholder="@yourname"
-                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500"
+                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
                 />
               </div>
               <div>
@@ -264,7 +264,7 @@ function ProfileSetupForm() {
                   onChange={e => setCity(e.target.value)}
                   required
                   placeholder="e.g. Breda"
-                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500"
+                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
                 />
               </div>
               <div>
@@ -277,7 +277,7 @@ function ProfileSetupForm() {
                   maxLength={160}
                   rows={2}
                   placeholder="A line about yourself..."
-                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none"
+                  className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent resize-none"
                 />
                 <p className="text-gray-700 dark:text-gray-300 text-xs mt-1 text-right">{bio.length}/160</p>
               </div>
@@ -286,7 +286,7 @@ function ProfileSetupForm() {
 
           {/* ── Layer 2: Interests ── */}
           <section>
-            <h2 className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-1">02 · Interests</h2>
+            <h2 className="text-xs text-accent font-semibold uppercase tracking-wider mb-1">02 · Interests</h2>
             <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">Pick up to 8 — shown on your profile and used to match you with events.</p>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map(interest => (
@@ -296,7 +296,7 @@ function ProfileSetupForm() {
                   onClick={() => toggleInterest(interest)}
                   className={`px-3 py-1.5 rounded-full text-sm border transition ${
                     selectedInterests.includes(interest)
-                      ? 'bg-orange-500 border-orange-500 text-white'
+                      ? 'bg-accent border-accent text-white'
                       : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-500'
                   }`}
                 >
@@ -309,7 +309,7 @@ function ProfileSetupForm() {
 
           {/* ── Layer 3: Social Vibe ── */}
           <section>
-            <h2 className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-1">03 · Social Vibe</h2>
+            <h2 className="text-xs text-accent font-semibold uppercase tracking-wider mb-1">03 · Social Vibe</h2>
             <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">How would you describe your social style?</p>
             <div className="space-y-2">
               {VIBES.map(vibe => (
@@ -319,7 +319,7 @@ function ProfileSetupForm() {
                   onClick={() => setSelectedVibe(vibe.id)}
                   className={`w-full text-left px-4 py-3 rounded-xl border transition ${
                     selectedVibe === vibe.id
-                      ? 'bg-orange-500/15 border-orange-500 text-white'
+                      ? 'bg-accent/15 border-accent text-white'
                       : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'
                   }`}
                 >
@@ -332,7 +332,7 @@ function ProfileSetupForm() {
 
           {/* ── Layer 4: Availability ── */}
           <section>
-            <h2 className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-1">04 · Availability</h2>
+            <h2 className="text-xs text-accent font-semibold uppercase tracking-wider mb-1">04 · Availability</h2>
             <p className="text-gray-500 dark:text-gray-400 text-xs mb-4">Lets people know your social energy right now.</p>
 
             {/* Social battery */}
@@ -346,7 +346,7 @@ function ProfileSetupForm() {
                     onClick={() => setBattery(b.id)}
                     className={`flex-1 py-3 rounded-xl border text-center transition ${
                       battery === b.id
-                        ? 'bg-orange-500/15 border-orange-500 text-white'
+                        ? 'bg-accent/15 border-accent text-white'
                         : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
                     }`}
                   >
@@ -368,7 +368,7 @@ function ProfileSetupForm() {
                 type="button"
                 onClick={() => setAvailableThisWeek(prev => !prev)}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
-                  availableThisWeek ? 'bg-orange-500' : 'bg-gray-700'
+                  availableThisWeek ? 'bg-accent' : 'bg-gray-700'
                 }`}
               >
                 <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white dark:bg-[#221c16] shadow transition-transform ${
@@ -388,7 +388,7 @@ function ProfileSetupForm() {
                     onClick={() => setPreferredTime(t.id)}
                     className={`py-2.5 rounded-xl border text-sm transition ${
                       preferredTime === t.id
-                        ? 'bg-orange-500/15 border-orange-500 text-white font-medium'
+                        ? 'bg-accent/15 border-accent text-white font-medium'
                         : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
                     }`}
                   >
@@ -401,7 +401,7 @@ function ProfileSetupForm() {
 
           {/* ── Social Media ── */}
           <section>
-            <h2 className="text-xs text-orange-500 font-semibold uppercase tracking-wider mb-1">Social Media</h2>
+            <h2 className="text-xs text-accent font-semibold uppercase tracking-wider mb-1">Social Media</h2>
             <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
               🔒 Only visible to people who've attended an event with you.
             </p>
@@ -411,7 +411,7 @@ function ProfileSetupForm() {
                 { label: 'TikTok',    value: tiktok,    set: setTiktok,    placeholder: '@username' },
                 { label: 'Snapchat',  value: snapchat,  set: setSnapchat,  placeholder: 'username' },
               ].map(({ label, value, set, placeholder }) => (
-                <div key={label} className="flex items-center bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 gap-3 focus-within:border-orange-500 transition">
+                <div key={label} className="flex items-center bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 gap-3 focus-within:border-accent transition">
                   <span className="text-gray-500 dark:text-gray-400 text-sm w-20 shrink-0">{label}</span>
                   <input
                     type="text"
@@ -430,7 +430,7 @@ function ProfileSetupForm() {
           <button
             type="submit"
             disabled={loading || !username || !city}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-xl transition disabled:opacity-40 text-sm"
+            className="w-full bg-accent hover:brightness-90 text-white font-semibold py-4 rounded-xl transition disabled:opacity-40 text-sm"
           >
             {uploadingAvatar ? 'Uploading photo…' : loading ? 'Saving…' : isEditing ? 'Save changes' : "Let's go →"}
           </button>

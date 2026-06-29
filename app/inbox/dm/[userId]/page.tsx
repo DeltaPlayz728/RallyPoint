@@ -200,7 +200,7 @@ export default function DmThreadPage() {
           <img src={other.avatar_url} alt={displayName} className="w-8 h-8 rounded-full object-cover" />
         ) : (
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-black dark:text-[#fdf6ec] ${
-            other.is_bot ? 'bg-orange-500' : 'bg-gray-700'
+            other.is_bot ? 'bg-accent' : 'bg-gray-700'
           }`}>
             {other.is_bot ? '📍' : displayName[1]?.toUpperCase() ?? displayName[0]?.toUpperCase()}
           </div>
@@ -209,7 +209,7 @@ export default function DmThreadPage() {
           <div className="font-semibold text-sm flex items-center gap-1.5">
             {displayName}
             {other.is_bot && (
-              <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-semibold">
+              <span className="text-[10px] bg-orange-100 text-accent px-1.5 py-0.5 rounded-full font-semibold">
                 AI
               </span>
             )}
@@ -237,7 +237,7 @@ export default function DmThreadPage() {
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
                 isMe
-                  ? 'bg-orange-500 text-white rounded-br-sm'
+                  ? 'bg-accent text-white rounded-br-sm'
                   : 'bg-gray-200 dark:bg-gray-700 text-[#15110d] dark:text-[#fdf6ec] rounded-bl-sm'
               }`}>
                 {displayContent}
@@ -247,7 +247,7 @@ export default function DmThreadPage() {
                   <button
                     onClick={() => respondToProposal(proposalId, true)}
                     disabled={respondingTo === proposalId}
-                    className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-xl font-semibold transition disabled:opacity-50"
+                    className="text-xs bg-accent hover:brightness-90 text-white px-3 py-1.5 rounded-xl font-semibold transition disabled:opacity-50"
                   >
                     {respondingTo === proposalId ? 'Creating…' : 'Yes, set it up'}
                   </button>
@@ -277,12 +277,12 @@ export default function DmThreadPage() {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Send a message..."
-          className="flex-1 bg-gray-200 dark:bg-gray-700 text-[#15110d] dark:text-[#fdf6ec] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className="flex-1 bg-gray-200 dark:bg-gray-700 text-[#15110d] dark:text-[#fdf6ec] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
         />
         <button
           type="submit"
           disabled={sending || !newMessage.trim()}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-40"
+          className="bg-accent hover:brightness-90 text-white px-4 py-2 rounded-full text-sm font-medium transition disabled:opacity-40"
         >
           Send
         </button>

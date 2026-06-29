@@ -56,15 +56,15 @@ export default function EarlyAccessPage() {
         {done ? (
           /* Success state */
           <div className="text-center">
-            <div className="w-20 h-20 rounded-full bg-orange-500 border border-black flex items-center justify-center text-4xl mx-auto mb-6">
+            <div className="w-20 h-20 rounded-full bg-accent border border-black flex items-center justify-center text-4xl mx-auto mb-6">
               ⚡
             </div>
             <h1 className="text-2xl font-bold mb-2">You're on the list</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6">
               We'll email you the moment RallyPoint goes live in your city. You're one of the first — that means something.
             </p>
-            <div className="bg-orange-500 border border-black rounded-2xl px-5 py-4 mb-8">
-              <p className="text-orange-600 text-sm font-semibold">⚡ Founding Member status reserved</p>
+            <div className="bg-accent border border-black rounded-2xl px-5 py-4 mb-8">
+              <p className="text-accent text-sm font-semibold">⚡ Founding Member status reserved</p>
               <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Your badge will be waiting when you sign up.</p>
             </div>
             <Link
@@ -78,7 +78,7 @@ export default function EarlyAccessPage() {
           <>
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-1.5 bg-orange-500 border border-black text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              <div className="inline-flex items-center gap-1.5 bg-accent border border-black text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 ⚡ Founding Member — First 50 only
               </div>
               <h1 className="text-3xl font-bold leading-tight mb-3">
@@ -110,22 +110,22 @@ export default function EarlyAccessPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Your email address"
                 required
-                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
+                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-accent transition"
               />
               <input
                 type="text"
                 value={city}
                 onChange={e => setCity(e.target.value)}
                 placeholder="Your city (optional)"
-                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 transition"
+                className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-accent transition"
               />
 
-              {error && <p className="text-orange-600 text-sm text-center">{error}</p>}
+              {error && <p className="text-accent text-sm text-center">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition disabled:opacity-50 text-sm"
+                className="w-full bg-accent hover:brightness-90 active:scale-[0.98] text-white font-bold py-4 rounded-2xl transition disabled:opacity-50 text-sm"
               >
                 {loading ? 'Reserving your spot…' : 'Reserve my founding spot →'}
               </button>

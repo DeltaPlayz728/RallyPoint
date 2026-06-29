@@ -363,7 +363,7 @@ export default function CommunityDetailPage() {
 
   if (loading || !community) return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex flex-col">
-      <div className="h-12 bg-orange-500 flex items-center px-4">
+      <div className="h-12 bg-accent flex items-center px-4">
         <span className="text-white text-sm">←</span>
       </div>
       <div className="flex items-center justify-center pt-20 text-gray-500">Loading...</div>
@@ -382,7 +382,7 @@ export default function CommunityDetailPage() {
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] flex flex-col pb-0">
 
       {/* Orange top bar */}
-      <div className="h-12 bg-orange-500 flex items-center justify-between px-4 shrink-0 relative">
+      <div className="h-12 bg-accent flex items-center justify-between px-4 shrink-0 relative">
         <button onClick={() => router.push('/communities')} className="text-white text-lg leading-none">←</button>
         <span className="text-white text-sm font-semibold truncate max-w-[60%]">{community.name}</span>
         <button onClick={() => setShowMenu(v => !v)} className="text-white text-lg leading-none">⋯</button>
@@ -400,7 +400,7 @@ export default function CommunityDetailPage() {
             {!isMember && (
               <button
                 onClick={() => { setShowMenu(false); handleJoin() }}
-                className="block w-full text-left px-4 py-2.5 text-orange-500 hover:bg-gray-50 dark:hover:bg-[#2b241c]"
+                className="block w-full text-left px-4 py-2.5 text-accent hover:bg-gray-50 dark:hover:bg-[#2b241c]"
               >
                 Join community
               </button>
@@ -493,7 +493,7 @@ export default function CommunityDetailPage() {
               onClick={() => setHomeView('announcements')}
               className="flex items-center gap-3 mx-2 mb-1.5 px-3 py-2.5 bg-white dark:bg-[#221c16] rounded-2xl w-[calc(100%-1rem)] text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-sm shrink-0">📌</div>
+              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0">📌</div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-[#15110d] dark:text-[#fdf6ec]">Announcements</p>
                 <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
@@ -506,7 +506,7 @@ export default function CommunityDetailPage() {
               onClick={() => setHomeView('about')}
               className="flex items-center gap-3 mx-2 px-3 py-2.5 bg-white dark:bg-[#221c16] rounded-2xl w-[calc(100%-1rem)] text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-sm shrink-0">📋</div>
+              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0">📋</div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-[#15110d] dark:text-[#fdf6ec]">About &amp; rules</p>
                 <p className="text-gray-400 dark:text-gray-500 text-xs truncate">Community guidelines</p>
@@ -521,7 +521,7 @@ export default function CommunityDetailPage() {
               {canModerate && (
                 <button
                   onClick={() => setMainTab('settings')}
-                  className="text-[11px] font-semibold text-orange-500"
+                  className="text-[11px] font-semibold text-accent"
                 >
                   + New channel
                 </button>
@@ -535,7 +535,7 @@ export default function CommunityDetailPage() {
                   onClick={() => { setSelectedChannelId(ch.id); setMainTab('chat') }}
                   className="flex items-center gap-3 mx-2 mb-1.5 px-3 py-2.5 bg-orange-50 dark:bg-[#2b241c] rounded-2xl w-[calc(100%-1rem)] text-left"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-sm shrink-0">💬</div>
+                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0">💬</div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">#{ch.name}</p>
                     <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
@@ -568,7 +568,7 @@ export default function CommunityDetailPage() {
 
         {mainTab === 'home' && homeView === 'announcements' && (
           <div className="px-4 pt-4">
-            <button onClick={() => setHomeView('list')} className="text-sm text-orange-500 mb-3">‹ Back</button>
+            <button onClick={() => setHomeView('list')} className="text-sm text-accent mb-3">‹ Back</button>
             {isOwner && (
               <div className="flex gap-2 mb-4">
                 <input
@@ -580,7 +580,7 @@ export default function CommunityDetailPage() {
                 <button
                   onClick={handlePostAnnouncement}
                   disabled={sending || !announcementDraft.trim()}
-                  className="bg-orange-500 text-white rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-60"
+                  className="bg-accent text-white rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-60"
                 >
                   Post
                 </button>
@@ -605,7 +605,7 @@ export default function CommunityDetailPage() {
 
         {mainTab === 'home' && homeView === 'about' && (
           <div className="px-4 pt-4">
-            <button onClick={() => setHomeView('list')} className="text-sm text-orange-500 mb-3">‹ Back</button>
+            <button onClick={() => setHomeView('list')} className="text-sm text-accent mb-3">‹ Back</button>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">About</p>
             <p className="text-sm text-[#15110d] dark:text-[#fdf6ec] whitespace-pre-wrap mb-5">
               {community.description || 'No description set for this community yet.'}
@@ -627,7 +627,7 @@ export default function CommunityDetailPage() {
                     onClick={() => setSelectedChannelId(ch.id)}
                     className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
                       ch.id === activeChannelId
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-accent text-white'
                         : 'bg-white dark:bg-[#221c16] text-gray-500 border border-gray-200 dark:border-gray-700'
                     }`}
                   >
@@ -645,7 +645,7 @@ export default function CommunityDetailPage() {
                   <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">{m.senderName}</span>
                   <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
                     m.sender_id === userId
-                      ? 'bg-orange-500 text-white'
+                      ? 'bg-accent text-white'
                       : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700'
                   }`}>
                     {m.content}
@@ -671,7 +671,7 @@ export default function CommunityDetailPage() {
                 {isOwner ? "You're the owner of this community" : isMember ? `You're a member of this community${currentMember?.role === 'moderator' ? ' (moderator)' : ''}` : "You haven't joined yet"}
               </p>
               {!isMember ? (
-                <button onClick={handleJoin} className="mt-2 bg-orange-500 text-white rounded-xl px-4 py-2 text-sm font-medium">
+                <button onClick={handleJoin} className="mt-2 bg-accent text-white rounded-xl px-4 py-2 text-sm font-medium">
                   Join community
                 </button>
               ) : !isOwner ? (
@@ -693,7 +693,7 @@ export default function CommunityDetailPage() {
 
         {mainTab === 'settings' && canModerate && (
           <div className="px-4 pt-4 pb-8">
-            <button onClick={() => setMainTab('home')} className="text-sm text-orange-500 mb-4">‹ Back</button>
+            <button onClick={() => setMainTab('home')} className="text-sm text-accent mb-4">‹ Back</button>
 
             {isOwner && (
               <>
@@ -729,7 +729,7 @@ export default function CommunityDetailPage() {
                   <button
                     onClick={handleSaveInfo}
                     disabled={savingInfo}
-                    className="bg-orange-500 text-white rounded-xl px-4 py-2 text-sm font-medium disabled:opacity-60"
+                    className="bg-accent text-white rounded-xl px-4 py-2 text-sm font-medium disabled:opacity-60"
                   >
                     {savingInfo ? 'Saving…' : 'Save changes'}
                   </button>
@@ -786,7 +786,7 @@ export default function CommunityDetailPage() {
                 <button
                   onClick={handleCreateChannel}
                   disabled={!newChannelName.trim()}
-                  className="bg-orange-500 text-white rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
+                  className="bg-accent text-white rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
                 >
                   Create
                 </button>
@@ -807,7 +807,7 @@ export default function CommunityDetailPage() {
                       {isOwner && (
                         <button
                           onClick={() => handleSetRole(m.user_id, m.role === 'moderator' ? 'member' : 'moderator')}
-                          className="text-orange-500 text-xs font-medium"
+                          className="text-accent text-xs font-medium"
                         >
                           {m.role === 'moderator' ? 'Demote' : 'Make mod'}
                         </button>
@@ -831,7 +831,7 @@ export default function CommunityDetailPage() {
                   {bans.map((b) => (
                     <div key={b.user_id} className="flex items-center justify-between bg-[#fdf6ec] dark:bg-[#15110d] rounded-xl px-3 py-2.5">
                       <span className="text-sm text-[#15110d] dark:text-[#fdf6ec]">{b.name}</span>
-                      <button onClick={() => handleUnban(b.user_id)} className="text-orange-500 text-xs font-medium">
+                      <button onClick={() => handleUnban(b.user_id)} className="text-accent text-xs font-medium">
                         Unban
                       </button>
                     </div>
@@ -856,7 +856,7 @@ export default function CommunityDetailPage() {
           <button
             onClick={handleSend}
             disabled={sending || !draft.trim()}
-            className="bg-orange-500 text-white rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-60"
+            className="bg-accent text-white rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-60"
           >
             Send
           </button>
@@ -876,14 +876,14 @@ export default function CommunityDetailPage() {
             className="flex-1 flex flex-col items-center gap-0.5 py-2.5"
           >
             <span className={`text-base ${mainTab === t.key ? 'opacity-100' : 'opacity-50'}`}>{t.icon}</span>
-            <span className={`text-[10px] ${mainTab === t.key ? 'text-orange-500 font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
+            <span className={`text-[10px] ${mainTab === t.key ? 'text-accent font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
               {t.label}
             </span>
           </button>
         ))}
         <button onClick={() => setMainTab('you')} className="flex-1 flex flex-col items-center gap-0.5 py-2.5">
-          <div className={`w-[18px] h-[18px] rounded-full ${mainTab === 'you' ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
-          <span className={`text-[10px] ${mainTab === 'you' ? 'text-orange-500 font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
+          <div className={`w-[18px] h-[18px] rounded-full ${mainTab === 'you' ? 'bg-accent' : 'bg-gray-300 dark:bg-gray-600'}`} />
+          <span className={`text-[10px] ${mainTab === 'you' ? 'text-accent font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
             You
           </span>
         </button>
@@ -905,7 +905,7 @@ export default function CommunityDetailPage() {
                   {m.avatar_url ? (
                     <img src={m.avatar_url} alt={m.name} className="w-9 h-9 rounded-full object-cover" />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
                       {m.name[0]?.toUpperCase()}
                     </div>
                   )}

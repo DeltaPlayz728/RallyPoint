@@ -67,7 +67,7 @@ export default function TermsOfServicePage() {
 
           <section>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-base mb-2">10. Contact</h2>
-            <p>Questions about these Terms? Contact us at <a href="mailto:2023ford.john@gmail.com" className="text-orange-600 hover:underline">2023ford.john@gmail.com</a></p>
+            <p>Questions about these Terms? Contact us at <a href="mailto:2023ford.john@gmail.com" className="text-accent hover:underline">2023ford.john@gmail.com</a></p>
           </section>
 
         </div>

@@ -18,13 +18,21 @@ drop policy if exists "community_icons_select" on storage.objects;
 create policy "community_icons_select" on storage.objects
   for select using (bucket_id = 'community-icons');
 
+-- NOTE: the subquery below qualifies every column reference (c.id, c.owner_id)
+-- AND explicitly writes `objects.name` (not bare `name`) for the file path.
+-- The `communities` table also has a column called `name` (the display name),
+-- so an unqualified `name` here would resolve to `communities.name` instead of
+-- `storage.objects.name` (the uploaded file's path) — a column-shadowing bug
+-- that silently makes the ownership check always false. Confirmed and fixed
+-- live in prod on 2026-06-29 after testing revealed icon/banner uploads were
+-- failing RLS for every community owner. Keep `objects.name` qualified here.
 drop policy if exists "community_icons_insert" on storage.objects;
 create policy "community_icons_insert" on storage.objects
   for insert with check (
     bucket_id = 'community-icons'
     and exists (
       select 1 from public.communities c
-      where c.id::text = split_part(name, '.', 1)
+      where c.id::text = split_part(objects.name, '.', 1)
         and c.owner_id = auth.uid()
     )
   );
@@ -35,7 +43,7 @@ create policy "community_icons_update" on storage.objects
     bucket_id = 'community-icons'
     and exists (
       select 1 from public.communities c
-      where c.id::text = split_part(name, '.', 1)
+      where c.id::text = split_part(objects.name, '.', 1)
         and c.owner_id = auth.uid()
     )
   );
@@ -46,7 +54,7 @@ create policy "community_icons_delete" on storage.objects
     bucket_id = 'community-icons'
     and exists (
       select 1 from public.communities c
-      where c.id::text = split_part(name, '.', 1)
+      where c.id::text = split_part(objects.name, '.', 1)
         and c.owner_id = auth.uid()
     )
   );

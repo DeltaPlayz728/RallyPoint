@@ -82,7 +82,7 @@ export default function CommunitiesPage() {
         {canCreate ? (
           <Link
             href="/communities/create"
-            className="block w-full text-center bg-orange-500 text-white rounded-lg py-2.5 text-sm font-medium mt-4 mb-6"
+            className="block w-full text-center bg-accent text-white rounded-lg py-2.5 text-sm font-medium mt-4 mb-6"
           >
             + Create a community
           </Link>

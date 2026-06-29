@@ -142,14 +142,14 @@ function VenueSheet({
                 <Link
                   key={event.id}
                   href={`/events/${event.id}`}
-                  className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+                  className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-accent transition"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{event.title}</p>
                     <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{formatDate(event.starts_at)}</p>
                   </div>
                   <div className="ml-3 flex flex-col items-end gap-1 shrink-0">
-                    <span className={`text-xs font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+                    <span className={`text-xs font-bold ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                       {event.price > 0 ? `€${event.price}` : 'Free'}
                     </span>
                     {event.attendee_count > 0 && (
@@ -162,7 +162,7 @@ function VenueSheet({
 
             <Link
               href={createHref}
-              className="mt-3 flex items-center justify-center gap-2 w-full border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-orange-600 hover:border-orange-500 rounded-xl py-3 text-sm transition"
+              className="mt-3 flex items-center justify-center gap-2 w-full border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-accent hover:border-accent rounded-xl py-3 text-sm transition"
             >
               + Add another event here
             </Link>
@@ -173,7 +173,7 @@ function VenueSheet({
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">Be the first to host something at {venue.name}</p>
             <Link
               href={createHref}
-              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-xl transition"
+              className="inline-flex items-center gap-2 bg-accent hover:brightness-90 text-white font-semibold px-6 py-3 rounded-xl transition"
             >
               🎉 Create event here
             </Link>
@@ -208,11 +208,11 @@ function EventSheet({
           <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
             event.type === 'casual'
               ? 'bg-purple-500 text-white border border-black'
-              : 'bg-orange-500 text-white border border-black'
+              : 'bg-accent text-white border border-black'
           }`}>
             {event.type === 'casual' ? '😊 Casual' : '🎳 Social'}
           </span>
-          <span className={`font-bold text-sm ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+          <span className={`font-bold text-sm ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
             {event.price > 0 ? `€${event.price}` : 'Free'}
           </span>
         </div>
@@ -226,7 +226,7 @@ function EventSheet({
 
         <Link
           href={`/events/${event.id}`}
-          className="flex items-center justify-center w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition"
+          className="flex items-center justify-center w-full bg-accent hover:brightness-90 text-white font-bold py-3.5 rounded-xl transition"
         >
           View Event →
         </Link>
@@ -243,13 +243,13 @@ function EventSheet({
                 <Link
                   key={nearby.id}
                   href={`/events/${nearby.id}`}
-                  className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+                  className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-accent transition"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{nearby.title}</p>
                     <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{formatDate(nearby.starts_at)}</p>
                   </div>
-                  <span className={`ml-3 text-xs font-bold shrink-0 ${nearby.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+                  <span className={`ml-3 text-xs font-bold shrink-0 ${nearby.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                     {nearby.price > 0 ? `€${nearby.price}` : 'Free'}
                   </span>
                 </Link>
@@ -299,7 +299,7 @@ function CitySheet({
               <Link
                 key={event.id}
                 href={`/events/${event.id}`}
-                className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-orange-500 transition"
+                className="flex items-center justify-between bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 hover:border-accent transition"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{event.title}</p>
@@ -308,7 +308,7 @@ function CitySheet({
                   </p>
                 </div>
                 <div className="ml-3 flex flex-col items-end gap-1 shrink-0">
-                  <span className={`text-xs font-bold ${event.price > 0 ? 'text-orange-600' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+                  <span className={`text-xs font-bold ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                     {event.price > 0 ? `€${event.price}` : 'Free'}
                   </span>
                   {event.attendee_count > 0 && (
@@ -503,7 +503,7 @@ export default function MapPage() {
     return (
       <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
-          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
           <p className="text-sm">Loading map…</p>
         </div>
       </div>
@@ -540,7 +540,7 @@ export default function MapPage() {
             </button>
           )}
           {citySearching && (
-            <div className="w-3.5 h-3.5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
           )}
         </div>
       </form>
@@ -554,7 +554,7 @@ export default function MapPage() {
               onClick={() => setActiveFilter(f.id)}
               className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
                 activeFilter === f.id
-                  ? 'bg-orange-500 border-orange-500 text-white'
+                  ? 'bg-accent border-accent text-white'
                   : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-500'
               }`}
             >
@@ -571,7 +571,7 @@ export default function MapPage() {
           Casual
         </span>
         <span className="flex items-center gap-1.5 shrink-0">
-          <span className="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block" />
+          <span className="w-2.5 h-2.5 rounded-full bg-accent inline-block" />
           Social
         </span>
         <span className="flex items-center gap-1.5 shrink-0">
@@ -579,7 +579,7 @@ export default function MapPage() {
           Not joined
         </span>
         <span className="flex items-center gap-1.5 shrink-0">
-          <span className="text-orange-500">🚩</span>
+          <span className="text-accent">🚩</span>
           Joined
         </span>
         {venues.length > 0 && (

@@ -123,7 +123,7 @@ export default function PublicProfilePage() {
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold">{profile.full_name}</h1>
               {profile.account_type === 'organizer' && (
-                <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-orange-100 text-accent px-2 py-0.5 rounded-full">
                   {profile.venue_name ? 'Venue' : 'Organizer'}
                 </span>
               )}
@@ -131,7 +131,7 @@ export default function PublicProfilePage() {
             {profile.username && <p className="text-gray-500 dark:text-gray-400 text-sm">@{profile.username}</p>}
             {profile.city && <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">📍 {profile.city}</p>}
             {profile.venue_name && (
-              <p className="text-orange-600 text-xs mt-0.5">🏟️ {profile.venue_name}</p>
+              <p className="text-accent text-xs mt-0.5">🏟️ {profile.venue_name}</p>
             )}
           </div>
         </div>
@@ -184,7 +184,7 @@ export default function PublicProfilePage() {
                     href={`https://instagram.com/${profile.instagram}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-orange-600 transition"
+                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-accent transition"
                   >
                     <span className="text-lg">📸</span>
                     <span>@{profile.instagram}</span>
@@ -196,7 +196,7 @@ export default function PublicProfilePage() {
                     href={`https://tiktok.com/@${profile.tiktok}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-orange-600 transition"
+                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-accent transition"
                   >
                     <span className="text-lg">🎵</span>
                     <span>@{profile.tiktok}</span>
@@ -208,7 +208,7 @@ export default function PublicProfilePage() {
                     href={`https://snapchat.com/add/${profile.snapchat}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-orange-600 transition"
+                    className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-accent transition"
                   >
                     <span className="text-lg">👻</span>
                     <span>{profile.snapchat}</span>
@@ -227,7 +227,7 @@ export default function PublicProfilePage() {
         {/* Meetup request */}
         <Link
           href={`/meetups`}
-          className="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition"
+          className="block w-full text-center bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-lg transition"
         >
           🤝 Request a Meetup
         </Link>

@@ -133,7 +133,7 @@ export default function MeetupsPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => respond(req.id, 'accepted')}
-                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium py-2 rounded-lg transition"
+                        className="flex-1 bg-accent hover:brightness-90 text-white text-sm font-medium py-2 rounded-lg transition"
                       >
                         Accept
                       </button>
