@@ -49,6 +49,14 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Every app page is personalized (per-user greeting, theme accent, live
+  // data) and rendered client-side after hydration, so it must never be
+  // served from Vercel's edge cache or a browser's disk/back-forward cache.
+  // Without this, navigating away and back (or reopening after a deploy)
+  // can restore a stale cached HTML shell from an older deploy — this is
+  // what caused the "reverts to the old design" bug reported 2026-06-29.
+  supabaseResponse.headers.set('Cache-Control', 'private, no-store, must-revalidate')
+
   // Public routes — no auth needed
   const publicRoutes = ['/auth/login', '/auth/signup', '/welcome', '/', '/onboarding', '/tos', '/privacy', '/suspended', '/early-access']
   if (publicRoutes.some(route => pathname.startsWith(route))) {
