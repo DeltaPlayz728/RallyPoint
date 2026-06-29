@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
-import { Bell, Lock, MapPin, Clock, Coffee, Users, Search, Sparkles } from 'lucide-react'
+import { Bell, Lock, MapPin, Clock, Search } from 'lucide-react'
 
 // Avatar colour palette — used for attendee dot row
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
@@ -116,12 +116,11 @@ function EventCard({ event }: { event: Event }) {
         <div className="p-4">
           {/* Badges row */}
           <div className="flex items-center justify-between mb-3">
-            <span className={`text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full font-bold border-2 flex items-center gap-1 ${
+            <span className={`text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full font-bold border-2 border-black ${
               isCasual
-                ? 'bg-purple-500 text-white border-black'
-                : 'bg-accent text-white border-black'
+                ? 'bg-purple-500 text-white'
+                : 'bg-accent text-white'
             }`}>
-              {isCasual ? <Coffee size={12} strokeWidth={2.5} /> : <Users size={12} strokeWidth={2.5} />}
               {isCasual ? 'Casual' : 'Social'}
             </span>
             <span className={`text-base font-black ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
@@ -317,8 +316,10 @@ export default function FeedPage() {
 
       {/* Header */}
       <div className="relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
-        {/* Decorative accent blob — bold & expressive flourish behind the headline */}
-        <div className="absolute -top-14 -right-12 w-52 h-52 rounded-full bg-accent/25 blur-2xl pointer-events-none" aria-hidden="true" />
+        {/* Decorative blobs — layered, solid (not blurred) shapes bleeding off the
+            corner, matching the hand-picked, collage-poster feel of the mockup. */}
+        <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-accent pointer-events-none" aria-hidden="true" />
+        <div className="absolute top-6 -right-6 w-16 h-16 rounded-full bg-purple-500 pointer-events-none" aria-hidden="true" />
 
         <div className="relative flex items-center justify-between mb-4">
           <div>
@@ -326,8 +327,9 @@ export default function FeedPage() {
               {greeting}{username ? `, ${username}` : ''}
             </p>
             <h1 className="text-2xl font-black text-[#15110d] dark:text-[#fdf6ec] mt-1 leading-tight">
-              What's the{' '}
-              <span className="inline-block bg-accent text-white px-2 py-0.5 rounded-lg -rotate-2 border-2 border-black">
+              <span className="inline-block -rotate-2">What's</span>{' '}
+              <span className="inline-block">the</span>{' '}
+              <span className="inline-block bg-accent text-white px-2 py-0.5 rounded-lg rotate-2 border-2 border-black">
                 move
               </span>
             </h1>
@@ -347,20 +349,28 @@ export default function FeedPage() {
 
         {/* Filter chips */}
         <div className="relative flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
-          {FILTERS.map(f => (
-            <button
-              key={f.id}
-              onClick={() => setActiveFilter(f.id)}
-              className={`shrink-0 flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold border-2 border-black transition ${
-                activeFilter === f.id
-                  ? 'bg-accent text-white'
-                  : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec]'
-              }`}
-            >
-              {f.id === 'foryou' && <Sparkles size={12} strokeWidth={2.5} />}
-              {f.label}
-            </button>
-          ))}
+          {FILTERS.map(f => {
+            const isForYou = f.id === 'foryou'
+            const isActive = activeFilter === f.id
+            return (
+              <button
+                key={f.id}
+                onClick={() => setActiveFilter(f.id)}
+                className={`relative shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border-2 border-black transition ${
+                  isForYou
+                    ? 'bg-black text-white'
+                    : isActive
+                    ? 'bg-accent text-white'
+                    : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec]'
+                }`}
+              >
+                {f.label}
+                {isForYou && isActive && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-accent rounded-full border-2 border-black" />
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
