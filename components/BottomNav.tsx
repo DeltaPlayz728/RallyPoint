@@ -2,10 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Map, Calendar, Users, User } from 'lucide-react'
+import { Map, Calendar, Users, User, type LucideIcon } from 'lucide-react'
 import Logo from './Logo'
 
-const navItems = [
+type NavItem =
+  | { href: string; label: string; Icon: LucideIcon; special?: undefined }
+  | { href: string; label: string; special: true; Icon?: undefined }
+
+const navItems: NavItem[] = [
   { href: '/map',           label: 'Map',     Icon: Map },
   { href: '/events',        label: 'Events',  Icon: Calendar },
   { href: '/events/create', label: 'Rally',   special: true },
