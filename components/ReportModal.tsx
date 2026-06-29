@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { CheckCircle2 } from 'lucide-react'
 
 const REASONS = [
   'Fake or spam account',
@@ -58,7 +59,7 @@ export default function ReportModal({ targetType, targetId, targetName, onClose 
       >
         {done ? (
           <div className="text-center py-6">
-            <div className="text-3xl mb-3">✅</div>
+            <CheckCircle2 size={28} className="mx-auto mb-3 text-green-600" />
             <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold">Report submitted</p>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">We'll review this shortly.</p>
           </div>

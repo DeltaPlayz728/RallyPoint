@@ -2,21 +2,30 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import {
+  Home, Calendar, Map as MapIcon, MessageCircle, Handshake, Camera,
+  type LucideIcon,
+} from 'lucide-react'
 
 // ─── Constants (mirrors profile/setup) ───────────────────────────────────────
+//
+// NOTE: these INTERESTS strings are persisted verbatim into profiles.interests
+// (see finish() below), so stripping the emoji prefix here also changes the
+// stored data values for any new signups going forward. Flagged for review —
+// existing rows with emoji-prefixed interests are unaffected by this change.
 
 const INTERESTS = [
-  '☕ Coffee', '🥾 Hiking', '🎮 Gaming', '🎵 Music', '💪 Fitness', '🎨 Art',
-  '🍕 Food & Drinks', '🎬 Movies', '⚽ Sports', '✈️ Travel', '📚 Reading',
-  '🎳 Bowling', '🎤 Karaoke', '💃 Dancing', '🚴 Cycling', '📷 Photography',
-  '🍳 Cooking', '🧘 Yoga', '🧗 Climbing', '🎲 Board Games',
+  'Coffee', 'Hiking', 'Gaming', 'Music', 'Fitness', 'Art',
+  'Food & Drinks', 'Movies', 'Sports', 'Travel', 'Reading',
+  'Bowling', 'Karaoke', 'Dancing', 'Cycling', 'Photography',
+  'Cooking', 'Yoga', 'Climbing', 'Board Games',
 ]
 
 const VIBES = [
-  { id: 'chill',  label: '😌 Chill & Low-Key',   desc: 'Small groups, easy going' },
-  { id: 'social', label: '🗣️ Social & Talkative', desc: 'Love meeting new people' },
-  { id: 'active', label: '⚡ High Energy',         desc: 'Active and adventurous' },
-  { id: 'deep',   label: '🧠 Deep Conversations', desc: 'Thoughtful connections' },
+  { id: 'chill',  label: 'Chill & Low-Key',   desc: 'Small groups, easy going' },
+  { id: 'social', label: 'Social & Talkative', desc: 'Love meeting new people' },
+  { id: 'active', label: 'High Energy',         desc: 'Active and adventurous' },
+  { id: 'deep',   label: 'Deep Conversations', desc: 'Thoughtful connections' },
 ]
 
 // ─── Slides ───────────────────────────────────────────────────────────────────
@@ -24,7 +33,6 @@ const VIBES = [
 function WelcomeSlide() {
   return (
     <div className="flex flex-col items-center text-center px-6">
-      <div className="text-6xl mb-6">🟠</div>
       <h1 className="text-3xl font-bold mb-3">
         Welcome to Rally<span className="text-accent">Point</span>
       </h1>
@@ -41,16 +49,16 @@ function FeaturesSlide() {
       <h2 className="text-2xl font-bold text-center mb-2">Everything in one place</h2>
       <p className="text-gray-500 dark:text-gray-400 text-sm text-center mb-6">Here's what you can do on RallyPoint.</p>
       <div className="grid grid-cols-2 gap-3">
-        {[
-          { icon: '🏠', label: 'Live Feed',     desc: 'Casual meetups happening now near you' },
-          { icon: '🎳', label: 'Events Tab',    desc: 'Venue nights & big scheduled events' },
-          { icon: '🗺️', label: 'Pulse Map',     desc: 'See every event around you visually' },
-          { icon: '💬', label: 'Group Chat',    desc: 'Talk with attendees before you show up' },
-          { icon: '🤝', label: '1:1 Meetups',  desc: 'Request private hangouts after events' },
-          { icon: '📸', label: 'Social Links',  desc: 'Share your socials after meeting IRL' },
-        ].map(f => (
+        {([
+          { icon: Home,          label: 'Live Feed',     desc: 'Casual meetups happening now near you' },
+          { icon: Calendar,      label: 'Events Tab',    desc: 'Venue nights & big scheduled events' },
+          { icon: MapIcon,       label: 'Pulse Map',     desc: 'See every event around you visually' },
+          { icon: MessageCircle, label: 'Group Chat',    desc: 'Talk with attendees before you show up' },
+          { icon: Handshake,     label: '1:1 Meetups',  desc: 'Request private hangouts after events' },
+          { icon: Camera,        label: 'Social Links',  desc: 'Share your socials after meeting IRL' },
+        ] as { icon: LucideIcon; label: string; desc: string }[]).map(f => (
           <div key={f.label} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-3">
-            <div className="text-2xl mb-1">{f.icon}</div>
+            <f.icon size={22} className="mb-1 text-[#15110d] dark:text-[#fdf6ec]" />
             <div className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">{f.label}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{f.desc}</div>
           </div>

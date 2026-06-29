@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
+import { MapPin, Check } from 'lucide-react'
 
 type Message = {
   id: string
@@ -202,7 +203,7 @@ export default function DmThreadPage() {
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-black dark:text-[#fdf6ec] ${
             other.is_bot ? 'bg-accent' : 'bg-gray-700'
           }`}>
-            {other.is_bot ? '📍' : displayName[1]?.toUpperCase() ?? displayName[0]?.toUpperCase()}
+            {other.is_bot ? <MapPin size={16} /> : displayName[1]?.toUpperCase() ?? displayName[0]?.toUpperCase()}
           </div>
         )}
         <div>
@@ -223,7 +224,7 @@ export default function DmThreadPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">
-            {other.is_bot ? "Say hi — I can help you find or plan something to do. 👋" : 'No messages yet. Say hi! 👋'}
+            {other.is_bot ? "Say hi — I can help you find or plan something to do." : 'No messages yet. Say hi!'}
           </div>
         )}
         {messages.map(msg => {
@@ -261,7 +262,7 @@ export default function DmThreadPage() {
                 </div>
               )}
               {proposalId && resolved && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">✓ Responded</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-flex items-center gap-1"><Check size={11} /> Responded</span>
               )}
               <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">{formatTime(msg.created_at)}</span>
             </div>

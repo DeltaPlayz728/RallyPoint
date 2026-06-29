@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Zap, Ticket, MapPin, Megaphone, type LucideIcon } from 'lucide-react'
 
-const PERKS = [
-  { icon: '⚡', title: 'Founding Member badge', desc: 'Permanent badge on your profile — visible to everyone you meet.' },
-  { icon: '🎟️', title: 'First 50 spots', desc: 'Only the first 50 signups get founding status. After that it\'s gone.' },
-  { icon: '📍', title: 'Breda launch priority', desc: 'First access when we go live in Breda. Be there from day one.' },
-  { icon: '🗣️', title: 'Shape the app', desc: 'Direct line to the founder. Your feedback gets built in.' },
+const PERKS: { Icon: LucideIcon; title: string; desc: string }[] = [
+  { Icon: Zap, title: 'Founding Member badge', desc: 'Permanent badge on your profile — visible to everyone you meet.' },
+  { Icon: Ticket, title: 'First 50 spots', desc: 'Only the first 50 signups get founding status. After that it\'s gone.' },
+  { Icon: MapPin, title: 'Breda launch priority', desc: 'First access when we go live in Breda. Be there from day one.' },
+  { Icon: Megaphone, title: 'Shape the app', desc: 'Direct line to the founder. Your feedback gets built in.' },
 ]
 
 export default function EarlyAccessPage() {
@@ -56,15 +57,15 @@ export default function EarlyAccessPage() {
         {done ? (
           /* Success state */
           <div className="text-center">
-            <div className="w-20 h-20 rounded-full bg-accent border border-black flex items-center justify-center text-4xl mx-auto mb-6">
-              ⚡
+            <div className="w-20 h-20 rounded-full bg-accent border border-black flex items-center justify-center mx-auto mb-6">
+              <Zap size={36} className="text-white" />
             </div>
             <h1 className="text-2xl font-bold mb-2">You're on the list</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6">
               We'll email you the moment RallyPoint goes live in your city. You're one of the first — that means something.
             </p>
             <div className="bg-accent border border-black rounded-2xl px-5 py-4 mb-8">
-              <p className="text-accent text-sm font-semibold">⚡ Founding Member status reserved</p>
+              <p className="text-accent text-sm font-semibold inline-flex items-center gap-1"><Zap size={14} className="shrink-0" /> Founding Member status reserved</p>
               <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Your badge will be waiting when you sign up.</p>
             </div>
             <Link
@@ -79,7 +80,7 @@ export default function EarlyAccessPage() {
             {/* Header */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-1.5 bg-accent border border-black text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-                ⚡ Founding Member — First 50 only
+                <Zap size={13} className="shrink-0" /> Founding Member — First 50 only
               </div>
               <h1 className="text-3xl font-bold leading-tight mb-3">
                 Get early access<br />to RallyPoint
@@ -93,7 +94,7 @@ export default function EarlyAccessPage() {
             <div className="w-full space-y-2.5 mb-8">
               {PERKS.map(p => (
                 <div key={p.title} className="flex items-start gap-3 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5">
-                  <span className="text-xl shrink-0 mt-0.5">{p.icon}</span>
+                  <p.Icon size={20} className="shrink-0 mt-0.5 text-accent" />
                   <div>
                     <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm font-semibold">{p.title}</p>
                     <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{p.desc}</p>

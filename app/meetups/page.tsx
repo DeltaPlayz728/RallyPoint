@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import TopBar from '@/components/TopBar'
+import { Check, X, Clock } from 'lucide-react'
 
 type Request = {
   id: string
@@ -80,9 +81,9 @@ export default function MeetupsPage() {
   }
 
   const statusBadge = (status: string) => {
-    if (status === 'accepted') return <span className="text-xs text-green-600 font-medium">✓ Accepted</span>
-    if (status === 'declined') return <span className="text-xs text-red-600 font-medium">✗ Declined</span>
-    return <span className="text-xs text-yellow-700 font-medium">⏳ Pending</span>
+    if (status === 'accepted') return <span className="text-xs text-green-600 font-medium inline-flex items-center gap-1"><Check size={12} /> Accepted</span>
+    if (status === 'declined') return <span className="text-xs text-red-600 font-medium inline-flex items-center gap-1"><X size={12} /> Declined</span>
+    return <span className="text-xs text-yellow-700 font-medium inline-flex items-center gap-1"><Clock size={12} /> Pending</span>
   }
 
   if (loading) return (

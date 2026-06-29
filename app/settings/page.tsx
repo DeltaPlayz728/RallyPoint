@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { useTheme, ACCENT_PRESETS } from '@/components/ThemeProvider'
 import { effectiveTier, TIER_LABELS, nextTier, SubscriptionTier, IS_PLAYTEST } from '@/lib/subscription'
+import { Check, AlertTriangle } from 'lucide-react'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -124,7 +125,7 @@ export default function SettingsPage() {
                   }}
                 >
                   {accent === preset.id && (
-                    <span className="text-white text-sm">✓</span>
+                    <Check size={14} className="text-white" />
                   )}
                 </button>
               ))}
@@ -170,8 +171,8 @@ export default function SettingsPage() {
                 : 'Thanks for supporting RallyPoint!'}
             </p>
             {IS_PLAYTEST && (
-              <p className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs rounded-lg p-2.5 mb-3">
-                ⚠️ Playtest build — subscriptions aren't active yet, no real money is charged.
+              <p className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs rounded-lg p-2.5 mb-3 inline-flex items-center gap-1.5">
+                <AlertTriangle size={14} className="shrink-0" /> Playtest build — subscriptions aren't active yet, no real money is charged.
               </p>
             )}
             <div className="flex gap-2">

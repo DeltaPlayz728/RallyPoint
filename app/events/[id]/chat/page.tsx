@@ -195,7 +195,7 @@ export default function EventChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">
-            No messages yet. Say hi! 👋
+            No messages yet. Say hi!
           </div>
         )}
         {messages.map(msg => {

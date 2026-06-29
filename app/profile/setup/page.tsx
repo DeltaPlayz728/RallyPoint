@@ -4,34 +4,44 @@ import { useEffect, useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Logo from '@/components/Logo'
+import {
+  Camera, Lock, BatteryFull, BatteryMedium, BatteryLow,
+  type LucideIcon,
+} from 'lucide-react'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
+//
+// NOTE: INTERESTS strings are persisted verbatim into profiles.interests (see
+// handleSubmit below), so stripping the emoji prefix here also changes the
+// stored data values for any new saves going forward. Flagged for review —
+// vibe/social_battery/preferred_time are saved by `id`, not by label, so those
+// are unaffected.
 
 const INTERESTS = [
-  '☕ Coffee', '🥾 Hiking', '🎮 Gaming', '🎵 Music', '💪 Fitness', '🎨 Art',
-  '🍕 Food & Drinks', '🎬 Movies', '⚽ Sports', '✈️ Travel', '📚 Reading',
-  '🎳 Bowling', '🎤 Karaoke', '💃 Dancing', '🚴 Cycling', '📷 Photography',
-  '🍳 Cooking', '🧘 Yoga', '🧗 Climbing', '🎲 Board Games',
+  'Coffee', 'Hiking', 'Gaming', 'Music', 'Fitness', 'Art',
+  'Food & Drinks', 'Movies', 'Sports', 'Travel', 'Reading',
+  'Bowling', 'Karaoke', 'Dancing', 'Cycling', 'Photography',
+  'Cooking', 'Yoga', 'Climbing', 'Board Games',
 ]
 
 const VIBES = [
-  { id: 'chill',  label: '😌 Chill & Low-Key',      desc: 'Small groups, easy going, no pressure' },
-  { id: 'social', label: '🗣️ Social & Talkative',    desc: 'Love meeting lots of new people' },
-  { id: 'active', label: '⚡ High Energy',            desc: 'Active, adventurous, up for anything' },
-  { id: 'deep',   label: '🧠 Deep Conversations',    desc: 'Thoughtful, meaningful connections' },
+  { id: 'chill',  label: 'Chill & Low-Key',      desc: 'Small groups, easy going, no pressure' },
+  { id: 'social', label: 'Social & Talkative',    desc: 'Love meeting lots of new people' },
+  { id: 'active', label: 'High Energy',            desc: 'Active, adventurous, up for anything' },
+  { id: 'deep',   label: 'Deep Conversations',    desc: 'Thoughtful, meaningful connections' },
 ]
 
 const BATTERIES = [
-  { id: 'full',   label: '🔋 Full',   desc: 'Ready for anything' },
-  { id: 'medium', label: '🪫 Medium', desc: 'Selective but open' },
-  { id: 'low',    label: '🔴 Low',    desc: 'Need easy low-key plans' },
-]
+  { id: 'full',   icon: BatteryFull,   label: 'Full',   desc: 'Ready for anything' },
+  { id: 'medium', icon: BatteryMedium, label: 'Medium', desc: 'Selective but open' },
+  { id: 'low',    icon: BatteryLow,    label: 'Low',    desc: 'Need easy low-key plans' },
+] as { id: string; icon: LucideIcon; label: string; desc: string }[]
 
 const TIMES = [
-  { id: 'morning',   label: '🌅 Mornings'  },
-  { id: 'afternoon', label: '☀️ Afternoons' },
-  { id: 'evening',   label: '🌙 Evenings'  },
-  { id: 'any',       label: '🔄 Any time'  },
+  { id: 'morning',   label: 'Mornings'  },
+  { id: 'afternoon', label: 'Afternoons' },
+  { id: 'evening',   label: 'Evenings'  },
+  { id: 'any',       label: 'Any time'  },
 ]
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -228,7 +238,7 @@ function ProfileSetupForm() {
               </div>
               {/* Camera badge */}
               <div className="absolute bottom-0 right-0 w-7 h-7 bg-accent rounded-full flex items-center justify-center border-2 border-black text-sm">
-                📷
+                <Camera size={14} className="text-white" />
               </div>
             </label>
             <input
@@ -350,8 +360,8 @@ function ProfileSetupForm() {
                         : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
                     }`}
                   >
-                    <div className="text-lg mb-0.5">{b.label.split(' ')[0]}</div>
-                    <div className="text-xs">{b.label.split(' ').slice(1).join(' ')}</div>
+                    <b.icon size={18} className="mx-auto mb-0.5" />
+                    <div className="text-xs">{b.label}</div>
                     <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{b.desc}</div>
                   </button>
                 ))}
@@ -402,8 +412,8 @@ function ProfileSetupForm() {
           {/* ── Social Media ── */}
           <section>
             <h2 className="text-xs text-accent font-semibold uppercase tracking-wider mb-1">Social Media</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
-              🔒 Only visible to people who've attended an event with you.
+            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3 inline-flex items-center gap-1">
+              <Lock size={12} /> Only visible to people who've attended an event with you.
             </p>
             <div className="space-y-2">
               {[

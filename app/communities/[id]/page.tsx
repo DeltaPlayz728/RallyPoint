@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { Camera, Pin, ClipboardList, MessageCircle, Users, Check, Settings, Home, Calendar, type LucideIcon } from 'lucide-react'
 
 type Community = {
   id: string
@@ -437,7 +438,7 @@ export default function CommunityDetailPage() {
               className="absolute top-2.5 right-3 w-7 h-7 rounded-full bg-black/30 flex items-center justify-center text-white text-xs"
               title="Edit banner"
             >
-              {uploadingBanner ? '…' : '📷'}
+              {uploadingBanner ? '…' : <Camera size={14} />}
             </button>
           </>
         )}
@@ -463,7 +464,7 @@ export default function CommunityDetailPage() {
                   className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center text-white text-[10px]"
                   title="Edit community picture"
                 >
-                  {uploadingIcon ? '…' : '📷'}
+                  {uploadingIcon ? '…' : <Camera size={10} />}
                 </button>
               </>
             )}
@@ -493,7 +494,7 @@ export default function CommunityDetailPage() {
               onClick={() => setHomeView('announcements')}
               className="flex items-center gap-3 mx-2 mb-1.5 px-3 py-2.5 bg-white dark:bg-[#221c16] rounded-2xl w-[calc(100%-1rem)] text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0">📌</div>
+              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0 text-white"><Pin size={16} /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-[#15110d] dark:text-[#fdf6ec]">Announcements</p>
                 <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
@@ -506,7 +507,7 @@ export default function CommunityDetailPage() {
               onClick={() => setHomeView('about')}
               className="flex items-center gap-3 mx-2 px-3 py-2.5 bg-white dark:bg-[#221c16] rounded-2xl w-[calc(100%-1rem)] text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0">📋</div>
+              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0 text-white"><ClipboardList size={16} /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-[#15110d] dark:text-[#fdf6ec]">About &amp; rules</p>
                 <p className="text-gray-400 dark:text-gray-500 text-xs truncate">Community guidelines</p>
@@ -535,7 +536,7 @@ export default function CommunityDetailPage() {
                   onClick={() => { setSelectedChannelId(ch.id); setMainTab('chat') }}
                   className="flex items-center gap-3 mx-2 mb-1.5 px-3 py-2.5 bg-orange-50 dark:bg-[#2b241c] rounded-2xl w-[calc(100%-1rem)] text-left"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0">💬</div>
+                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0 text-white"><MessageCircle size={16} /></div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">#{ch.name}</p>
                     <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
@@ -556,7 +557,7 @@ export default function CommunityDetailPage() {
               onClick={() => setShowMembers(true)}
               className="flex items-center gap-3 mx-2 mt-5 px-3 py-3 border-t border-gray-200 dark:border-gray-700 w-[calc(100%-1rem)] text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#2b241c] flex items-center justify-center text-sm shrink-0 text-gray-500">👥</div>
+              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#2b241c] flex items-center justify-center text-sm shrink-0 text-gray-500"><Users size={16} /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">Members</p>
                 <p className="text-gray-400 dark:text-gray-500 text-xs">{members.length} total</p>
@@ -593,8 +594,8 @@ export default function CommunityDetailPage() {
                 {announcements.map((a) => (
                   <div key={a.id} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4">
                     <p className="text-sm text-[#15110d] dark:text-[#fdf6ec]">{a.content}</p>
-                    <p className="text-gray-400 dark:text-gray-500 text-xs mt-1.5">
-                      📌 {a.authorName} · {new Date(a.created_at).toLocaleDateString()}
+                    <p className="text-gray-400 dark:text-gray-500 text-xs mt-1.5 inline-flex items-center gap-1">
+                      <Pin size={10} /> {a.authorName} · {new Date(a.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 ))}
@@ -683,9 +684,9 @@ export default function CommunityDetailPage() {
             {canModerate && (
               <button
                 onClick={() => setMainTab('settings')}
-                className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-left text-sm font-medium text-[#15110d] dark:text-[#fdf6ec]"
+                className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-left text-sm font-medium text-[#15110d] dark:text-[#fdf6ec] inline-flex items-center gap-1.5"
               >
-                ⚙️ Community settings
+                <Settings size={16} /> Community settings
               </button>
             )}
           </div>
@@ -753,7 +754,7 @@ export default function CommunityDetailPage() {
                           boxShadow: community.banner_color === hex ? '0 0 0 2px white, 0 0 0 4px ' + hex : 'none',
                         }}
                       >
-                        {community.banner_color === hex && <span className="text-white text-sm">✓</span>}
+                        {community.banner_color === hex && <Check size={14} className="text-white" />}
                       </button>
                     ))}
                   </div>
@@ -866,16 +867,16 @@ export default function CommunityDetailPage() {
       {/* Bottom tab bar */}
       <div className="flex border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#221c16] shrink-0">
         {([
-          { key: 'home', label: 'Home', icon: '🏠' },
-          { key: 'chat', label: 'Chat', icon: '💬' },
-          { key: 'events', label: 'Events', icon: '📅' },
-        ] as const).map((t) => (
+          { key: 'home', label: 'Home', icon: Home },
+          { key: 'chat', label: 'Chat', icon: MessageCircle },
+          { key: 'events', label: 'Events', icon: Calendar },
+        ] as { key: MainTab; label: string; icon: LucideIcon }[]).map((t) => (
           <button
             key={t.key}
             onClick={() => { setMainTab(t.key); if (t.key === 'home') setHomeView('list') }}
             className="flex-1 flex flex-col items-center gap-0.5 py-2.5"
           >
-            <span className={`text-base ${mainTab === t.key ? 'opacity-100' : 'opacity-50'}`}>{t.icon}</span>
+            <t.icon size={18} className={mainTab === t.key ? 'opacity-100' : 'opacity-50'} />
             <span className={`text-[10px] ${mainTab === t.key ? 'text-accent font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
               {t.label}
             </span>

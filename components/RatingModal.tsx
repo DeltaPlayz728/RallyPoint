@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { PartyPopper, Star } from 'lucide-react'
 
 interface Props {
   eventId: string
@@ -36,7 +37,7 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
   const stars = [1, 2, 3, 4, 5]
   const active = hovered || rating
 
-  const label = ['', 'Not great', 'It was ok', 'Pretty good', 'Really good', 'Amazing! 🔥'][active] ?? ''
+  const label = ['', 'Not great', 'It was ok', 'Pretty good', 'Really good', 'Amazing!'][active] ?? ''
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -49,7 +50,7 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
 
         {done ? (
           <div className="text-center py-4">
-            <div className="text-4xl mb-3">🙌</div>
+            <PartyPopper size={32} className="mx-auto mb-3 text-accent" />
             <p className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg">Thanks for rating!</p>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your feedback helps hosts improve.</p>
           </div>
@@ -68,10 +69,9 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
                   onClick={() => setRating(s)}
                   onMouseEnter={() => setHovered(s)}
                   onMouseLeave={() => setHovered(0)}
-                  className="text-4xl transition-transform active:scale-90"
-                  style={{ filter: s <= active ? 'none' : 'grayscale(1) opacity(0.3)' }}
+                  className="transition-transform active:scale-90"
                 >
-                  ⭐
+                  <Star size={32} className={s <= active ? 'text-accent fill-accent' : 'text-gray-300 dark:text-gray-600'} />
                 </button>
               ))}
             </div>

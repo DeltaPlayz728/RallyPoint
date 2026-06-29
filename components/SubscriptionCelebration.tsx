@@ -3,28 +3,29 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { entitlementLabel, TIER_LABELS } from '@/lib/subscription'
+import { Zap, Heart, Sparkles, Building2, type LucideIcon } from 'lucide-react'
 
 const CONFETTI_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#eab308']
 const CONFETTI_COUNT = 36
 
-const COPY: Record<string, { emoji: string; title: string; body: string }> = {
+const COPY: Record<string, { icon: LucideIcon; title: string; body: string }> = {
   founding: {
-    emoji: '⚡',
+    icon: Zap,
     title: "You're a Founding Member!",
     body: "You've been granted the Planner tier for free, forever — communities, paid-event hosting, and everything else, on us.",
   },
   go_getter: {
-    emoji: '💛',
+    icon: Heart,
     title: 'Welcome to Go Getter!',
     body: 'Your supporter badge and custom banner color are live on your profile.',
   },
   extrovert: {
-    emoji: '✨',
+    icon: Sparkles,
     title: "You're an Extrovert now!",
     body: 'Priority placement, event boosts, vibe filters, and read receipts are unlocked.',
   },
   planner: {
-    emoji: '🏘️',
+    icon: Building2,
     title: 'Welcome to Planner!',
     body: 'You can now create communities, host paid events, and see event analytics.',
   },
@@ -110,7 +111,7 @@ export default function SubscriptionCelebration() {
         className="relative bg-white dark:bg-[#221c16] rounded-2xl p-6 max-w-sm w-full text-center shadow-xl"
         style={{ animation: 'celebration-pop 0.4s ease-out' }}
       >
-        <div className="text-5xl mb-3">{copy.emoji}</div>
+        <copy.icon size={40} className="mx-auto mb-3 text-accent" />
         <h2 className="text-xl font-bold text-[#15110d] dark:text-[#fdf6ec] mb-1">
           {copy.title}
         </h2>

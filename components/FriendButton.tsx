@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useFriendship } from '@/lib/useFriendship'
+import { Check } from 'lucide-react'
 
 interface Props {
   currentUserId: string
@@ -63,9 +64,9 @@ export default function FriendButton({ currentUserId, targetUserId, size = 'md' 
       <button
         onClick={unfriend}
         disabled={acting}
-        className={`${base} bg-purple-500 border-black text-white hover:bg-red-100 hover:border-red-400 hover:text-red-600`}
+        className={`${base} bg-purple-500 border-black text-white hover:bg-red-100 hover:border-red-400 hover:text-red-600 inline-flex items-center gap-1`}
       >
-        ✓ Friends
+        <Check size={14} /> Friends
       </button>
     )
   }

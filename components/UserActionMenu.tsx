@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import ReportModal from './ReportModal'
+import { Ban, Flag } from 'lucide-react'
 
 interface Props {
   targetUserId: string
@@ -65,15 +66,15 @@ export default function UserActionMenu({ targetUserId, targetName }: Props) {
             <button
               onClick={handleBlock}
               disabled={blocking}
-              className="w-full text-left px-4 py-3 text-sm text-accent hover:bg-gray-100 dark:hover:bg-gray-700 transition border-b border-gray-200 dark:border-gray-700"
+              className="w-full text-left px-4 py-3 text-sm text-accent hover:bg-gray-100 dark:hover:bg-gray-700 transition border-b border-gray-200 dark:border-gray-700 inline-flex items-center gap-1.5"
             >
-              🚫 {blocking ? 'Blocking…' : 'Block user'}
+              <Ban size={14} /> {blocking ? 'Blocking…' : 'Block user'}
             </button>
             <button
               onClick={() => { setOpen(false); setShowReport(true) }}
-              className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition inline-flex items-center gap-1.5"
             >
-              🚩 Report user
+              <Flag size={14} /> Report user
             </button>
           </div>
         </>

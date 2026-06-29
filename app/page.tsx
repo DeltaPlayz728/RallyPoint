@@ -1,5 +1,10 @@
 import Link from 'next/link'
 import Logo from '@/components/Logo'
+import {
+  Zap, MapPin, PartyPopper, Handshake, Home, MessageCircle,
+  Map as MapIcon, Camera, Lock, Gift,
+  type LucideIcon,
+} from 'lucide-react'
 
 export default function LandingPage() {
   return (
@@ -33,7 +38,7 @@ export default function LandingPage() {
           href="/early-access"
           className="inline-block bg-orange-100 border border-orange-300 text-accent text-xs font-medium px-3 py-1 rounded-full mb-6 hover:bg-orange-200 transition"
         >
-          ⚡ Founding Member spots open — claim yours →
+          <span className="inline-flex items-center gap-1"><Zap size={14} /> Founding Member spots open — claim yours →</span>
         </Link>
 
         <h1 className="text-5xl sm:text-6xl font-bold leading-tight max-w-2xl mb-6">
@@ -68,13 +73,13 @@ export default function LandingPage() {
       <section className="px-6 py-16 max-w-4xl mx-auto w-full">
         <h2 className="text-2xl font-bold text-center mb-12">How it works</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {[
-            { step: '01', icon: '📍', title: 'Find an event', desc: 'Browse casual meetups and social events happening near you right now.' },
-            { step: '02', icon: '🎳', title: 'Show up', desc: 'Join, chat with the group beforehand, and actually go meet people in person.' },
-            { step: '03', icon: '🤝', title: 'Connect', desc: "After the event, request 1:1 meetups and unlock each other's socials." },
-          ].map(item => (
+          {([
+            { step: '01', icon: MapPin,    title: 'Find an event', desc: 'Browse casual meetups and social events happening near you right now.' },
+            { step: '02', icon: PartyPopper, title: 'Show up', desc: 'Join, chat with the group beforehand, and actually go meet people in person.' },
+            { step: '03', icon: Handshake, title: 'Connect', desc: "After the event, request 1:1 meetups and unlock each other's socials." },
+          ] as { step: string; icon: LucideIcon; title: string; desc: string }[]).map(item => (
             <div key={item.step} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
-              <div className="text-3xl mb-3">{item.icon}</div>
+              <item.icon size={28} className="mb-3 text-[#15110d] dark:text-[#fdf6ec]" />
               <div className="text-xs text-accent font-semibold mb-1">{item.step}</div>
               <h3 className="font-bold text-[#15110d] dark:text-[#fdf6ec] mb-2">{item.title}</h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{item.desc}</p>
@@ -88,18 +93,18 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-12">Everything you need to actually meet people</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              { icon: '🏠', label: 'Live Feed', desc: 'Casual meetups happening now' },
-              { icon: '🎳', label: 'Venue Events', desc: 'Ticketed events at real venues' },
-              { icon: '💬', label: 'Group Chat', desc: 'Talk before you show up' },
-              { icon: '🗺️', label: 'Pulse Map', desc: 'See events around you visually' },
-              { icon: '🤝', label: '1:1 Meetups', desc: 'Request private hangouts' },
-              { icon: '📸', label: 'Social Links', desc: 'Share socials after meeting IRL' },
-              { icon: '🔒', label: 'Safe by design', desc: 'Age siloing, no ID required' },
-              { icon: '🆓', label: 'Free to join', desc: 'No subscription to browse' },
-            ].map(f => (
+            {([
+              { icon: Home,          label: 'Live Feed', desc: 'Casual meetups happening now' },
+              { icon: PartyPopper,    label: 'Venue Events', desc: 'Ticketed events at real venues' },
+              { icon: MessageCircle,  label: 'Group Chat', desc: 'Talk before you show up' },
+              { icon: MapIcon,        label: 'Pulse Map', desc: 'See events around you visually' },
+              { icon: Handshake,      label: '1:1 Meetups', desc: 'Request private hangouts' },
+              { icon: Camera,         label: 'Social Links', desc: 'Share socials after meeting IRL' },
+              { icon: Lock,           label: 'Safe by design', desc: 'Age siloing, no ID required' },
+              { icon: Gift,           label: 'Free to join', desc: 'No subscription to browse' },
+            ] as { icon: LucideIcon; label: string; desc: string }[]).map(f => (
               <div key={f.label} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                <div className="text-2xl mb-2">{f.icon}</div>
+                <f.icon size={20} className="mb-2 text-[#15110d] dark:text-[#fdf6ec]" />
                 <div className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec] mb-1">{f.label}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">{f.desc}</div>
               </div>

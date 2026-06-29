@@ -49,7 +49,7 @@ function templateReply(message: string): string {
   const m = message.toLowerCase()
 
   if (/\b(hi|hey|hello|sup|yo)\b/.test(m)) {
-    return "Hey! 👋 I'm the RallyPoint Assistant. Want help finding something to do nearby, or thinking about hosting your own event?"
+    return "Hey! I'm the RallyPoint Assistant. Want help finding something to do nearby, or thinking about hosting your own event?"
   }
   if (/bored|nothing to do|what.?s happening/.test(m)) {
     return "Check the Map tab — tap a pin to see what's nearby, or search a city to see everything happening there. If it's quiet, you could be the one to kick something off!"
@@ -58,7 +58,7 @@ function templateReply(message: string): string {
     return "Love that energy. Hit the Rally tab to set one up — pick a venue, a time, and whether it's casual or ticketed. Takes under a minute."
   }
   if (/thanks|thank you/.test(m)) {
-    return "Anytime! Go rally something up. 🎉"
+    return "Anytime! Go rally something up."
   }
 
   return "I'm running in basic mode right now (no AI key configured yet), but I can still point you around — try the Map tab for what's nearby or the Rally tab to host something."

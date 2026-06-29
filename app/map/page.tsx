@@ -8,6 +8,11 @@ import Link from 'next/link'
 import type { EventPin, Venue } from '@/components/MapView'
 import TopBar from '@/components/TopBar'
 import { triggerSeedCheck } from '@/lib/seedCheck'
+import {
+  Search, X, Users, MapPin, Clock, Flag,
+  Music, Beer, Coffee, Trees, Dumbbell, Film, FerrisWheel, Utensils,
+  type LucideIcon,
+} from 'lucide-react'
 
 // Leaflet must be loaded client-side only
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -62,18 +67,18 @@ function formatDate(iso: string) {
   )
 }
 
-function getVenueEmoji(types: string[]): string {
-  if (types.includes('bowling_alley'))  return '🎳'
-  if (types.includes('night_club'))     return '🎵'
-  if (types.includes('bar'))            return '🍺'
-  if (types.includes('cafe'))           return '☕'
-  if (types.includes('park'))           return '🌳'
-  if (types.includes('gym'))            return '💪'
-  if (types.includes('movie_theater'))  return '🎬'
-  if (types.includes('amusement_park')) return '🎡'
-  if (types.includes('stadium'))        return '🏟️'
-  if (types.includes('restaurant'))     return '🍽️'
-  return '📍'
+function getVenueIcon(types: string[]): LucideIcon {
+  if (types.includes('bowling_alley'))  return MapPin
+  if (types.includes('night_club'))     return Music
+  if (types.includes('bar'))            return Beer
+  if (types.includes('cafe'))           return Coffee
+  if (types.includes('park'))           return Trees
+  if (types.includes('gym'))            return Dumbbell
+  if (types.includes('movie_theater'))  return Film
+  if (types.includes('amusement_park')) return FerrisWheel
+  if (types.includes('stadium'))        return MapPin
+  if (types.includes('restaurant'))     return Utensils
+  return MapPin
 }
 
 // ─── Bottom sheet ─────────────────────────────────────────────────────────────
@@ -87,7 +92,7 @@ function VenueSheet({
   nearbyEvents: EventPin[]
   onClose: () => void
 }) {
-  const emoji = getVenueEmoji(venue.types)
+  const VenueIcon = getVenueIcon(venue.types)
   const venueTypeLabel = (() => {
     if (venue.types.includes('bowling_alley'))  return 'Bowling Alley'
     if (venue.types.includes('night_club'))     return 'Night Club'
@@ -122,7 +127,7 @@ function VenueSheet({
 
         {/* Venue header */}
         <div className="flex items-center gap-3 mb-1">
-          <span className="text-3xl">{emoji}</span>
+          <VenueIcon size={28} className="text-[#15110d] dark:text-[#fdf6ec]" />
           <div>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg leading-tight">{venue.name}</h2>
             <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{venueTypeLabel} · {venue.vicinity}</p>
@@ -153,7 +158,9 @@ function VenueSheet({
                       {event.price > 0 ? `€${event.price}` : 'Free'}
                     </span>
                     {event.attendee_count > 0 && (
-                      <span className="text-gray-500 dark:text-gray-400 text-xs">👥 {event.attendee_count}</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs inline-flex items-center gap-1">
+                        <Users size={12} /> {event.attendee_count}
+                      </span>
                     )}
                   </div>
                 </Link>
@@ -175,7 +182,7 @@ function VenueSheet({
               href={createHref}
               className="inline-flex items-center gap-2 bg-accent hover:brightness-90 text-white font-semibold px-6 py-3 rounded-xl transition"
             >
-              🎉 Create event here
+              Create event here
             </Link>
           </div>
         )}
@@ -210,7 +217,7 @@ function EventSheet({
               ? 'bg-purple-500 text-white border border-black'
               : 'bg-accent text-white border border-black'
           }`}>
-            {event.type === 'casual' ? '😊 Casual' : '🎳 Social'}
+            {event.type === 'casual' ? 'Casual' : 'Social'}
           </span>
           <span className={`font-bold text-sm ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
             {event.price > 0 ? `€${event.price}` : 'Free'}
@@ -218,10 +225,16 @@ function EventSheet({
         </div>
 
         <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-xl mb-1">{event.title}</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">📍 {event.location}</p>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">🕐 {formatDate(event.starts_at)}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-1 inline-flex items-center gap-1">
+          <MapPin size={14} /> {event.location}
+        </p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-1 inline-flex items-center gap-1">
+          <Clock size={14} /> {formatDate(event.starts_at)}
+        </p>
         {event.attendee_count > 0 && (
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">👥 {event.attendee_count} going</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 inline-flex items-center gap-1">
+            <Users size={14} /> {event.attendee_count} going
+          </p>
         )}
 
         <Link
@@ -312,7 +325,9 @@ function CitySheet({
                     {event.price > 0 ? `€${event.price}` : 'Free'}
                   </span>
                   {event.attendee_count > 0 && (
-                    <span className="text-gray-500 dark:text-gray-400 text-xs">👥 {event.attendee_count}</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs inline-flex items-center gap-1">
+                      <Users size={12} /> {event.attendee_count}
+                    </span>
                   )}
                 </div>
               </Link>
@@ -521,7 +536,7 @@ export default function MapPage() {
       {/* City search bar */}
       <form onSubmit={handleCitySearch} className="px-4 pt-2 pb-1 shrink-0 z-10">
         <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 rounded-full px-4 py-2">
-          <span className="text-gray-500 dark:text-gray-400 text-sm">🔍</span>
+          <Search size={16} className="text-gray-500 dark:text-gray-400" />
           <input
             ref={searchRef}
             type="text"
@@ -536,7 +551,7 @@ export default function MapPage() {
               onClick={() => setCityQuery('')}
               className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white text-xs"
             >
-              ✕
+              <X size={14} />
             </button>
           )}
           {citySearching && (
@@ -575,16 +590,16 @@ export default function MapPage() {
           Social
         </span>
         <span className="flex items-center gap-1.5 shrink-0">
-          <span className="text-gray-500 dark:text-gray-400">🏳️</span>
+          <Flag size={12} className="text-gray-500 dark:text-gray-400" />
           Not joined
         </span>
         <span className="flex items-center gap-1.5 shrink-0">
-          <span className="text-accent">🚩</span>
+          <Flag size={12} className="text-accent" />
           Joined
         </span>
         {venues.length > 0 && (
           <span className="flex items-center gap-1.5 shrink-0">
-            <span className="text-base leading-none">📍</span>
+            <MapPin size={14} />
             Venue
           </span>
         )}

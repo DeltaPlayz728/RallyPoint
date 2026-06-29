@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { effectiveTier, hasFeature, TIER_LABELS, SubscriptionTier } from '@/lib/subscription'
 import TopBar from '@/components/TopBar'
+import { Settings, Users, Target, BatteryFull, BatteryMedium, BatteryLow, MapPin, Clock, Check } from 'lucide-react'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 const BANNER_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6', '#ef4444', '#eab308']
@@ -21,20 +22,20 @@ type Event = {
 }
 
 const VIBE_LABELS: Record<string, string> = {
-  chill:  '😌 Chill & Low-Key',
-  social: '🗣️ Social & Talkative',
-  active: '⚡ High Energy',
-  deep:   '🧠 Deep Conversations',
+  chill:  'Chill & Low-Key',
+  social: 'Social & Talkative',
+  active: 'High Energy',
+  deep:   'Deep Conversations',
 }
 
-const BATTERY_LABELS: Record<string, { icon: string; label: string; color: string }> = {
-  full:   { icon: '🔋', label: 'Full battery',   color: 'text-green-600' },
-  medium: { icon: '🪫', label: 'Medium battery', color: 'text-yellow-600' },
-  low:    { icon: '🔴', label: 'Low battery',    color: 'text-red-500' },
+const BATTERY_LABELS: Record<string, { icon: typeof BatteryFull; label: string; color: string }> = {
+  full:   { icon: BatteryFull,   label: 'Full battery',   color: 'text-green-600' },
+  medium: { icon: BatteryMedium, label: 'Medium battery', color: 'text-yellow-600' },
+  low:    { icon: BatteryLow,    label: 'Low battery',    color: 'text-red-500' },
 }
 
 const TIME_LABELS: Record<string, string> = {
-  morning: '🌅 Mornings', afternoon: '☀️ Afternoons', evening: '🌙 Evenings', any: '🔄 Any time',
+  morning: 'Mornings', afternoon: 'Afternoons', evening: 'Evenings', any: 'Any time',
 }
 
 type Profile = {
@@ -244,22 +245,26 @@ export default function ProfilePage() {
                 <h1 className="text-lg font-bold leading-tight">{profile?.full_name}</h1>
                 {isSupporter && (
                   <span className="text-[10px] bg-accent text-white px-2 py-0.5 rounded-full font-semibold">
-                    💛 {TIER_LABELS[tier]}
+                    {TIER_LABELS[tier]}
                   </span>
                 )}
                 {isFoundingMember && (
                   <span className="text-[10px] bg-accent text-white border border-black px-2 py-0.5 rounded-full font-semibold">
-                    ⚡ Founding Member
+                    Founding Member
                   </span>
                 )}
                 {isOrganizer && (
-                  <span className="text-[10px] bg-blue-100 text-blue-700 dark:text-blue-400 border border-blue-300 px-2 py-0.5 rounded-full font-semibold">
-                    🎯 Organizer
+                  <span className="text-[10px] bg-blue-100 text-blue-700 dark:text-blue-400 border border-blue-300 px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1">
+                    <Target size={10} /> Organizer
                   </span>
                 )}
               </div>
               {profile?.username && <p className="text-gray-500 dark:text-gray-400 text-sm">@{profile.username}</p>}
-              {profile?.city && <p className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">📍 {profile.city}</p>}
+              {profile?.city && (
+                <p className="text-gray-600 dark:text-gray-400 text-xs mt-0.5 inline-flex items-center gap-1">
+                  <MapPin size={12} /> {profile.city}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -268,7 +273,7 @@ export default function ProfilePage() {
               aria-label="Settings"
               className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition border border-gray-200 dark:border-gray-700 p-2 rounded-xl"
             >
-              ⚙️
+              <Settings size={18} />
             </Link>
             <button onClick={handleSignOut} className="text-xs text-gray-600 dark:text-gray-400 hover:text-red-400 transition border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-xl">
               Sign out
@@ -301,13 +306,19 @@ export default function ProfilePage() {
               </span>
             )}
             {profile?.social_battery && (
-              <span className={`bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-xs px-2.5 py-1 rounded-full ${BATTERY_LABELS[profile.social_battery]?.color ?? 'text-gray-500 dark:text-gray-400'}`}>
-                {BATTERY_LABELS[profile.social_battery]?.icon} {BATTERY_LABELS[profile.social_battery]?.label}
+              <span className={`bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${BATTERY_LABELS[profile.social_battery]?.color ?? 'text-gray-500 dark:text-gray-400'}`}>
+                {BATTERY_LABELS[profile.social_battery]?.icon && (
+                  (() => {
+                    const BatteryIcon = BATTERY_LABELS[profile.social_battery].icon
+                    return <BatteryIcon size={12} />
+                  })()
+                )}
+                {BATTERY_LABELS[profile.social_battery]?.label}
               </span>
             )}
             {profile?.available_this_week && (
-              <span className="bg-purple-500 border border-black text-white text-xs px-2.5 py-1 rounded-full">
-                ✅ Open this week
+              <span className="bg-purple-500 border border-black text-white text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                <Check size={12} /> Open this week
               </span>
             )}
             {profile?.preferred_time && profile.preferred_time !== 'any' && (
@@ -357,12 +368,12 @@ export default function ProfilePage() {
           <Link href="/profile/setup?edit=true" className="flex-1 text-center border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600 hover:text-black dark:hover:text-white text-sm py-2.5 rounded-2xl transition">
             Edit Profile
           </Link>
-          <Link href="/friends" className="flex-1 text-center border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-accent hover:text-accent text-sm py-2.5 rounded-2xl transition">
-            🤝 Friends
+          <Link href="/friends" className="flex-1 text-center border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-accent hover:text-accent text-sm py-2.5 rounded-2xl transition inline-flex items-center justify-center gap-1.5">
+            <Users size={14} /> Friends
           </Link>
           {!isOrganizer && (
-            <button onClick={() => setShowOrganizerModal(true)} className="flex-1 text-center border border-accent/40 text-accent hover:bg-orange-100 text-sm py-2.5 rounded-2xl transition">
-              🎯 Organizer
+            <button onClick={() => setShowOrganizerModal(true)} className="flex-1 text-center border border-accent/40 text-accent hover:bg-orange-100 text-sm py-2.5 rounded-2xl transition inline-flex items-center justify-center gap-1.5">
+              <Target size={14} /> Organizer
             </button>
           )}
         </div>
@@ -402,7 +413,9 @@ export default function ProfilePage() {
                         {event.type}
                       </span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">📍 {event.location} · 🕐 {formatDate(event.starts_at)}</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-xs mt-1 inline-flex items-center gap-1">
+                      <MapPin size={12} /> {event.location} · <Clock size={12} /> {formatDate(event.starts_at)}
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -425,7 +438,9 @@ export default function ProfilePage() {
                         {event.type}
                       </span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">📍 {event.location} · 🕐 {formatDate(event.starts_at)}</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-xs mt-1 inline-flex items-center gap-1">
+                      <MapPin size={12} /> {event.location} · <Clock size={12} /> {formatDate(event.starts_at)}
+                    </p>
                   </div>
                 </Link>
               ))}

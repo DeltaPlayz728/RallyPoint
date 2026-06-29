@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import TopBar from '@/components/TopBar'
 import { triggerSeedCheck } from '@/lib/seedCheck'
+import { Building2, MapPin, Clock, Users } from 'lucide-react'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -65,8 +66,8 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
             <div className="flex-1 pr-2">
               <div className="flex items-center gap-1.5 mb-1">
                 {isVenue && (
-                  <span className="text-[10px] bg-accent text-white border border-black px-2 py-0.5 rounded-full font-medium">
-                    🏟️ {event.organizer?.venue_name}
+                  <span className="text-[10px] bg-accent text-white border border-black px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1">
+                    <Building2 size={11} className="shrink-0" /> {event.organizer?.venue_name}
                   </span>
                 )}
               </div>
@@ -86,14 +87,14 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
           <div className="flex items-end justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
               <span className="text-gray-500 dark:text-gray-400 text-xs flex items-center gap-1.5">
-                <span className="shrink-0">📍</span>
+                <MapPin size={13} className="shrink-0" />
                 <span className="truncate">{event.location}</span>
                 {distKm !== undefined && (
                   <span className="text-gray-600 dark:text-gray-400 shrink-0">· {distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`}</span>
                 )}
               </span>
               <span className="text-gray-500 dark:text-gray-400 text-xs flex items-center gap-1.5">
-                <span className="shrink-0">🕐</span>
+                <Clock size={13} className="shrink-0" />
                 <span>{formatDate(event.starts_at)}</span>
               </span>
             </div>
@@ -186,18 +187,19 @@ export default function EventsPage() {
       <div className="px-4 pt-3 pb-3 border-b border-gray-300 dark:border-gray-700 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
         <div className="flex gap-2">
           {([
-            { id: 'social', label: '🎳 Social' },
-            { id: 'nearme', label: '📍 Near me' },
-          ] as { id: Slide; label: string }[]).map(s => (
+            { id: 'social', label: 'Social', Icon: Users },
+            { id: 'nearme', label: 'Near me', Icon: MapPin },
+          ] as { id: Slide; label: string; Icon: typeof Users }[]).map(s => (
             <button
               key={s.id}
               onClick={() => setSlide(s.id)}
-              className={`px-5 py-2 rounded-full text-sm font-semibold border transition ${
+              className={`px-5 py-2 rounded-full text-sm font-semibold border transition inline-flex items-center gap-1.5 ${
                 slide === s.id
                   ? 'bg-accent border-accent text-white'
                   : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
               }`}
             >
+              <s.Icon size={14} className="shrink-0" />
               {s.label}
             </button>
           ))}
@@ -218,7 +220,7 @@ export default function EventsPage() {
           </div>
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="text-4xl mb-4">🎳</div>
+            <Users size={40} className="text-gray-400 mb-4" />
             <p className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">No events yet</p>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
               {slide === 'nearme' ? 'Nothing nearby right now — check back soon.' : 'Venues and organizers will show up here.'}

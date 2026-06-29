@@ -5,6 +5,12 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import TopBar from '@/components/TopBar'
+import {
+  Search, Building2, MessageCircle, PartyPopper, Music, Pizza, Palette,
+  Trophy, Drama, MapPin, Hand, X, type LucideIcon,
+} from 'lucide-react'
+
+const EVENT_CHAT_ICONS: LucideIcon[] = [Trophy, Music, Pizza, Palette, Trophy, Drama]
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -57,7 +63,7 @@ type EventChatRow = {
   lastMessage: string
   lastAt: string
   unread: boolean
-  emoji: string
+  icon: LucideIcon
 }
 
 type JoinedCommunityRow = {
@@ -139,7 +145,7 @@ export default function FriendsPage() {
         lastMessage: 'Tap to open chat',
         lastAt: '',
         unread: false,
-        emoji: ['🎳', '🎵', '🍕', '🎨', '⚽', '🎭'][i % 6],
+        icon: EVENT_CHAT_ICONS[i % EVENT_CHAT_ICONS.length],
       }))
       setEventChats(chatRows)
 
@@ -241,7 +247,7 @@ export default function FriendsPage() {
       <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5" style={{ width: '80%' }}>
-            <span className="text-gray-600 dark:text-gray-400 text-sm">🔍</span>
+            <Search size={14} className="text-gray-600 dark:text-gray-400" />
             <input
               type="text"
               placeholder="Search friends..."
@@ -256,7 +262,7 @@ export default function FriendsPage() {
             style={{ width: '20%' }}
             title="Communities"
           >
-            🏘️
+            <Building2 size={18} />
           </Link>
         </div>
       </div>
@@ -313,8 +319,8 @@ export default function FriendsPage() {
 
             {/* DMs section */}
             <div className="px-4 pt-4 pb-1">
-              <p className="text-gray-600 dark:text-gray-400 text-[11px] font-semibold uppercase tracking-widest mb-2">
-                💬 Messages &amp; Groups
+              <p className="text-gray-600 dark:text-gray-400 text-[11px] font-semibold uppercase tracking-widest mb-2 inline-flex items-center gap-1">
+                <MessageCircle size={12} /> Messages &amp; Groups
               </p>
             </div>
 
@@ -324,8 +330,8 @@ export default function FriendsPage() {
                 href={`/inbox/dm/${botId}`}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-[#221c16] active:bg-white transition"
               >
-                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-lg shrink-0">
-                  📍
+                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center text-lg shrink-0 text-white">
+                  <MapPin size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate flex items-center gap-1.5">
@@ -383,8 +389,8 @@ export default function FriendsPage() {
             {eventChats.length > 0 && (
               <>
                 <div className="px-4 pt-5 pb-1">
-                  <p className="text-gray-600 dark:text-gray-400 text-[11px] font-semibold uppercase tracking-widest mb-2">
-                    🎳 Event &amp; Venue Chats
+                  <p className="text-gray-600 dark:text-gray-400 text-[11px] font-semibold uppercase tracking-widest mb-2 inline-flex items-center gap-1">
+                    <Trophy size={12} /> Event &amp; Venue Chats
                   </p>
                 </div>
                 <div>
@@ -394,8 +400,8 @@ export default function FriendsPage() {
                       href={`/events/${ec.eventId}/chat`}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-[#221c16] active:bg-white transition"
                     >
-                      <div className="w-11 h-11 bg-accent border border-black rounded-2xl flex items-center justify-center text-xl shrink-0">
-                        {ec.emoji}
+                      <div className="w-11 h-11 bg-accent border border-black rounded-2xl flex items-center justify-center text-xl shrink-0 text-white">
+                        <ec.icon size={20} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[#15110d] dark:text-[#fdf6ec] font-semibold text-sm truncate">{ec.eventTitle}</p>
@@ -443,7 +449,7 @@ export default function FriendsPage() {
                           onClick={() => handleRespond(f.friendshipId, 'declined')}
                           className="text-xs border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-xl transition hover:border-gray-500"
                         >
-                          ✕
+                          <X size={12} />
                         </button>
                       </div>
                     </div>
@@ -482,7 +488,7 @@ export default function FriendsPage() {
 
             {pendingReceived.length === 0 && pendingSent.length === 0 && (
               <div className="flex flex-col items-center justify-center mt-20 text-center">
-                <div className="text-4xl mb-4">👋</div>
+                <Hand size={32} className="mb-4 text-gray-400" />
                 <p className="text-[#15110d] dark:text-[#fdf6ec] font-bold mb-1">No pending requests</p>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">Add friends from event attendee lists</p>
               </div>

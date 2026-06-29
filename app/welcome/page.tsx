@@ -3,19 +3,26 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/Logo'
+import {
+  Map as MapIcon, Calendar, Handshake, Rocket, Glasses, Search, Target, Check,
+  type LucideIcon,
+} from 'lucide-react'
 
+// NOTE: these INTERESTS strings are persisted to sessionStorage (rp_interests)
+// and read again at signup, so stripping the emoji prefix here also changes
+// the stored values for any new signups going forward. Flagged for review.
 const INTERESTS = [
-  '🎳 Bowling', '🎵 Music', '🍕 Food', '🎨 Art',
-  '⚽ Sports', '🎭 Comedy', '🎮 Gaming', '🥾 Hiking',
-  '🎬 Film', '📚 Books', '🌃 Nightlife', '☕ Coffee',
+  'Bowling', 'Music', 'Food', 'Art',
+  'Sports', 'Comedy', 'Gaming', 'Hiking',
+  'Film', 'Books', 'Nightlife', 'Coffee',
 ]
 
 const VIBES = [
-  { id: 'outgoing',  label: 'Outgoing',  emoji: '🚀', desc: 'First to arrive, last to leave' },
-  { id: 'chill',     label: 'Chill',     emoji: '😎', desc: 'Good vibes, no pressure' },
-  { id: 'curious',   label: 'Curious',   emoji: '🔍', desc: 'Here to explore and try things' },
-  { id: 'selective', label: 'Selective', emoji: '🎯', desc: 'Small groups, real connections' },
-]
+  { id: 'outgoing',  label: 'Outgoing',  icon: Rocket,  desc: 'First to arrive, last to leave' },
+  { id: 'chill',     label: 'Chill',     icon: Glasses, desc: 'Good vibes, no pressure' },
+  { id: 'curious',   label: 'Curious',   icon: Search,  desc: 'Here to explore and try things' },
+  { id: 'selective', label: 'Selective', icon: Target,  desc: 'Small groups, real connections' },
+] as { id: string; label: string; icon: LucideIcon; desc: string }[]
 
 type Step = 0 | 1 | 2
 
@@ -69,13 +76,13 @@ export default function WelcomePage() {
             </div>
 
             <div className="space-y-3 mb-8">
-              {[
-                { icon: '🗺️', text: 'See what\'s happening around you' },
-                { icon: '🎳', text: 'Join events or create your own' },
-                { icon: '🤝', text: 'Meet people worth knowing' },
-              ].map(item => (
+              {([
+                { icon: MapIcon,  text: 'See what\'s happening around you' },
+                { icon: Calendar, text: 'Join events or create your own' },
+                { icon: Handshake, text: 'Meet people worth knowing' },
+              ] as { icon: LucideIcon; text: string }[]).map(item => (
                 <div key={item.text} className="flex items-center gap-3">
-                  <span className="text-2xl">{item.icon}</span>
+                  <item.icon size={24} className="text-[#15110d] dark:text-[#fdf6ec]" />
                   <span className="text-gray-600 dark:text-gray-400 text-sm">{item.text}</span>
                 </div>
               ))}
@@ -146,7 +153,7 @@ export default function WelcomePage() {
                       : 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700 hover:border-gray-600'
                   }`}
                 >
-                  <span className="text-2xl">{v.emoji}</span>
+                  <v.icon size={24} className={selectedVibe === v.id ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'} />
                   <div>
                     <p className={`font-semibold text-sm ${selectedVibe === v.id ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
                       {v.label}
@@ -154,7 +161,7 @@ export default function WelcomePage() {
                     <p className="text-gray-500 dark:text-gray-400 text-xs">{v.desc}</p>
                   </div>
                   {selectedVibe === v.id && (
-                    <span className="ml-auto text-accent font-bold">✓</span>
+                    <Check size={16} className="ml-auto text-accent" strokeWidth={3} />
                   )}
                 </button>
               ))}

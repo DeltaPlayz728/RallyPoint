@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
+import { Handshake, CheckCircle2, XCircle, PartyPopper, Clock, MessageCircle, Bell, type LucideIcon } from 'lucide-react'
 
 type Notification = {
   id: string
@@ -16,14 +17,14 @@ type Notification = {
   created_at: string
 }
 
-const typeIcon: Record<string, string> = {
-  meetup_request: '🤝',
-  meetup_accepted: '✅',
-  meetup_declined: '❌',
-  event_join: '🎉',
-  event_reminder: '🕐',
-  group_chat: '💬',
-  default: '🔔',
+const typeIcon: Record<string, LucideIcon> = {
+  meetup_request: Handshake,
+  meetup_accepted: CheckCircle2,
+  meetup_declined: XCircle,
+  event_join: PartyPopper,
+  event_reminder: Clock,
+  group_chat: MessageCircle,
+  default: Bell,
 }
 
 export default function InboxPage() {
@@ -92,21 +93,21 @@ export default function InboxPage() {
 
         {notifications.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-4xl mb-3">🔔</div>
+            <Bell size={32} className="mx-auto mb-3 text-gray-400" />
             <p className="text-[#15110d] dark:text-[#fdf6ec] font-medium mb-1">All caught up</p>
             <p className="text-gray-500 dark:text-gray-400 text-sm">Notifications will appear here.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {notifications.map(n => {
-              const icon = typeIcon[n.type] ?? typeIcon.default
+              const Icon = typeIcon[n.type] ?? typeIcon.default
               const content = (
                 <div className={`flex items-start gap-3 p-4 rounded-xl border transition ${
                   n.read
                     ? 'bg-white dark:bg-[#221c16] border-gray-200 dark:border-gray-700'
                     : 'bg-white dark:bg-[#221c16] border-accent/40'
                 }`}>
-                  <span className="text-2xl shrink-0 mt-0.5">{icon}</span>
+                  <Icon size={20} className="shrink-0 mt-0.5 text-[#15110d] dark:text-[#fdf6ec]" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <p className={`text-sm font-medium leading-snug ${n.read ? 'text-gray-600 dark:text-gray-400' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>

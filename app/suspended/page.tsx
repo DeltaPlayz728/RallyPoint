@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Ban } from 'lucide-react'
 
 export default function SuspendedPage() {
   const router = useRouter()
@@ -13,7 +14,7 @@ export default function SuspendedPage() {
 
   return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] flex flex-col items-center justify-center px-6 text-center">
-      <div className="text-5xl mb-5">🚫</div>
+      <Ban size={44} className="mb-5 text-red-600" />
       <h1 className="text-2xl font-bold mb-2">Account Suspended</h1>
       <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm leading-relaxed mb-8">
         Your account has been temporarily suspended following reports from other users.

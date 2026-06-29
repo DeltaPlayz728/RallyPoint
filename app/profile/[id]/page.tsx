@@ -5,6 +5,11 @@ import { supabase } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
+import {
+  MapPin, Trophy, Check, Instagram, Music, Ghost, Lock, Handshake,
+  BatteryFull, BatteryMedium, BatteryLow,
+  type LucideIcon,
+} from 'lucide-react'
 
 type Profile = {
   id: string
@@ -81,16 +86,16 @@ export default function PublicProfilePage() {
   if (!profile) return null
 
   const vibeLabels: Record<string, string> = {
-    chill: '😌 Chill & Low-Key',
-    social: '🗣️ Social & Talkative',
-    active: '⚡ High Energy',
-    deep: '🧠 Deep Conversations',
+    chill: 'Chill & Low-Key',
+    social: 'Social & Talkative',
+    active: 'High Energy',
+    deep: 'Deep Conversations',
   }
 
-  const batteryLabels: Record<string, { icon: string; color: string }> = {
-    full:   { icon: '🔋', color: 'text-green-600' },
-    medium: { icon: '🪫', color: 'text-yellow-700' },
-    low:    { icon: '🔴', color: 'text-red-600' },
+  const batteryLabels: Record<string, { icon: LucideIcon; color: string }> = {
+    full:   { icon: BatteryFull,   color: 'text-green-600' },
+    medium: { icon: BatteryMedium, color: 'text-yellow-700' },
+    low:    { icon: BatteryLow,    color: 'text-red-600' },
   }
 
   const hasSocials = profile.instagram || profile.tiktok || profile.snapchat
@@ -129,9 +134,15 @@ export default function PublicProfilePage() {
               )}
             </div>
             {profile.username && <p className="text-gray-500 dark:text-gray-400 text-sm">@{profile.username}</p>}
-            {profile.city && <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">📍 {profile.city}</p>}
+            {profile.city && (
+              <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5 inline-flex items-center gap-1">
+                <MapPin size={12} /> {profile.city}
+              </p>
+            )}
             {profile.venue_name && (
-              <p className="text-accent text-xs mt-0.5">🏟️ {profile.venue_name}</p>
+              <p className="text-accent text-xs mt-0.5 inline-flex items-center gap-1">
+                <Trophy size={12} /> {profile.venue_name}
+              </p>
             )}
           </div>
         </div>
@@ -150,13 +161,17 @@ export default function PublicProfilePage() {
               </span>
             )}
             {profile.social_battery && (
-              <span className={`bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-xs px-2.5 py-1 rounded-full ${batteryLabels[profile.social_battery]?.color ?? 'text-gray-500 dark:text-gray-400'}`}>
-                {batteryLabels[profile.social_battery]?.icon} {profile.social_battery === 'full' ? 'Full battery' : profile.social_battery === 'medium' ? 'Medium battery' : 'Low battery'}
+              <span className={`bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${batteryLabels[profile.social_battery]?.color ?? 'text-gray-500 dark:text-gray-400'}`}>
+                {batteryLabels[profile.social_battery]?.icon && (() => {
+                  const BatteryIcon = batteryLabels[profile.social_battery].icon
+                  return <BatteryIcon size={12} />
+                })()}
+                {profile.social_battery === 'full' ? 'Full battery' : profile.social_battery === 'medium' ? 'Medium battery' : 'Low battery'}
               </span>
             )}
             {profile.available_this_week && (
-              <span className="bg-purple-500 border border-black text-white text-xs px-2.5 py-1 rounded-full">
-                ✅ Open this week
+              <span className="bg-purple-500 border border-black text-white text-xs px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                <Check size={12} /> Open this week
               </span>
             )}
           </div>
@@ -186,7 +201,7 @@ export default function PublicProfilePage() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-accent transition"
                   >
-                    <span className="text-lg">📸</span>
+                    <Instagram size={18} />
                     <span>@{profile.instagram}</span>
                     <span className="text-gray-500 dark:text-gray-400 text-xs ml-auto">Instagram →</span>
                   </a>
@@ -198,7 +213,7 @@ export default function PublicProfilePage() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-accent transition"
                   >
-                    <span className="text-lg">🎵</span>
+                    <Music size={18} />
                     <span>@{profile.tiktok}</span>
                     <span className="text-gray-500 dark:text-gray-400 text-xs ml-auto">TikTok →</span>
                   </a>
@@ -210,7 +225,7 @@ export default function PublicProfilePage() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 text-sm text-[#15110d] dark:text-[#fdf6ec] hover:text-accent transition"
                   >
-                    <span className="text-lg">👻</span>
+                    <Ghost size={18} />
                     <span>{profile.snapchat}</span>
                     <span className="text-gray-500 dark:text-gray-400 text-xs ml-auto">Snapchat →</span>
                   </a>
@@ -218,7 +233,9 @@ export default function PublicProfilePage() {
               </div>
             ) : (
               <div className="text-center py-3">
-                <p className="text-gray-500 dark:text-gray-400 text-sm">🔒 Attend an event together to see their socials.</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm inline-flex items-center gap-1">
+                  <Lock size={14} /> Attend an event together to see their socials.
+                </p>
               </div>
             )}
           </div>
@@ -227,9 +244,9 @@ export default function PublicProfilePage() {
         {/* Meetup request */}
         <Link
           href={`/meetups`}
-          className="block w-full text-center bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-lg transition"
+          className="flex items-center justify-center gap-1.5 w-full text-center bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-lg transition"
         >
-          🤝 Request a Meetup
+          <Handshake size={16} /> Request a Meetup
         </Link>
       </div>
     </div>

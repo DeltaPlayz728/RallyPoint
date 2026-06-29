@@ -40,23 +40,56 @@ interface MapViewProps {
 }
 
 // ─── Icon helpers ────────────────────────────────────────────────────────────
+//
+// Leaflet's L.divIcon() takes a raw HTML string — React components can't be
+// injected directly into it. lucide-static (which ships pre-rendered SVG
+// markup) isn't a project dependency, so instead we hand-build small inline
+// <svg> strings using lucide-react's own path data (copied from its source,
+// same viewBox/stroke conventions) for each place type. This keeps the map
+// pins visually consistent with the rest of the app's lucide iconography
+// without adding a new dependency or emoji.
 
-function getVenueEmoji(types: string[]): string {
-  if (types.includes('bowling_alley'))  return '🎳'
-  if (types.includes('night_club'))     return '🎵'
-  if (types.includes('bar'))            return '🍺'
-  if (types.includes('cafe'))           return '☕'
-  if (types.includes('park'))           return '🌳'
-  if (types.includes('gym'))            return '💪'
-  if (types.includes('movie_theater'))  return '🎬'
-  if (types.includes('amusement_park')) return '🎡'
-  if (types.includes('stadium'))        return '🏟️'
-  if (types.includes('restaurant'))     return '🍽️'
-  return '📍'
+const LUCIDE_SVG_OPEN = (size: number) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">`
+
+const VENUE_ICON_PATHS: Record<string, string> = {
+  // Music (night_club)
+  music: `<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>`,
+  // Beer (bar)
+  beer: `<path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 2 11 2s2 1.5 3 1.5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"/><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>`,
+  // Coffee (cafe)
+  coffee: `<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>`,
+  // Trees (park)
+  trees: `<path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/>`,
+  // Dumbbell (gym)
+  dumbbell: `<path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/>`,
+  // Film (movie_theater)
+  film: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>`,
+  // FerrisWheel (amusement_park)
+  ferrisWheel: `<circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="m6.8 15-3.5 2"/><path d="m20.7 7-3.5 2"/><path d="M6.8 9 3.3 7"/><path d="m20.7 17-3.5-2"/><path d="m9 22 3-8 3 8"/><path d="M8 22h8"/><path d="M18 18.7a9 9 0 1 0-12 0"/>`,
+  // Utensils (restaurant)
+  utensils: `<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>`,
+  // MapPin (bowling_alley, stadium, default)
+  mapPin: `<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>`,
+}
+
+function getVenueIconSvg(types: string[], size = 18): string {
+  let key = 'mapPin'
+  if (types.includes('bowling_alley'))  key = 'mapPin'
+  else if (types.includes('night_club')) key = 'music'
+  else if (types.includes('bar'))        key = 'beer'
+  else if (types.includes('cafe'))       key = 'coffee'
+  else if (types.includes('park'))       key = 'trees'
+  else if (types.includes('gym'))        key = 'dumbbell'
+  else if (types.includes('movie_theater'))  key = 'film'
+  else if (types.includes('amusement_park')) key = 'ferrisWheel'
+  else if (types.includes('stadium'))    key = 'mapPin'
+  else if (types.includes('restaurant')) key = 'utensils'
+  return `${LUCIDE_SVG_OPEN(size)}${VENUE_ICON_PATHS[key]}</svg>`
 }
 
 function createVenueIcon(types: string[], selected: boolean) {
-  const emoji = getVenueEmoji(types)
+  const iconSvg = getVenueIconSvg(types, 18)
   const border = selected ? '#f97316' : '#374151'
   const bg     = selected ? '#1c0a00' : '#111827'
   const shadow = selected
@@ -74,11 +107,11 @@ function createVenueIcon(types: string[], selected: boolean) {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        color: #f3f4f6;
         box-shadow: ${shadow};
         transition: border-color 0.2s, box-shadow 0.2s;
         cursor: pointer;
-      ">${emoji}</div>
+      ">${iconSvg}</div>
     `,
     iconSize: [38, 38],
     iconAnchor: [19, 19],

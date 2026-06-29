@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event
 
   try {
-    // ✅ Cryptographic signature check — rejects any request not from Stripe
+    // Cryptographic signature check — rejects any request not from Stripe
     event = stripe.webhooks.constructEvent(
       body,
       sig,

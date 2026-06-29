@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { moderateEvent } from '@/lib/contentModeration'
 import Logo from '@/components/Logo'
+import { Smile, Users, Check } from 'lucide-react'
 
 const PRICE_MAP: Record<string, number> = {
   small: 10,
@@ -150,7 +151,7 @@ function CreateEventForm() {
                 : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
-            😊 Casual Meetup
+            <span className="inline-flex items-center gap-1.5"><Smile size={16} className="shrink-0" /> Casual Meetup</span>
             <div className="text-xs font-normal opacity-75 mt-0.5">Free · Spontaneous</div>
           </button>
           <button
@@ -162,7 +163,7 @@ function CreateEventForm() {
                 : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
-            🎳 Social Event
+            <span className="inline-flex items-center gap-1.5"><Users size={16} className="shrink-0" /> Social Event</span>
             <div className="text-xs font-normal opacity-75 mt-0.5">Coordinated · Paid</div>
           </button>
         </div>
@@ -269,7 +270,7 @@ function CreateEventForm() {
 
           {type === 'casual' && (
             <div className="bg-white dark:bg-[#221c16] rounded-lg px-4 py-3 text-sm text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700">
-              ✅ Casual meetups are always <span className="text-[#15110d] dark:text-[#fdf6ec] font-medium">free</span> for everyone.
+              <span className="inline-flex items-center gap-1.5"><Check size={14} className="shrink-0 text-green-600" /> Casual meetups are always <span className="text-[#15110d] dark:text-[#fdf6ec] font-medium">free</span> for everyone.</span>
             </div>
           )}
 

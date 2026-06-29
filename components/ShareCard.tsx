@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { MapPin, Calendar } from 'lucide-react'
 
 interface Props {
   eventTitle: string
@@ -24,7 +25,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'I showed up. 🙌',
+          title: 'I showed up.',
           text: `Just attended "${eventTitle}" on RallyPoint. rally-point.app`,
         })
         setShared(true)
@@ -43,7 +44,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
       {/* Instructions */}
       <p className="text-gray-400 text-xs mb-4 text-center">
         {shared
-          ? '✅ Nice! Screenshot the card below to post your story'
+          ? 'Nice! Screenshot the card below to post your story'
           : 'Share your experience with your friends'}
       </p>
 
@@ -79,7 +80,6 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
 
           {/* Headline */}
           <div className="mb-6">
-            <p className="text-5xl mb-3">🙌</p>
             <h1 className="text-3xl font-black text-white leading-tight">
               I showed<br />up.
             </h1>
@@ -90,10 +90,10 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
             <p className="text-white font-bold text-base leading-snug mb-2">{eventTitle}</p>
             <div className="flex flex-col gap-1">
               <p className="text-gray-400 text-xs flex items-center gap-1.5">
-                <span>📍</span>{eventLocation}
+                <MapPin size={12} />{eventLocation}
               </p>
               <p className="text-gray-400 text-xs flex items-center gap-1.5">
-                <span>📅</span>{formatShareDate(eventDate)}
+                <Calendar size={12} />{formatShareDate(eventDate)}
               </p>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function ShareCard({ eventTitle, eventLocation, eventDate, onClos
           </button>
         ) : (
           <div className="w-full bg-gray-900 border border-gray-700 text-gray-300 font-medium py-4 rounded-2xl text-sm text-center">
-            📸 Hold the card above to save it
+            Hold the card above to save it
           </div>
         )}
         <button

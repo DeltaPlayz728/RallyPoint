@@ -8,6 +8,7 @@ import FriendButton from '@/components/FriendButton'
 import RatingModal from '@/components/RatingModal'
 import ShareCard from '@/components/ShareCard'
 import Logo from '@/components/Logo'
+import { ChevronLeft, Check, Sparkles, MapPin, Clock, Users, MessageCircle, Send } from 'lucide-react'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -397,7 +398,7 @@ export default function EventDetailPage() {
           onClick={() => router.back()}
           className="absolute top-4 left-4 w-9 h-9 bg-white/70 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white border border-gray-300 dark:border-gray-700 transition"
         >
-          ←
+          <ChevronLeft size={18} />
         </button>
 
         {/* Logo */}
@@ -408,7 +409,7 @@ export default function EventDetailPage() {
         {/* Payment banners */}
         {paymentStatus === 'success' && (
           <div className="mb-4 bg-green-100 border border-green-300 text-green-800 text-sm px-4 py-2.5 rounded-xl flex items-center gap-2">
-            ✅ Payment successful — you're in!
+            <Check size={16} className="shrink-0" /> Payment successful — you're in!
           </div>
         )}
         {paymentStatus === 'cancelled' && (
@@ -424,11 +425,11 @@ export default function EventDetailPage() {
               ? 'bg-purple-500 text-white border-black'
               : 'bg-accent text-white border-black'
           }`}>
-            {isCasual ? '😊 Casual Meetup' : '🎳 Social Event'}
+            {isCasual ? 'Casual Meetup' : 'Social Event'}
           </span>
           {event.is_suggested && (
-            <span className="ml-2 text-xs px-3 py-1.5 rounded-full font-semibold border bg-orange-100 text-accent border-orange-300">
-              ✨ Suggested by RallyPoint
+            <span className="ml-2 text-xs px-3 py-1.5 rounded-full font-semibold border bg-orange-100 text-accent border-orange-300 inline-flex items-center gap-1">
+              <Sparkles size={12} className="shrink-0" /> Suggested by RallyPoint
             </span>
           )}
         </div>
@@ -455,7 +456,7 @@ export default function EventDetailPage() {
       <div className="px-4 py-5 border-b border-gray-300 dark:border-gray-700 space-y-3.5">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-base shrink-0">
-            📍
+            <MapPin size={16} />
           </div>
           <div>
             <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm font-medium">{event.location}</p>
@@ -465,14 +466,14 @@ export default function EventDetailPage() {
 
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-base shrink-0">
-            🕐
+            <Clock size={16} />
           </div>
           <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm">{formatDate(event.starts_at)}</p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-base shrink-0">
-            👥
+            <Users size={16} />
           </div>
           <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm">
             {attendees.length} going
@@ -548,7 +549,7 @@ export default function EventDetailPage() {
                       {requestStatus === 'pending' ? (
                         <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full border border-yellow-300">Meetup sent</span>
                       ) : requestStatus === 'accepted' ? (
-                        <span className="text-xs text-white bg-purple-500 px-2 py-1 rounded-full border border-black">✓ Met</span>
+                        <span className="text-xs text-white bg-purple-500 px-2 py-1 rounded-full border border-black inline-flex items-center gap-1"><Check size={11} className="shrink-0" /> Met</span>
                       ) : requestStatus !== 'declined' ? (
                         <button
                           onClick={() => setRequestModal({ userId: a.user_id, name })}
@@ -578,7 +579,7 @@ export default function EventDetailPage() {
               href={`/events/${event.id}/chat`}
               className="flex items-center justify-center gap-1.5 px-4 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec] rounded-2xl transition text-sm font-medium"
             >
-              💬
+              <MessageCircle size={18} />
             </Link>
             <button
               onClick={() => setShowCancelConfirm(true)}
@@ -594,14 +595,14 @@ export default function EventDetailPage() {
               href={`/events/${event.id}/chat`}
               className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec] font-semibold py-3.5 rounded-2xl transition text-sm"
             >
-              💬 Group Chat
+              <MessageCircle size={16} className="shrink-0" /> Group Chat
             </Link>
             <button
               onClick={() => setShowShare(true)}
               className="px-4 border border-gray-300 dark:border-gray-700 hover:border-accent text-gray-500 dark:text-gray-400 hover:text-accent rounded-2xl transition text-lg"
               title="Share this event"
             >
-              📤
+              <Send size={18} />
             </button>
             <button
               onClick={handleLeave}

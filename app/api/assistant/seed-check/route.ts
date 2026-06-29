@@ -38,7 +38,7 @@ function nextSaturdayEvening(): Date {
   return d
 }
 
-// Score a template against the user's interests (e.g. "🎮 Gaming", "⚽ Sports") —
+// Score a template against the user's interests (e.g. "Gaming", "Sports") —
 // strips the emoji prefix, lowercases, and checks for word-level overlap with the
 // template's title/description. Best-effort personalization, not exact matching.
 function interestScore(template: { title: string; description: string }, interests: string[]): number {
@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
   await supabaseAdmin.from('dm_messages').insert({
     thread_id: thread.id,
     sender_id: bot.id,
-    content: `Hey — it's pretty quiet around ${city} right now, so I went ahead and set up "${event.title}"${venueLine} for ${when}. It's live now — check it out in Events, invite people, or tweak the details. You're not auto-joined, so hop on if you're in. 🎉`,
+    content: `Hey — it's pretty quiet around ${city} right now, so I went ahead and set up "${event.title}"${venueLine} for ${when}. It's live now — check it out in Events, invite people, or tweak the details. You're not auto-joined, so hop on if you're in.`,
   })
 
   // ── Propose a couple of alternate ideas, leaning on the user's interests ───

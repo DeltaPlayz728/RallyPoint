@@ -12,6 +12,7 @@ import {
   effectiveTier,
   IS_PLAYTEST,
 } from '@/lib/subscription'
+import { AlertTriangle, Check } from 'lucide-react'
 
 const TIER_BLURB: Record<SubscriptionTier, string> = {
   free: 'Everything you need to find people and events near you. This is the real app — no paywalls on the core experience.',
@@ -100,10 +101,11 @@ export default function UpgradePage() {
         </p>
 
         {IS_PLAYTEST && (
-          <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-sm rounded-xl p-3 mb-4">
-            ⚠️ <strong>Playtest build.</strong> Pricing below is a preview — nothing
+          <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-sm rounded-xl p-3 mb-4 flex items-start gap-1.5">
+            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+            <span><strong>Playtest build.</strong> Pricing below is a preview — nothing
             is purchasable yet and no real money will be charged. Subscriptions
-            turn on at full launch.
+            turn on at full launch.</span>
           </div>
         )}
 
@@ -154,7 +156,7 @@ export default function UpgradePage() {
                 <ul className="text-sm text-[#15110d] dark:text-[#fdf6ec] space-y-1 mb-3">
                   {TIER_FEATURES[tier].map((f) => (
                     <li key={f} className="flex items-start gap-1.5">
-                      <span className="text-accent mt-0.5">✓</span>
+                      <Check size={14} className="text-accent mt-0.5 shrink-0" />
                       <span>{f}</span>
                     </li>
                   ))}

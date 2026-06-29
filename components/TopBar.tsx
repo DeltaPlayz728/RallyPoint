@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Bell } from 'lucide-react'
 import Logo from './Logo'
 
 interface TopBarProps {
@@ -38,7 +39,7 @@ export default function TopBar({ title }: TopBarProps) {
 
       {/* Inbox bell */}
       <Link href="/inbox" className="relative p-1">
-        <span className="text-xl">🔔</span>
+        <Bell size={20} className="text-[#15110d] dark:text-[#fdf6ec]" />
         {unread && (
           <span
             className="absolute top-0.5 right-0.5 w-2.5 h-2.5 rounded-full border-2 border-black"
