@@ -4,9 +4,8 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import TopBar from '@/components/TopBar'
 import { triggerSeedCheck } from '@/lib/seedCheck'
-import { Building2, MapPin, Clock, Users } from 'lucide-react'
+import { Bell, Building2, MapPin, Clock, Users } from 'lucide-react'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -59,21 +58,19 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
 
   return (
     <Link href={`/events/${event.id}`}>
-      <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden active:scale-[0.985] transition-transform duration-100">
-        <div className="h-0.5 w-full bg-accent" />
+      <div className="bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 rounded-3xl overflow-hidden active:scale-[0.985] transition-transform duration-100 cursor-pointer">
+        <div className="h-1 w-full bg-accent" />
         <div className="p-4">
-          <div className="flex items-start justify-between mb-2">
+          <div className="flex items-start justify-between mb-3">
             <div className="flex-1 pr-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                {isVenue && (
-                  <span className="text-[10px] bg-accent text-white border border-black px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1">
-                    <Building2 size={11} className="shrink-0" /> {event.organizer?.venue_name}
-                  </span>
-                )}
-              </div>
+              {isVenue && (
+                <span className="text-[10px] uppercase tracking-wide bg-accent text-white border-2 border-black px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 mb-2">
+                  <Building2 size={11} className="shrink-0" /> {event.organizer?.venue_name}
+                </span>
+              )}
               <h3 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-[15px] leading-snug">{event.title}</h3>
             </div>
-            <span className={`text-sm font-bold shrink-0 ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
+            <span className={`text-base font-black shrink-0 ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
             </span>
           </div>
@@ -129,11 +126,20 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true)
   const [slide, setSlide] = useState<Slide>('social')
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
+  const [unread, setUnread] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
+
+      // Notification bell unread state — same check used in TopBar/Feed
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
+      setUnread((count ?? 0) > 0)
 
       // If this area looks empty, let the assistant propose a seed event (at most
       // once/day across Map/Feed/Events — see lib/seedCheck.ts).
@@ -180,12 +186,41 @@ export default function EventsPage() {
   const displayed = slide === 'social' ? socialEvents : nearMeEvents
 
   return (
-    <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
-      <TopBar title="Events" />
+    <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
 
-      {/* Slide tabs */}
-      <div className="px-4 pt-3 pb-3 border-b border-gray-300 dark:border-gray-700 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
-        <div className="flex gap-2">
+      {/* Header */}
+      <div className="relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
+        {/* Decorative blobs — matches the Feed header treatment */}
+        <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-accent pointer-events-none" aria-hidden="true" />
+        <div className="absolute top-6 -right-6 w-16 h-16 rounded-full bg-purple-500 pointer-events-none" aria-hidden="true" />
+
+        <div className="relative flex items-center justify-between mb-4">
+          <div>
+            <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">
+              Find a
+            </p>
+            <h1 className="text-2xl font-black text-[#15110d] dark:text-[#fdf6ec] mt-1 leading-tight">
+              <span className="inline-block -rotate-2">Crowd</span>{' '}
+              <span className="inline-block bg-accent text-white px-2 py-0.5 rounded-lg rotate-2 border-2 border-black">
+                nearby
+              </span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/inbox"
+              className="relative w-11 h-11 rounded-full bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 flex items-center justify-center active:scale-95 transition"
+            >
+              <Bell size={18} className="text-[#15110d] dark:text-[#fdf6ec]" />
+              {unread && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white dark:border-[#221c16]" />
+              )}
+            </Link>
+          </div>
+        </div>
+
+        {/* Slide tabs */}
+        <div className="relative flex gap-2">
           {([
             { id: 'social', label: 'Social', Icon: Users },
             { id: 'nearme', label: 'Near me', Icon: MapPin },
@@ -193,13 +228,13 @@ export default function EventsPage() {
             <button
               key={s.id}
               onClick={() => setSlide(s.id)}
-              className={`px-5 py-2 rounded-full text-sm font-semibold border transition inline-flex items-center gap-1.5 ${
+              className={`relative shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border-2 border-black transition inline-flex items-center gap-1.5 ${
                 slide === s.id
-                  ? 'bg-accent border-accent text-white'
-                  : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
+                  ? 'bg-accent text-white'
+                  : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec]'
               }`}
             >
-              <s.Icon size={14} className="shrink-0" />
+              <s.Icon size={13} className="shrink-0" />
               {s.label}
             </button>
           ))}
@@ -210,7 +245,7 @@ export default function EventsPage() {
         {loading ? (
           <div className="space-y-3">
             {[0, 1, 2].map(i => (
-              <div key={i} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 space-y-3">
+              <div key={i} className="bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 rounded-3xl p-4 space-y-3">
                 <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                 <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                 <div className="h-px bg-gray-200 dark:bg-gray-700" />
@@ -220,8 +255,10 @@ export default function EventsPage() {
           </div>
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <Users size={40} className="text-gray-400 mb-4" />
-            <p className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">No events yet</p>
+            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 flex items-center justify-center mb-4">
+              <Users size={28} className="text-gray-400" />
+            </div>
+            <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">No events yet</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
               {slide === 'nearme' ? 'Nothing nearby right now — check back soon.' : 'Venues and organizers will show up here.'}
             </p>
