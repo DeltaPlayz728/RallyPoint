@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
+import { Bell, Lock, MapPin, Clock, Coffee, Users, Search, Sparkles } from 'lucide-react'
 
 // Avatar colour palette — used for attendee dot row
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
@@ -25,7 +26,7 @@ type Event = {
 type Filter = 'foryou' | 'all' | 'today' | 'tomorrow' | 'week'
 
 const FILTERS: { id: Filter; label: string }[] = [
-  { id: 'foryou',   label: '⚡ For You' },
+  { id: 'foryou',   label: 'For You'   },
   { id: 'all',      label: 'All'       },
   { id: 'today',    label: 'Today'     },
   { id: 'tomorrow', label: 'Tomorrow'  },
@@ -115,12 +116,13 @@ function EventCard({ event }: { event: Event }) {
         <div className="p-4">
           {/* Badges row */}
           <div className="flex items-center justify-between mb-3">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
+            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border flex items-center gap-1 ${
               isCasual
                 ? 'bg-purple-500 text-white border-black'
                 : 'bg-accent text-white border-black'
             }`}>
-              {isCasual ? '😊 Casual' : '🎳 Social'}
+              {isCasual ? <Coffee size={12} strokeWidth={2.5} /> : <Users size={12} strokeWidth={2.5} />}
+              {isCasual ? 'Casual' : 'Social'}
             </span>
             <span className={`text-sm font-bold ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
@@ -146,11 +148,11 @@ function EventCard({ event }: { event: Event }) {
           <div className="flex items-end justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
               <span className="text-gray-500 dark:text-gray-400 text-xs flex items-center gap-1.5">
-                <span className="shrink-0">📍</span>
+                <MapPin size={13} className="shrink-0" />
                 <span className="truncate">{event.location}</span>
               </span>
               <span className="text-gray-500 dark:text-gray-400 text-xs flex items-center gap-1.5">
-                <span className="shrink-0">🕐</span>
+                <Clock size={13} className="shrink-0" />
                 <span>{formatDate(event.starts_at)}</span>
               </span>
             </div>
@@ -308,7 +310,7 @@ export default function FeedPage() {
       {/* Minor mode banner */}
       {isMinor && (
         <div className="bg-blue-100 dark:bg-blue-950 border-b border-blue-300 dark:border-blue-800 px-4 py-2.5 flex items-center gap-2">
-          <span className="text-blue-600 dark:text-blue-400 text-xs">🔒</span>
+          <Lock size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />
           <p className="text-blue-700 dark:text-blue-400 text-xs">You're browsing the under-18 feed — casual meetups only.</p>
         </div>
       )}
@@ -323,17 +325,14 @@ export default function FeedPage() {
             <h1 className="text-xl font-bold text-[#15110d] dark:text-[#fdf6ec] mt-0.5">What's the move</h1>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Link href="/inbox" className="relative p-1">
-              <span className="text-xl">🔔</span>
-              {unread && (
-                <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-black" />
-              )}
-            </Link>
             <Link
-              href="/events/create"
-              className="bg-accent hover:brightness-90 active:scale-95 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+              href="/inbox"
+              className="relative w-10 h-10 rounded-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center active:scale-95 transition"
             >
-              + Create
+              <Bell size={18} className="text-[#15110d] dark:text-[#fdf6ec]" />
+              {unread && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white dark:border-[#221c16]" />
+              )}
             </Link>
           </div>
         </div>
@@ -344,12 +343,13 @@ export default function FeedPage() {
             <button
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
+              className={`shrink-0 flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
                 activeFilter === f.id
                   ? 'bg-accent border-accent text-white'
                   : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-600'
               }`}
             >
+              {f.id === 'foryou' && <Sparkles size={12} strokeWidth={2.5} />}
               {f.label}
             </button>
           ))}
@@ -366,8 +366,10 @@ export default function FeedPage() {
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#221c16] flex items-center justify-center text-3xl mb-4">
-              {activeFilter === 'all' ? '📍' : '🔍'}
+            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 flex items-center justify-center mb-4">
+              {activeFilter === 'all'
+                ? <MapPin size={28} className="text-gray-400" />
+                : <Search size={28} className="text-gray-400" />}
             </div>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">
               {activeFilter === 'all' ? 'No events yet' : `Nothing ${activeFilter === 'today' ? 'today' : activeFilter === 'tomorrow' ? 'tomorrow' : 'this week'}`}
