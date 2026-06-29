@@ -64,6 +64,7 @@ type JoinedCommunityRow = {
   id: string
   name: string
   bannerColor: string
+  iconUrl: string | null
 }
 
 type View = 'chat' | 'requests'
@@ -145,7 +146,7 @@ export default function FriendsPage() {
       // Load communities the user has joined — shown as a row above the search bar
       const { data: membershipData } = await supabase
         .from('community_members')
-        .select('community_id, communities(id, name, banner_color)')
+        .select('community_id, communities(id, name, banner_color, icon_url)')
         .eq('user_id', user.id)
 
       const communityRows: JoinedCommunityRow[] = (membershipData ?? [])
@@ -155,6 +156,7 @@ export default function FriendsPage() {
           id: c.id,
           name: c.name,
           bannerColor: c.banner_color ?? '#f97316',
+          iconUrl: c.icon_url ?? null,
         }))
       setJoinedCommunities(communityRows)
 
@@ -217,10 +219,14 @@ export default function FriendsPage() {
             {joinedCommunities.map((c) => (
               <Link key={c.id} href={`/communities/${c.id}`} className="flex flex-col items-center gap-1.5 shrink-0">
                 <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center font-black text-white text-lg shrink-0 border-2 border-white dark:border-[#221c16] shadow-sm"
+                  className="w-14 h-14 rounded-full flex items-center justify-center font-black text-white text-lg shrink-0 border-2 border-white dark:border-[#221c16] shadow-sm overflow-hidden"
                   style={{ background: c.bannerColor }}
                 >
-                  {c.name[0]?.toUpperCase() ?? '?'}
+                  {c.iconUrl ? (
+                    <img src={c.iconUrl} alt={c.name} className="w-full h-full object-cover" />
+                  ) : (
+                    c.name[0]?.toUpperCase() ?? '?'
+                  )}
                 </div>
                 <span className="text-[11px] text-gray-500 dark:text-gray-400 max-w-[60px] truncate text-center">
                   {c.name}

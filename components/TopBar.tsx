@@ -40,7 +40,10 @@ export default function TopBar({ title }: TopBarProps) {
       <Link href="/inbox" className="relative p-1">
         <span className="text-xl">🔔</span>
         {unread && (
-          <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-black" />
+          <span
+            className="absolute top-0.5 right-0.5 w-2.5 h-2.5 rounded-full border-2 border-black"
+            style={{ backgroundColor: 'var(--accent, #f97316)' }}
+          />
         )}
       </Link>
     </div>

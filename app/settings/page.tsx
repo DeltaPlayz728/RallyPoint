@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
-import { useTheme } from '@/components/ThemeProvider'
+import { useTheme, ACCENT_PRESETS } from '@/components/ThemeProvider'
 import { effectiveTier, TIER_LABELS, nextTier, SubscriptionTier, IS_PLAYTEST } from '@/lib/subscription'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme, accent, setAccent } = useTheme()
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const [tier, setTier] = useState<SubscriptionTier>('free')
@@ -103,6 +103,32 @@ export default function SettingsPage() {
                 }`}
               />
             </button>
+          </div>
+
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4 mt-3">
+            <p className="font-medium text-[#15110d] dark:text-[#fdf6ec] mb-0.5">Accent color</p>
+            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
+              Pick the color that highlights buttons, the nav bar, and other accents across the app.
+            </p>
+            <div className="flex gap-3">
+              {ACCENT_PRESETS.map(preset => (
+                <button
+                  key={preset.id}
+                  onClick={() => setAccent(preset.id)}
+                  aria-label={preset.label}
+                  title={preset.label}
+                  className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center transition"
+                  style={{
+                    backgroundColor: preset.hex,
+                    boxShadow: accent === preset.id ? `0 0 0 2px white, 0 0 0 4px ${preset.hex}` : 'none',
+                  }}
+                >
+                  {accent === preset.id && (
+                    <span className="text-white text-sm">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 

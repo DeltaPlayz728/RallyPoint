@@ -12,6 +12,7 @@ type CommunityRow = {
   name: string
   description: string | null
   banner_color: string
+  icon_url: string | null
   member_count: number
   isMember: boolean
 }
@@ -36,7 +37,7 @@ export default function CommunitiesPage() {
 
       const { data: rows } = await supabase
         .from('communities')
-        .select('id, name, description, banner_color, community_members(user_id)')
+        .select('id, name, description, banner_color, icon_url, community_members(user_id)')
         .order('created_at', { ascending: false })
 
       const mapped: CommunityRow[] = (rows ?? []).map((c: any) => ({
@@ -44,6 +45,7 @@ export default function CommunitiesPage() {
         name: c.name,
         description: c.description,
         banner_color: c.banner_color,
+        icon_url: c.icon_url ?? null,
         member_count: c.community_members?.length ?? 0,
         isMember: !!c.community_members?.some((m: any) => m.user_id === user.id),
       }))
@@ -105,8 +107,19 @@ export default function CommunitiesPage() {
                 href={`/communities/${c.id}`}
                 className="block bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden"
               >
-                <div className="h-12" style={{ background: c.banner_color }} />
-                <div className="p-4">
+                <div className="h-12 relative" style={{ background: c.banner_color }}>
+                  <div
+                    className="absolute left-3 -bottom-4 w-9 h-9 rounded-full border-2 border-white dark:border-[#221c16] overflow-hidden flex items-center justify-center text-white text-sm font-bold shrink-0"
+                    style={{ backgroundColor: c.banner_color }}
+                  >
+                    {c.icon_url ? (
+                      <img src={c.icon_url} alt={c.name} className="w-full h-full object-cover" />
+                    ) : (
+                      c.name.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                </div>
+                <div className="p-4 pl-14">
                   <div className="flex items-center justify-between mb-1">
                     <h2 className="font-semibold text-[#15110d] dark:text-[#fdf6ec]">{c.name}</h2>
                     {c.isMember && (

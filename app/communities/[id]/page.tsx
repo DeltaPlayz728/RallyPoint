@@ -12,7 +12,12 @@ type Community = {
   rules: string | null
   banner_color: string
   banner_url: string | null
+  icon_url: string | null
 }
+
+// Preset accent colors owners can pick for their community — same set as the
+// personal app-wide accent picker in Settings, applied scoped to this page only.
+const COMMUNITY_ACCENT_PRESETS = ['#f97316', '#14b8a6', '#a855f7', '#ec4899', '#3b82f6', '#22c55e']
 
 type Message = {
   id: string
@@ -58,6 +63,7 @@ export default function CommunityDetailPage() {
   const communityId = params.id as string
   const bottomRef = useRef<HTMLDivElement>(null)
   const bannerInputRef = useRef<HTMLInputElement>(null)
+  const iconInputRef = useRef<HTMLInputElement>(null)
 
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
@@ -78,6 +84,8 @@ export default function CommunityDetailPage() {
   const [announcementDraft, setAnnouncementDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [uploadingBanner, setUploadingBanner] = useState(false)
+  const [uploadingIcon, setUploadingIcon] = useState(false)
+  const [savingAccent, setSavingAccent] = useState(false)
 
   const [nameDraft, setNameDraft] = useState('')
   const [descDraft, setDescDraft] = useState('')
@@ -92,7 +100,7 @@ export default function CommunityDetailPage() {
 
       const { data: c } = await supabase
         .from('communities')
-        .select('id, owner_id, name, description, rules, banner_color, banner_url')
+        .select('id, owner_id, name, description, rules, banner_color, banner_url, icon_url')
         .eq('id', communityId)
         .maybeSingle()
 
@@ -260,6 +268,38 @@ export default function CommunityDetailPage() {
     setUploadingBanner(false)
   }
 
+  const handleIconPick = () => iconInputRef.current?.click()
+
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !community) return
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB.'); return }
+    setUploadingIcon(true)
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${community.id}.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('community-icons')
+      .upload(path, file, { upsert: true, contentType: file.type })
+
+    if (!uploadError) {
+      const { data: pub } = supabase.storage.from('community-icons').getPublicUrl(path)
+      const iconUrl = `${pub.publicUrl}?t=${Date.now()}`
+      await supabase.from('communities').update({ icon_url: iconUrl }).eq('id', community.id)
+      setCommunity({ ...community, icon_url: iconUrl })
+    } else {
+      alert('Could not upload community picture. Please try again.')
+    }
+    setUploadingIcon(false)
+  }
+
+  const handleSetAccent = async (hex: string) => {
+    if (!community || !isOwner) return
+    setSavingAccent(true)
+    const { error } = await supabase.from('communities').update({ banner_color: hex }).eq('id', community.id)
+    if (!error) setCommunity({ ...community, banner_color: hex })
+    setSavingAccent(false)
+  }
+
   const handleSaveInfo = async () => {
     if (!community || !isOwner) return
     setSavingInfo(true)
@@ -401,9 +441,37 @@ export default function CommunityDetailPage() {
             </button>
           </>
         )}
-        <div className="px-4 pb-2.5">
-          <h1 className="text-lg font-semibold text-white drop-shadow">{community.name}</h1>
-          <p className="text-[11px] text-white/90 drop-shadow">{members.length} member{members.length === 1 ? '' : 's'}</p>
+        <div className="px-4 pb-2.5 flex items-center gap-2.5">
+          {/* Group icon — Discord/WhatsApp-style circular avatar overlapping the banner */}
+          <div className="relative shrink-0">
+            <div
+              className="w-11 h-11 rounded-full border-2 border-white/80 overflow-hidden flex items-center justify-center text-white font-bold text-base shrink-0"
+              style={{ backgroundColor: community.banner_color }}
+            >
+              {community.icon_url ? (
+                <img src={community.icon_url} alt={community.name} className="w-full h-full object-cover" />
+              ) : (
+                community.name.charAt(0).toUpperCase()
+              )}
+            </div>
+            {isOwner && (
+              <>
+                <input ref={iconInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleIconUpload} />
+                <button
+                  onClick={handleIconPick}
+                  disabled={uploadingIcon}
+                  className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center text-white text-[10px]"
+                  title="Edit community picture"
+                >
+                  {uploadingIcon ? '…' : '📷'}
+                </button>
+              </>
+            )}
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-white drop-shadow">{community.name}</h1>
+            <p className="text-[11px] text-white/90 drop-shadow">{members.length} member{members.length === 1 ? '' : 's'}</p>
+          </div>
         </div>
       </div>
 
@@ -665,6 +733,30 @@ export default function CommunityDetailPage() {
                   >
                     {savingInfo ? 'Saving…' : 'Save changes'}
                   </button>
+                </div>
+
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Community theme</p>
+                <div className="bg-white dark:bg-[#221c16] rounded-2xl p-4 mb-5">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                    The accent color members see on this community's banner and icon.
+                  </p>
+                  <div className="flex gap-3">
+                    {COMMUNITY_ACCENT_PRESETS.map((hex) => (
+                      <button
+                        key={hex}
+                        onClick={() => handleSetAccent(hex)}
+                        disabled={savingAccent}
+                        aria-label={`Set accent ${hex}`}
+                        className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center transition disabled:opacity-60"
+                        style={{
+                          backgroundColor: hex,
+                          boxShadow: community.banner_color === hex ? '0 0 0 2px white, 0 0 0 4px ' + hex : 'none',
+                        }}
+                      >
+                        {community.banner_color === hex && <span className="text-white text-sm">✓</span>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </>
             )}

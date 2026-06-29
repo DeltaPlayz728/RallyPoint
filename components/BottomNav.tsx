@@ -30,12 +30,16 @@ export default function BottomNav() {
             const isCreateActive = pathname.startsWith(item.href)
             return (
               <Link key={item.href} href={item.href} className="flex flex-col items-center justify-self-center">
-                <span className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-0.5 transition border-2 ${
-                  isCreateActive ? 'border-orange-500' : 'border-transparent'
-                }`}>
+                <span
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center mb-0.5 transition border-2"
+                  style={{ borderColor: isCreateActive ? 'var(--accent, #f97316)' : 'transparent' }}
+                >
                   <Logo size={26} />
                 </span>
-                <span className={`text-xs transition ${isCreateActive ? 'text-orange-500' : 'text-gray-500'}`}>
+                <span
+                  className="text-xs transition text-gray-500"
+                  style={isCreateActive ? { color: 'var(--accent, #f97316)' } : undefined}
+                >
                   {item.label}
                 </span>
               </Link>
@@ -46,8 +50,9 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-self-center text-xs transition ${
-                isActive ? 'text-orange-500' : 'text-gray-500 hover:text-black dark:hover:text-white'
+                isActive ? '' : 'text-gray-500 hover:text-black dark:hover:text-white'
               }`}
+              style={isActive ? { color: 'var(--accent, #f97316)' } : undefined}
             >
               <span className="text-xl mb-0.5">{item.icon}</span>
               <span>{item.label}</span>
