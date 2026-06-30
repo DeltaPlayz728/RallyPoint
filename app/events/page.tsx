@@ -188,6 +188,15 @@ export default function EventsPage() {
   return (
     <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
 
+      {/* Background depth bubbles — opaque pastels, sit behind all content (cards
+          stay solid white on top), fixed + pointer-events-none so they never
+          cover or interfere with events. Kept sparse on purpose. */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute top-[22%] -left-16 w-40 h-40 rounded-full bg-[#f6d9bf] dark:bg-accent/10" />
+        <div className="absolute top-[56%] -right-12 w-32 h-32 rounded-full bg-[#cfeede] dark:bg-teal-500/10" />
+        <div className="absolute -bottom-12 left-[18%] w-44 h-44 rounded-full bg-[#dcd2ef] dark:bg-purple-500/10" />
+      </div>
+
       {/* Header */}
       <div className="relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
         {/* Decorative blobs — matches the Feed header treatment */}
@@ -241,7 +250,7 @@ export default function EventsPage() {
         </div>
       </div>
 
-      <div className="px-4 pt-4 max-w-lg mx-auto">
+      <div className="relative z-[1] px-4 pt-4 max-w-lg mx-auto">
         {loading ? (
           <div className="space-y-3">
             {[0, 1, 2].map(i => (
