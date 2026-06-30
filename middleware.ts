@@ -57,6 +57,12 @@ export async function middleware(request: NextRequest) {
   // what caused the "reverts to the old design" bug reported 2026-06-29.
   supabaseResponse.headers.set('Cache-Control', 'private, no-store, must-revalidate')
 
+  // Logged-in users opening the app at the root marketing page go straight to
+  // their home/event screen (the Feed) instead of the public landing page.
+  if (pathname === '/' && user) {
+    return NextResponse.redirect(new URL('/feed', request.url))
+  }
+
   // Public routes — no auth needed
   const publicRoutes = ['/auth/login', '/auth/signup', '/welcome', '/', '/onboarding', '/tos', '/privacy', '/suspended', '/early-access']
   if (publicRoutes.some(route => pathname.startsWith(route))) {

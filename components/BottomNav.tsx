@@ -11,7 +11,7 @@ type NavItem =
 
 const navItems: NavItem[] = [
   { href: '/map',           label: 'Map',     Icon: Map },
-  { href: '/events',        label: 'Events',  Icon: Calendar },
+  { href: '/feed',          label: 'Events',  Icon: Calendar },
   { href: '/events/create', label: 'Rally',   special: true },
   { href: '/friends',       label: 'Friends', Icon: Users },
   { href: '/profile',       label: 'Profile', Icon: User },

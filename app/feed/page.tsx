@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Lock, MapPin, Clock, Search } from 'lucide-react'
+import WhatsNewModal from '@/components/WhatsNewModal'
 
 // Avatar colour palette — used for attendee dot row
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
@@ -306,6 +307,18 @@ export default function FeedPage() {
   return (
     <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
 
+      {/* Background depth bubbles — opaque pastels, sit behind all content (cards
+          stay solid white on top), fixed + pointer-events-none so they never
+          cover or interfere with events. Kept sparse on purpose. */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute top-[22%] -left-16 w-40 h-40 rounded-full bg-[#f6d9bf] dark:bg-accent/10" />
+        <div className="absolute top-[56%] -right-12 w-32 h-32 rounded-full bg-[#cfeede] dark:bg-teal-500/10" />
+        <div className="absolute -bottom-12 left-[18%] w-44 h-44 rounded-full bg-[#dcd2ef] dark:bg-purple-500/10" />
+      </div>
+
+      {/* What's New — Steam-style update popup, shown once per release */}
+      <WhatsNewModal />
+
       {/* Minor mode banner */}
       {isMinor && (
         <div className="bg-blue-100 dark:bg-blue-950 border-b border-blue-300 dark:border-blue-800 px-4 py-2.5 flex items-center gap-2">
@@ -375,7 +388,7 @@ export default function FeedPage() {
       </div>
 
       {/* Content */}
-      <div className="px-4 pt-4 max-w-lg mx-auto">
+      <div className="relative z-[1] px-4 pt-4 max-w-lg mx-auto">
         {loading ? (
           <div className="space-y-3">
             <SkeletonCard />
