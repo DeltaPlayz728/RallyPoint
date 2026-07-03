@@ -26,6 +26,7 @@ function CreateEventForm() {
   const [startsAt, setStartsAt] = useState('')
   const [maxAttendees, setMaxAttendees] = useState('')
   const [sizebracket, setSizeBracket] = useState('small')
+  const [ageRestricted, setAgeRestricted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -106,6 +107,7 @@ function CreateEventForm() {
         starts_at: new Date(startsAt).toISOString(),
         max_attendees: max,
         price,
+        age_restricted: ageRestricted,
         lat,
         lng,
         status: (!modResult.allowed && modResult.action === 'hold') ? 'pending_review' : 'active',
@@ -238,6 +240,24 @@ function CreateEventForm() {
               className="w-full bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-accent"
               placeholder="Leave blank for unlimited"
             />
+          </div>
+
+          {/* 18+ toggle — flags the event as age-restricted (enforcement is off until AGE_GATING_ENABLED is flipped) */}
+          <div>
+            <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Age restriction</label>
+            <button
+              type="button"
+              onClick={() => setAgeRestricted(v => !v)}
+              className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border transition ${
+                ageRestricted
+                  ? 'bg-red-500 border-red-500 text-white'
+                  : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              <span className="font-medium">18+ only</span>
+              <span className="text-xs font-semibold">{ageRestricted ? 'ON' : 'OFF'}</span>
+            </button>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Flags this event as 18+. Age verification isn't enforced yet — this just marks it.</p>
           </div>
 
           {/* Social event pricing */}
