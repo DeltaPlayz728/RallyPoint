@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Building2, MapPin, Clock, Users } from 'lucide-react'
 import { boundingBox, EVENT_RADIUS_KM } from '@/lib/geo'
+import { AGE_GATING_ENABLED, canSeeAgeRestricted } from '@/lib/ageGating'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -22,6 +23,7 @@ type EventRow = {
   max_attendees: number | null
   price: number
   type: string
+  age_restricted: boolean
   attendee_count: number
   organizer: {
     full_name: string
@@ -67,6 +69,11 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
               {isVenue && (
                 <span className="text-[10px] uppercase tracking-wide bg-accent text-white border-2 border-black px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 mb-2">
                   <Building2 size={11} className="shrink-0" /> {event.organizer?.venue_name}
+                </span>
+              )}
+              {event.age_restricted && (
+                <span className="text-[10px] uppercase tracking-wide bg-red-500 text-white border-2 border-black px-2 py-0.5 rounded-full font-bold inline-block mb-1">
+                  18+
                 </span>
               )}
               <h3 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-[15px] leading-snug">{event.title}</h3>
@@ -146,6 +153,17 @@ export default function EventsPage() {
       // once/day across Map/Feed/Events — see lib/seedCheck.ts).
       triggerSeedCheck(user.id)
 
+      // 18+ gating — scaffold; only queries the flag when AGE_GATING_ENABLED is on (lib/ageGating.ts)
+      let restrictAge = false
+      if (AGE_GATING_ENABLED) {
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('age_verified, is_minor')
+          .eq('id', user.id)
+          .maybeSingle()
+        restrictAge = !canSeeAgeRestricted(prof as any)
+      }
+
       // Social/paid events reach a wider radius than casual hangouts (see lib/geo.ts).
       let query = supabase
         .from('events')
@@ -157,6 +175,7 @@ export default function EventsPage() {
         .eq('status', 'active')
         .eq('type', 'social')
         .gte('starts_at', new Date().toISOString())
+      if (restrictAge) query = query.eq('age_restricted', false)
       if (pos) {
         const b = boundingBox(pos.lat, pos.lng, EVENT_RADIUS_KM)
         query = query

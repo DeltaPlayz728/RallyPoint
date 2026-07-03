@@ -7,6 +7,7 @@ import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Lock, MapPin, Clock, Search } from 'lucide-react'
 import WhatsNewModal from '@/components/WhatsNewModal'
 import { boundingBox, CASUAL_RADIUS_KM } from '@/lib/geo'
+import { canSeeAgeRestricted } from '@/lib/ageGating'
 
 // Avatar colour palette — used for attendee dot row
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
@@ -22,6 +23,7 @@ type Event = {
   max_attendees: number | null
   price: number
   created_by: string
+  age_restricted: boolean
   attendee_count: number
 }
 
@@ -118,13 +120,20 @@ function EventCard({ event }: { event: Event }) {
         <div className="p-4">
           {/* Badges row */}
           <div className="flex items-center justify-between mb-3">
-            <span className={`text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full font-bold border-2 border-black ${
-              isCasual
-                ? 'bg-purple-500 text-white'
-                : 'bg-accent text-white'
-            }`}>
-              {isCasual ? 'Casual' : 'Social'}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={`text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full font-bold border-2 border-black ${
+                isCasual
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-accent text-white'
+              }`}>
+                {isCasual ? 'Casual' : 'Social'}
+              </span>
+              {event.age_restricted && (
+                <span className="text-[10px] uppercase tracking-wide px-2 py-1 rounded-full font-bold border-2 border-black bg-red-500 text-white">
+                  18+
+                </span>
+              )}
+            </div>
             <span className={`text-base font-black ${event.price > 0 ? 'text-accent' : 'text-[#15110d] dark:text-[#fdf6ec]'}`}>
               {event.price > 0 ? `€${event.price}` : 'Free'}
             </span>
@@ -229,7 +238,7 @@ export default function FeedPage() {
       // Load display name + minor flag + interests
       const { data: profile } = await supabase
         .from('profiles')
-        .select('username, full_name, is_minor, interests')
+        .select('username, full_name, is_minor, interests, age_verified')
         .eq('id', user.id)
         .maybeSingle()
       setUsername(profile?.username || profile?.full_name?.split(' ')[0] || '')
@@ -256,6 +265,8 @@ export default function FeedPage() {
         .eq('status', 'active')
         .eq('type', 'casual')
         .gte('starts_at', new Date().toISOString())
+      // 18+ gating — scaffold; no-op until AGE_GATING_ENABLED is flipped (lib/ageGating.ts)
+      if (!canSeeAgeRestricted(profile as any)) query = query.eq('age_restricted', false)
       if (pos) {
         const b = boundingBox(pos.lat, pos.lng, CASUAL_RADIUS_KM)
         query = query
