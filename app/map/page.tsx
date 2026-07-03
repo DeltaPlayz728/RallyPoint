@@ -9,7 +9,7 @@ import type { EventPin, Venue } from '@/components/MapView'
 import TopBar from '@/components/TopBar'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import {
-  Search, X, Users, MapPin, Clock, Flag,
+  Search, X, Users, MapPin, Clock, Flag, Flame, History,
   Music, Beer, Coffee, Trees, Dumbbell, Film, FerrisWheel, Utensils,
   type LucideIcon,
 } from 'lucide-react'
@@ -17,27 +17,20 @@ import {
 // Leaflet must be loaded client-side only
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
 
-// ─── Filter config ────────────────────────────────────────────────────────────
+// ─── Discovery tabs ───────────────────────────────────────────────────────────
 
-type Filter = 'all' | 'today' | 'week' | 'casual' | 'social'
+type Filter = 'all' | 'trending' | 'popular' | 'visited'
 
-const FILTERS: { id: Filter; label: string }[] = [
-  { id: 'all',    label: 'All'       },
-  { id: 'today',  label: 'Today'     },
-  { id: 'week',   label: 'This Week' },
-  { id: 'casual', label: 'Casual'    },
-  { id: 'social', label: 'Social'    },
+const FILTERS: { id: Filter; label: string; Icon: LucideIcon }[] = [
+  { id: 'all',      label: 'All',      Icon: MapPin  },
+  { id: 'trending', label: 'Trending', Icon: Flame   },
+  { id: 'popular',  label: 'Popular',  Icon: Users   },
+  { id: 'visited',  label: 'Visited',  Icon: History },
 ]
 
-function isToday(iso: string) {
-  return new Date(iso).toDateString() === new Date().toDateString()
-}
-function isThisWeek(iso: string) {
-  const d = new Date(iso)
-  const now = new Date()
-  const weekOut = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-  return d >= now && d <= weekOut
-}
+// "Trending" = starting within this window, ranked by attendees (heating up now).
+// (event_attendees has no join timestamp, so recency of RSVPs isn't measurable.)
+const TRENDING_WINDOW_MS = 72 * 60 * 60 * 1000
 
 // ─── Distance helper (metres) ─────────────────────────────────────────────────
 
@@ -352,6 +345,7 @@ export default function MapPage() {
   const [selectedVenue, setSelectedVenue]   = useState<Venue | null>(null)
   const [selectedEvent, setSelectedEvent]   = useState<EventPin | null>(null)
   const [nearbyEvents, setNearbyEvents]     = useState<EventPin[]>([])
+  const [visitedEvents, setVisitedEvents]   = useState<EventPin[]>([])
   const [userCenter, setUserCenter]         = useState<[number, number]>(FALLBACK_CENTER)
   const [userDot, setUserDot]               = useState<[number, number] | null>(null)
   const [cityQuery, setCityQuery]           = useState('')
@@ -390,6 +384,24 @@ export default function MapPage() {
       }))
       setEvents(mapped)
       setLoading(false)
+
+      // "Visited" = past events the user attended (their own history)
+      const joinedEventIds = (attendeeRows ?? []).map((r: any) => r.event_id)
+      if (joinedEventIds.length > 0) {
+        const { data: vData } = await supabase
+          .from('events')
+          .select('id, title, type, location, price, starts_at, lat, lng, event_attendees(count)')
+          .in('id', joinedEventIds)
+          .lt('starts_at', new Date().toISOString())
+          .not('lat', 'is', null)
+          .not('lng', 'is', null)
+          .limit(100)
+        setVisitedEvents((vData ?? []).map((e: any) => ({
+          ...e,
+          attendee_count: e.event_attendees?.[0]?.count ?? 0,
+          joined: true,
+        })))
+      }
 
       // Get user location — center map + fetch local venues
       navigator.geolocation?.getCurrentPosition(
@@ -439,16 +451,20 @@ export default function MapPage() {
     document.head.appendChild(style)
   }, [])
 
-  // Client-side filter for event pins
+  // Discovery tab → which pins to show
   const filteredEvents = useMemo(() => {
-    return events.filter((e) => {
-      if (activeFilter === 'today')  return isToday(e.starts_at)
-      if (activeFilter === 'week')   return isThisWeek(e.starts_at)
-      if (activeFilter === 'casual') return e.type === 'casual'
-      if (activeFilter === 'social') return e.type === 'social'
-      return true
-    })
-  }, [events, activeFilter])
+    if (activeFilter === 'visited') return visitedEvents
+    if (activeFilter === 'popular') {
+      return [...events].sort((a, b) => b.attendee_count - a.attendee_count)
+    }
+    if (activeFilter === 'trending') {
+      const cutoff = Date.now() + TRENDING_WINDOW_MS
+      return events
+        .filter((e) => new Date(e.starts_at).getTime() <= cutoff)
+        .sort((a, b) => b.attendee_count - a.attendee_count)
+    }
+    return events
+  }, [events, visitedEvents, activeFilter])
 
   // Events within 150m of selected venue
   const venueEvents = useMemo(() => {
@@ -567,12 +583,13 @@ export default function MapPage() {
             <button
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold border-2 transition ${
                 activeFilter === f.id
-                  ? 'bg-accent border-accent text-white'
-                  : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-500'
+                  ? 'bg-accent border-black text-white'
+                  : 'bg-white dark:bg-[#221c16] border-black dark:border-gray-600 text-[#15110d] dark:text-[#fdf6ec]'
               }`}
             >
+              <f.Icon size={13} className="shrink-0" />
               {f.label}
             </button>
           ))}
