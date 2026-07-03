@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { useTheme } from './ThemeProvider'
 
 export type EventPin = {
   id: string
@@ -38,13 +39,19 @@ interface MapViewProps {
   userDot?: [number, number] | null
 }
 
-// Basemap style: use MapTiler when a free key is set, otherwise fall back to
-// keyless OpenFreeMap so the map works with zero setup. Both are MapLibre vector
-// styles, so this can be swapped for a custom Snapchat-style style later.
+// Basemap style follows the app theme. MapTiler when a key is set, else keyless
+// OpenFreeMap (light) / Carto dark-matter (dark) — all free MapLibre vector styles.
 const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY
-const STYLE_URL = MAPTILER_KEY
-  ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`
-  : 'https://tiles.openfreemap.org/styles/liberty'
+function styleFor(dark: boolean): string {
+  if (MAPTILER_KEY) {
+    return dark
+      ? `https://api.maptiler.com/maps/dataviz-dark/style.json?key=${MAPTILER_KEY}`
+      : `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`
+  }
+  return dark
+    ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+    : 'https://tiles.openfreemap.org/styles/liberty'
+}
 
 // ─── Icon markup (unchanged from the Leaflet version) ────────────────────────
 
@@ -169,16 +176,22 @@ export default function MapView({
   userDot,
 }: MapViewProps) {
   useMapAnimations()
+  const { theme } = useTheme()
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markersRef = useRef<maplibregl.Marker[]>([])
+  const currentStyleRef = useRef<string | null>(null)
 
   // Init map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
+    const initialStyle = styleFor(
+      typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+    )
+    currentStyleRef.current = initialStyle
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: STYLE_URL,
+      style: initialStyle,
       center: [center[1], center[0]], // MapLibre is [lng, lat]
       zoom: 14,
       attributionControl: { compact: true },
@@ -195,6 +208,14 @@ export default function MapView({
   useEffect(() => {
     if (mapRef.current) mapRef.current.easeTo({ center: [center[1], center[0]] })
   }, [center[0], center[1]])
+
+  // Follow the app's light/dark theme. Markers are DOM overlays, so setStyle keeps them.
+  useEffect(() => {
+    const url = styleFor(theme === 'dark')
+    if (!mapRef.current || currentStyleRef.current === url) return
+    currentStyleRef.current = url
+    mapRef.current.setStyle(url)
+  }, [theme])
 
   // (Re)render markers when data changes
   useEffect(() => {
