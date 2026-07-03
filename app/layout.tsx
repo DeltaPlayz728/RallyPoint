@@ -5,6 +5,7 @@ import BottomNavWrapper from "@/components/BottomNavWrapper";
 import SubscriptionCelebrationWrapper from "@/components/SubscriptionCelebrationWrapper";
 import FeedbackButton from "@/components/FeedbackButton";
 import { ThemeProvider, THEME_BOOTSTRAP_SCRIPT } from "@/components/ThemeProvider";
+import ErrorLogger from "@/components/ErrorLogger";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -83,6 +84,7 @@ export default function RootLayout({
           <BottomNavWrapper />
           <SubscriptionCelebrationWrapper />
           <FeedbackButton />
+          <ErrorLogger />
         </ThemeProvider>
       </body>
     </html>
