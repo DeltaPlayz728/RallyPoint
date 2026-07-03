@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
 
-// Server-side only. Uses the service-role key so it can read/write the venues
-// cache regardless of RLS (venues are no longer anon-readable).
+// Server-side only. Service-role key so it can read/write the shared venues table
+// regardless of RLS (venues are no longer anon-readable).
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const CACHE_HOURS = 24
 const RADIUS_M = 5000
+// If the shared DB already has at least this many venues near the user, serve those
+// and skip Overpass. Otherwise this user "fills in" the area (crowdsourced hubs).
+const ENOUGH_NEARBY = 12
 
 // Map an OSM element's tags to one of the app's venue "types" (drives the pin icon).
 function osmType(tags: Record<string, string> = {}): string | null {
@@ -39,23 +41,25 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const lat = parseFloat(searchParams.get('lat') || '51.5719')
   const lng = parseFloat(searchParams.get('lng') || '4.7683')
-  // Cache key: the real city if provided, else a coarse lat/lng cell (~11 km) so
-  // users in different areas don't share one cache bucket.
   const city = searchParams.get('city') || `@${lat.toFixed(1)},${lng.toFixed(1)}`
 
-  // Cache by city — Overpass is a shared free service, so lean on the 24h cache.
-  const cacheThreshold = new Date(Date.now() - CACHE_HOURS * 60 * 60 * 1000).toISOString()
-  const { data: cached } = await supabase
-    .from('venues')
+  // Bounding box (~RADIUS_M) around the user.
+  const dLat = RADIUS_M / 111000
+  const dLng = RADIUS_M / (111000 * Math.cos((lat * Math.PI) / 180))
+
+  // Serve the shared, permanent venue set near this location — everything any user
+  // has ever contributed here. This is the "users as hubs" effect.
+  const { data: nearby } = await supabase
+    .from('cached_venues')
     .select('*')
-    .eq('city', city)
-    .gt('cached_at', cacheThreshold)
-    .limit(200)
-  if (cached && cached.length > 5) {
-    return NextResponse.json({ venues: cached })
+    .gte('lat', lat - dLat).lte('lat', lat + dLat)
+    .gte('lng', lng - dLng).lte('lng', lng + dLng)
+    .limit(300)
+  if (nearby && nearby.length >= ENOUGH_NEARBY) {
+    return NextResponse.json({ venues: nearby })
   }
 
-  // Query OpenStreetMap via Overpass (free, no API key).
+  // Sparse area → this user fills it in: pull from OpenStreetMap and save permanently.
   const filters = [
     'node["amenity"~"^(bar|pub|cafe|nightclub|cinema|restaurant|fast_food)$"]',
     'way["amenity"~"^(bar|pub|cafe|nightclub|cinema|restaurant|fast_food)$"]',
@@ -68,7 +72,7 @@ export async function GET(req: NextRequest) {
     .join('')
   const query = `[out:json][timeout:25];(${filters});out center 80;`
 
-  const venues: any[] = []
+  const fresh: any[] = []
   try {
     const res = await fetch('https://overpass-api.de/api/interpreter', {
       method: 'POST',
@@ -88,7 +92,7 @@ export async function GET(req: NextRequest) {
       const vlng = el.lon ?? el.center?.lon
       if (vlat == null || vlng == null) continue
       seen.add(pid)
-      venues.push({
+      fresh.push({
         place_id: pid,
         name,
         lat: vlat,
@@ -100,13 +104,16 @@ export async function GET(req: NextRequest) {
       })
     }
   } catch {
-    return NextResponse.json({ venues: cached ?? [] })
+    return NextResponse.json({ venues: nearby ?? [] })
   }
 
-  if (venues.length > 0) {
-    const { error } = await supabase.from('venues').upsert(venues, { onConflict: 'place_id' })
+  if (fresh.length > 0) {
+    const { error } = await supabase.from('cached_venues').upsert(fresh, { onConflict: 'place_id' })
     if (error) console.error('venues upsert failed:', error.message)
-    return NextResponse.json({ venues })
+    // Merge what was already there with the new finds (dedup on place_id).
+    const freshIds = new Set(fresh.map((v) => v.place_id))
+    const merged = [...fresh, ...(nearby ?? []).filter((v: any) => !freshIds.has(v.place_id))]
+    return NextResponse.json({ venues: merged })
   }
-  return NextResponse.json({ venues: cached ?? [] })
+  return NextResponse.json({ venues: nearby ?? [] })
 }
