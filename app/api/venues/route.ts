@@ -14,6 +14,11 @@ const RADIUS_M = 5000
 // and skip Overpass. Otherwise this user "fills in" the area (crowdsourced hubs).
 const ENOUGH_NEARBY = 12
 
+// "Destination" venues auto-circled as Event Hubs (where you'd host/attend an event),
+// around any user worldwide. Everyday spots (cafe/bar/restaurant/park/gym) stay as
+// small pins so the map doesn't turn into a wall of circles. Tune this set to taste.
+const HUB_CATEGORIES = new Set(['bowling_alley', 'movie_theater', 'amusement_park', 'stadium', 'night_club'])
+
 // Map an OSM element's tags to one of the app's venue "types" (drives the pin icon).
 function osmType(tags: Record<string, string> = {}): string | null {
   const a = tags.amenity
@@ -100,6 +105,7 @@ export async function GET(req: NextRequest) {
         types: [t],
         vicinity: [tags['addr:street'], tags['addr:city']].filter(Boolean).join(', '),
         city,
+        is_hub: HUB_CATEGORIES.has(t),
         cached_at: new Date().toISOString(),
       })
     }
