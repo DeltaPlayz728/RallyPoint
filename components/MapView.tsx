@@ -27,6 +27,9 @@ export type Venue = {
   types: string[]
   vicinity: string
   city: string
+  is_hub?: boolean
+  photo_url?: string | null
+  active?: boolean
 }
 
 interface MapViewProps {
@@ -95,6 +98,24 @@ function venuePinHtml(types: string[], selected: boolean): string {
   return `<div class="rp-venue-pin" style="width:38px;height:38px;background:${bg};border:2px solid ${border};border-radius:50%;display:flex;align-items:center;justify-content:center;color:#f3f4f6;box-shadow:${shadow};transition:border-color .2s,box-shadow .2s;">${iconSvg}</div>`
 }
 
+function esc(s: string): string {
+  const m: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }
+  return s.replace(/[&<>"]/g, (c) => m[c] ?? c)
+}
+
+// Event Hub pin — Snap-style circular icon-in-a-ring + name label, distinct from
+// the small event flags. Active hubs (an event happening at the venue soon) "ping".
+function hubPinHtml(v: Venue): string {
+  const icon = getVenueIconSvg(v.types, 24)
+  const ring = v.active ? '#f97316' : '#15110d'
+  return `
+    <div style="position:relative;width:50px;height:50px;">
+      ${v.active ? '<div class="rp-hub-ping" style="position:absolute;inset:0;border-radius:50%;border:3px solid #f97316;"></div>' : ''}
+      <div style="position:relative;width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid ${ring};box-shadow:0 3px 9px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#15110d;">${icon}</div>
+      <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);background:${ring};color:#fff;font-size:10px;font-weight:800;border:2px solid #15110d;padding:1px 7px;border-radius:999px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);">${esc(v.name)}</div>
+    </div>`
+}
+
 function eventPinHtml(type: string, attendeeCount: number, eventId: string, joined: boolean): string {
   const color = type === 'casual' ? '#22c55e' : '#f97316'
   const hash = eventId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
@@ -158,6 +179,8 @@ function useMapAnimations() {
       .rp-dot-drift-2 { animation: rpDotDrift2 var(--drift-dur,5s) ease-in-out infinite; animation-delay: var(--drift-delay,0s); }
       .rp-dot-drift-3 { animation: rpDotDrift3 var(--drift-dur,5s) ease-in-out infinite; animation-delay: var(--drift-delay,0s); }
       .rp-user-dot { pointer-events: none !important; }
+      @keyframes rpHubPing { 0%{transform:scale(0.95);opacity:0.7;} 70%{transform:scale(1.7);opacity:0;} 100%{opacity:0;} }
+      .rp-hub-ping { animation: rpHubPing 2s ease-out infinite; }
       .maplibregl-ctrl-attrib { font-size: 10px; }
     `
     document.head.appendChild(style)
@@ -225,7 +248,8 @@ export default function MapView({
     markersRef.current = []
 
     venues.forEach((v) => {
-      const el = markerEl(venuePinHtml(v.types, v.place_id === selectedVenueId), () => onVenueClick(v))
+      const html = v.is_hub ? hubPinHtml(v) : venuePinHtml(v.types, v.place_id === selectedVenueId)
+      const el = markerEl(html, () => onVenueClick(v))
       markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([v.lng, v.lat]).addTo(map))
     })
 

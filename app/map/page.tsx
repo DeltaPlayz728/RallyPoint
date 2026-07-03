@@ -126,7 +126,12 @@ function VenueSheet({
         <div className="flex items-center gap-3 mb-1">
           <VenueIcon size={28} className="text-[#15110d] dark:text-[#fdf6ec]" />
           <div>
-            <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg leading-tight">{venue.name}</h2>
+            <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg leading-tight inline-flex items-center gap-2">
+              {venue.name}
+              {venue.is_hub && (
+                <span className="text-[10px] font-black uppercase tracking-wide bg-accent text-white border-2 border-black px-2 py-0.5 rounded-full">Hub</span>
+              )}
+            </h2>
             <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{venueTypeLabel} · {venue.vicinity}</p>
           </div>
         </div>
@@ -168,7 +173,7 @@ function VenueSheet({
               href={createHref}
               className="mt-3 flex items-center justify-center gap-2 w-full border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-accent hover:border-accent rounded-xl py-3 text-sm transition"
             >
-              + Add another event here
+              {venue.is_hub ? '+ Host another event here' : '+ Add another event here'}
             </Link>
           </div>
         ) : (
@@ -179,7 +184,7 @@ function VenueSheet({
               href={createHref}
               className="inline-flex items-center gap-2 bg-accent hover:brightness-90 text-white font-semibold px-6 py-3 rounded-xl transition"
             >
-              Create event here
+              {venue.is_hub ? 'Host an event here' : 'Create event here'}
             </Link>
           </div>
         )}
@@ -543,6 +548,18 @@ export default function MapPage() {
     )
   }, [selectedVenue, events])
 
+  // Hub pins "ping" when there's an event at the venue happening soon
+  const venuesForMap = useMemo(() => {
+    const soon = Date.now() + 7 * 24 * 60 * 60 * 1000
+    return venues.map((v) => {
+      if (!v.is_hub) return v
+      const active = events.some(
+        (e) => distanceM(v.lat, v.lng, e.lat, e.lng) < 150 && new Date(e.starts_at).getTime() <= soon
+      )
+      return { ...v, active }
+    })
+  }, [venues, events])
+
   const handleVenueClick = (venue: Venue) => {
     setSelectedEvent(null)
     setCitySheet(null)
@@ -699,7 +716,7 @@ export default function MapPage() {
       >
         <MapView
           events={filteredEvents}
-          venues={venues}
+          venues={venuesForMap}
           selectedVenueId={selectedVenue?.place_id ?? null}
           onVenueClick={handleVenueClick}
           onEventClick={handleEventClick}
