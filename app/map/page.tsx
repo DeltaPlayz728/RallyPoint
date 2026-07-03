@@ -17,6 +17,10 @@ import {
 // Leaflet must be loaded client-side only
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
 
+const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
+
+type FriendAtt = { id: string; name: string }
+
 // ─── Discovery tabs ───────────────────────────────────────────────────────────
 
 type Filter = 'all' | 'trending' | 'popular' | 'visited'
@@ -189,10 +193,12 @@ function VenueSheet({
 function EventSheet({
   event,
   nearbyEvents,
+  friends,
   onClose,
 }: {
   event: EventPin
   nearbyEvents: EventPin[]
+  friends: FriendAtt[]
   onClose: () => void
 }) {
   return (
@@ -228,6 +234,35 @@ function EventSheet({
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 inline-flex items-center gap-1">
             <Users size={14} /> {event.attendee_count} going
           </p>
+        )}
+
+        {friends.length > 0 && (
+          <div className="flex items-center gap-2.5 mb-4 bg-[#fdf6ec] dark:bg-[#15110d] border-2 border-black dark:border-gray-600 rounded-2xl px-3 py-2.5">
+            <div className="flex -space-x-2 shrink-0">
+              {friends.slice(0, 3).map((f, i) => (
+                <div
+                  key={f.id}
+                  className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-[11px] font-black text-white"
+                  style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                >
+                  {f.name.charAt(0).toUpperCase()}
+                </div>
+              ))}
+            </div>
+            <div className="flex-1 min-w-0 leading-tight">
+              <p className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-sm">
+                {friends.length} friend{friends.length > 1 ? 's' : ''} going
+              </p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs truncate">
+                {(() => {
+                  const names = friends.map((f) => f.name.split(' ')[0])
+                  return names.length <= 2
+                    ? names.join(' & ')
+                    : `${names.slice(0, 2).join(', ')} +${names.length - 2}`
+                })()} — come join them
+              </p>
+            </div>
+          </div>
         )}
 
         <Link
@@ -346,6 +381,7 @@ export default function MapPage() {
   const [selectedEvent, setSelectedEvent]   = useState<EventPin | null>(null)
   const [nearbyEvents, setNearbyEvents]     = useState<EventPin[]>([])
   const [visitedEvents, setVisitedEvents]   = useState<EventPin[]>([])
+  const [friendsByEvent, setFriendsByEvent] = useState<Record<string, FriendAtt[]>>({})
   const [userCenter, setUserCenter]         = useState<[number, number]>(FALLBACK_CENTER)
   const [userDot, setUserDot]               = useState<[number, number] | null>(null)
   const [cityQuery, setCityQuery]           = useState('')
@@ -401,6 +437,39 @@ export default function MapPage() {
           attendee_count: e.event_attendees?.[0]?.count ?? 0,
           joined: true,
         })))
+      }
+
+      // Friends attending — the social hook that drives joining
+      const { data: fr } = await supabase
+        .from('friendships')
+        .select('requester_id, receiver_id')
+        .eq('status', 'accepted')
+        .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      const friendIds = (fr ?? []).map((f: any) =>
+        f.requester_id === user.id ? f.receiver_id : f.requester_id
+      )
+      if (friendIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, full_name, username')
+          .in('id', friendIds)
+        const nameById = new Map<string, string>(
+          (profs ?? []).map((p: any) => [p.id, p.full_name || p.username || 'Friend'])
+        )
+        const eventIds = mapped.map((e) => e.id)
+        const { data: fa } = await supabase
+          .from('event_attendees')
+          .select('event_id, user_id')
+          .in('user_id', friendIds)
+          .in('event_id', eventIds)
+        const byEvent: Record<string, FriendAtt[]> = {}
+        ;(fa ?? []).forEach((row: any) => {
+          ;(byEvent[row.event_id] ||= []).push({
+            id: row.user_id,
+            name: nameById.get(row.user_id) || 'Friend',
+          })
+        })
+        setFriendsByEvent(byEvent)
       }
 
       // Get user location — center map + fetch local venues
@@ -653,6 +722,7 @@ export default function MapPage() {
         <EventSheet
           event={selectedEvent}
           nearbyEvents={nearbyEvents}
+          friends={friendsByEvent[selectedEvent.id] ?? []}
           onClose={closeSheets}
         />
       )}
