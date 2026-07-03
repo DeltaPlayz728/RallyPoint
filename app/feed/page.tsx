@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Lock, MapPin, Clock, Search } from 'lucide-react'
 import WhatsNewModal from '@/components/WhatsNewModal'
+import { boundingBox, CASUAL_RADIUS_KM } from '@/lib/geo'
 
 // Avatar colour palette — used for attendee dot row
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
@@ -221,7 +222,7 @@ export default function FeedPage() {
   const [unread, setUnread]             = useState(false)
 
   useEffect(() => {
-    const load = async () => {
+    const load = async (pos: { lat: number; lng: number } | null) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -247,13 +248,21 @@ export default function FeedPage() {
       // once/day across Map/Feed/Events — see lib/seedCheck.ts).
       triggerSeedCheck(user.id)
 
-      // Load casual events with attendee count — only upcoming events
-      const { data, error } = await supabase
+      // Load casual events — only upcoming, and geo-scoped to a local radius
+      // around the user so hangouts stay nearby (see lib/geo.ts).
+      let query = supabase
         .from('events')
         .select('*, event_attendees(count)')
         .eq('status', 'active')
         .eq('type', 'casual')
         .gte('starts_at', new Date().toISOString())
+      if (pos) {
+        const b = boundingBox(pos.lat, pos.lng, CASUAL_RADIUS_KM)
+        query = query
+          .gte('lat', b.minLat).lte('lat', b.maxLat)
+          .gte('lng', b.minLng).lte('lng', b.maxLng)
+      }
+      const { data, error } = await query
         .order('starts_at', { ascending: true })
         .limit(100)
 
@@ -265,7 +274,16 @@ export default function FeedPage() {
       }
       setLoading(false)
     }
-    load()
+    // Scope to the user's area; fall back to unscoped if location is unavailable.
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        p => load({ lat: p.coords.latitude, lng: p.coords.longitude }),
+        () => load(null),
+        { timeout: 8000 }
+      )
+    } else {
+      load(null)
+    }
   }, [])
 
   // Score an event by how many of the user's interests appear in its title/description

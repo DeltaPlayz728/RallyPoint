@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Building2, MapPin, Clock, Users } from 'lucide-react'
+import { boundingBox, EVENT_RADIUS_KM } from '@/lib/geo'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -129,7 +130,7 @@ export default function EventsPage() {
   const [unread, setUnread] = useState(false)
 
   useEffect(() => {
-    const load = async () => {
+    const load = async (pos: { lat: number; lng: number } | null) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
 
@@ -145,7 +146,8 @@ export default function EventsPage() {
       // once/day across Map/Feed/Events — see lib/seedCheck.ts).
       triggerSeedCheck(user.id)
 
-      const { data } = await supabase
+      // Social/paid events reach a wider radius than casual hangouts (see lib/geo.ts).
+      let query = supabase
         .from('events')
         .select(`
           *,
@@ -155,6 +157,13 @@ export default function EventsPage() {
         .eq('status', 'active')
         .eq('type', 'social')
         .gte('starts_at', new Date().toISOString())
+      if (pos) {
+        const b = boundingBox(pos.lat, pos.lng, EVENT_RADIUS_KM)
+        query = query
+          .gte('lat', b.minLat).lte('lat', b.maxLat)
+          .gte('lng', b.minLng).lte('lng', b.maxLng)
+      }
+      const { data } = await query
         .order('starts_at', { ascending: true })
         .limit(100)
 
@@ -164,12 +173,21 @@ export default function EventsPage() {
       })))
       setLoading(false)
     }
-    load()
-
-    // Get user location for Near Me sort
-    navigator.geolocation?.getCurrentPosition(pos => {
-      setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-    })
+    // Scope to the user's area (wider radius than casual hangouts); the resolved
+    // position also drives the "Near me" sort. Fall back to unscoped if denied.
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        p => {
+          const pos = { lat: p.coords.latitude, lng: p.coords.longitude }
+          setUserPos(pos)
+          load(pos)
+        },
+        () => load(null),
+        { timeout: 8000 }
+      )
+    } else {
+      load(null)
+    }
   }, [])
 
   const socialEvents = useMemo(() => events, [events])
