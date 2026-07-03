@@ -9,7 +9,7 @@ import type { EventPin, Venue } from '@/components/MapView'
 import TopBar from '@/components/TopBar'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import {
-  Search, X, Users, MapPin, Clock, Flag, Flame, History,
+  Search, X, Users, MapPin, Clock, Flag, Flame, History, Heart,
   Music, Beer, Coffee, Trees, Dumbbell, Film, FerrisWheel, Utensils,
   type LucideIcon,
 } from 'lucide-react'
@@ -23,13 +23,14 @@ type FriendAtt = { id: string; name: string }
 
 // ─── Discovery tabs ───────────────────────────────────────────────────────────
 
-type Filter = 'all' | 'trending' | 'popular' | 'visited'
+type Filter = 'all' | 'trending' | 'popular' | 'visited' | 'liked'
 
 const FILTERS: { id: Filter; label: string; Icon: LucideIcon }[] = [
   { id: 'all',      label: 'All',      Icon: MapPin  },
   { id: 'trending', label: 'Trending', Icon: Flame   },
   { id: 'popular',  label: 'Popular',  Icon: Users   },
   { id: 'visited',  label: 'Visited',  Icon: History },
+  { id: 'liked',    label: 'Liked',    Icon: Heart   },
 ]
 
 // "Trending" = starting within this window, ranked by attendees (heating up now).
@@ -83,10 +84,14 @@ function getVenueIcon(types: string[]): LucideIcon {
 function VenueSheet({
   venue,
   nearbyEvents,
+  liked,
+  onToggleLike,
   onClose,
 }: {
   venue: Venue
   nearbyEvents: EventPin[]
+  liked: boolean
+  onToggleLike: () => void
   onClose: () => void
 }) {
   const VenueIcon = getVenueIcon(venue.types)
@@ -124,8 +129,8 @@ function VenueSheet({
 
         {/* Venue header */}
         <div className="flex items-center gap-3 mb-1">
-          <VenueIcon size={28} className="text-[#15110d] dark:text-[#fdf6ec]" />
-          <div>
+          <VenueIcon size={28} className="text-[#15110d] dark:text-[#fdf6ec] shrink-0" />
+          <div className="flex-1 min-w-0">
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg leading-tight inline-flex items-center gap-2">
               {venue.name}
               {venue.is_hub && (
@@ -134,6 +139,13 @@ function VenueSheet({
             </h2>
             <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{venueTypeLabel} · {venue.vicinity}</p>
           </div>
+          <button
+            onClick={onToggleLike}
+            aria-label={liked ? 'Unlike' : 'Like'}
+            className="shrink-0 w-10 h-10 rounded-full border-2 border-black dark:border-gray-600 flex items-center justify-center active:scale-95 transition"
+          >
+            <Heart size={18} className={liked ? 'text-accent' : 'text-gray-500 dark:text-gray-400'} fill={liked ? 'currentColor' : 'none'} />
+          </button>
         </div>
 
         <div className="h-px bg-gray-200 dark:bg-gray-700 my-4" />
@@ -387,6 +399,7 @@ export default function MapPage() {
   const [nearbyEvents, setNearbyEvents]     = useState<EventPin[]>([])
   const [visitedEvents, setVisitedEvents]   = useState<EventPin[]>([])
   const [friendsByEvent, setFriendsByEvent] = useState<Record<string, FriendAtt[]>>({})
+  const [likedPlaceIds, setLikedPlaceIds]   = useState<Set<string>>(new Set())
   const [userCenter, setUserCenter]         = useState<[number, number]>(FALLBACK_CENTER)
   const [userDot, setUserDot]               = useState<[number, number] | null>(null)
   const [cityQuery, setCityQuery]           = useState('')
@@ -477,6 +490,13 @@ export default function MapPage() {
         setFriendsByEvent(byEvent)
       }
 
+      // Liked venues (for the Event Hubs "Liked" tab)
+      const { data: likeRows } = await supabase
+        .from('venue_likes')
+        .select('place_id')
+        .eq('user_id', user.id)
+      setLikedPlaceIds(new Set((likeRows ?? []).map((r: any) => r.place_id)))
+
       // Get user location — center map + fetch local venues
       navigator.geolocation?.getCurrentPosition(
         async (pos) => {
@@ -527,6 +547,7 @@ export default function MapPage() {
 
   // Discovery tab → which pins to show
   const filteredEvents = useMemo(() => {
+    if (activeFilter === 'liked') return []
     if (activeFilter === 'visited') return visitedEvents
     if (activeFilter === 'popular') {
       return [...events].sort((a, b) => b.attendee_count - a.attendee_count)
@@ -551,19 +572,37 @@ export default function MapPage() {
   // Hub pins "ping" when there's an event at the venue happening soon
   const venuesForMap = useMemo(() => {
     const soon = Date.now() + 7 * 24 * 60 * 60 * 1000
-    return venues.map((v) => {
+    const base = activeFilter === 'liked' ? venues.filter((v) => likedPlaceIds.has(v.place_id)) : venues
+    return base.map((v) => {
       if (!v.is_hub) return v
       const active = events.some(
         (e) => distanceM(v.lat, v.lng, e.lat, e.lng) < 150 && new Date(e.starts_at).getTime() <= soon
       )
       return { ...v, active }
     })
-  }, [venues, events])
+  }, [venues, events, activeFilter, likedPlaceIds])
 
   const handleVenueClick = (venue: Venue) => {
     setSelectedEvent(null)
     setCitySheet(null)
     setSelectedVenue(venue)
+  }
+
+  const toggleLike = async (placeId: string) => {
+    const isLiked = likedPlaceIds.has(placeId)
+    setLikedPlaceIds((prev) => {
+      const next = new Set(prev)
+      if (isLiked) next.delete(placeId)
+      else next.add(placeId)
+      return next
+    })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    if (isLiked) {
+      await supabase.from('venue_likes').delete().eq('user_id', user.id).eq('place_id', placeId)
+    } else {
+      await supabase.from('venue_likes').insert({ user_id: user.id, place_id: placeId })
+    }
   }
 
   const handleEventClick = (event: EventPin) => {
@@ -730,6 +769,8 @@ export default function MapPage() {
         <VenueSheet
           venue={selectedVenue}
           nearbyEvents={venueEvents}
+          liked={likedPlaceIds.has(selectedVenue.place_id)}
+          onToggleLike={() => toggleLike(selectedVenue.place_id)}
           onClose={closeSheets}
         />
       )}
