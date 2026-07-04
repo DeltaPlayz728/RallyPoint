@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
         lat: vlat,
         lng: vlng,
         types: [t],
-        vicinity: [tags['addr:street'], tags['addr:city']].filter(Boolean).join(', '),
+        vicinity: [[tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' '), tags['addr:city']].filter(Boolean).join(', '),
         city,
         is_hub: HUB_CATEGORIES.has(t),
         cached_at: new Date().toISOString(),
