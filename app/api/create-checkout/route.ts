@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import https from 'https'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
+import { requireMatchingUser } from '@/lib/sessionAuth'
 
 // SSL workaround for Windows dev only — never runs in production
 const agent =
@@ -32,6 +33,12 @@ export async function POST(req: NextRequest) {
     const { eventId, userId } = await req.json()
     if (!eventId || !userId) {
       return NextResponse.json({ error: 'Missing eventId or userId' }, { status: 400 })
+    }
+    // userId must match the signed-in session — the webhook trusts this
+    // metadata to decide which account gets added as an attendee, so it must
+    // be the caller's own id, not an arbitrary one from the body.
+    if (!(await requireMatchingUser(req, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Look up the event's real price and title ourselves — previously this

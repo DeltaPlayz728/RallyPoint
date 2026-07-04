@@ -4,6 +4,7 @@ import https from 'https'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
 import { TIER_PRICE_ENV, SubscriptionTier } from '@/lib/subscription'
+import { requireMatchingUser } from '@/lib/sessionAuth'
 
 // SSL workaround for Windows dev only — never runs in production
 const agent =
@@ -36,6 +37,12 @@ export async function POST(req: NextRequest) {
     }
     if (tier === 'free' || !(tier in TIER_PRICE_ENV)) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
+    }
+    // userId must match the signed-in session — otherwise the checkout (and the
+    // resulting subscription/customer binding via metadata) could be attributed
+    // to, or attached onto, another user's account.
+    if (!(await requireMatchingUser(req, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const priceId = TIER_PRICE_ENV[tier as Exclude<SubscriptionTier, 'free'>]

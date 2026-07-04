@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import https from 'https'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
+import { requireMatchingUser } from '@/lib/sessionAuth'
 
 const agent =
   process.env.NODE_ENV !== 'production'
@@ -28,6 +29,12 @@ export async function POST(req: NextRequest) {
     const { userId } = await req.json()
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+    }
+    // userId must match the signed-in session — otherwise anyone could open
+    // (and manage/cancel) another user's Stripe billing portal just by knowing
+    // their id. IDOR into billing.
+    if (!(await requireMatchingUser(req, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { data: profile, error } = await supabaseAdmin

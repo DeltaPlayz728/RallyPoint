@@ -8,6 +8,8 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 // POST — send friend request
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
@@ -17,6 +19,12 @@ export async function POST(req: NextRequest) {
 
   const { requesterId, receiverId } = await req.json()
   if (!requesterId || !receiverId || requesterId === receiverId) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+  // receiverId is interpolated into the PostgREST .or() filter below and used
+  // as an insert value — require a well-formed UUID so it can't inject filter
+  // syntax or create junk friendship rows / notifications for bogus ids.
+  if (!UUID_RE.test(receiverId)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
   // requesterId must match the actual signed-in session — otherwise anyone
