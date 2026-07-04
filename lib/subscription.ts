@@ -74,6 +74,10 @@ export function tierMeetsMinimum(tier: SubscriptionTier, minimum: SubscriptionTi
 }
 
 export function hasFeature(tier: SubscriptionTier | null | undefined, feature: Feature): boolean {
+  // During the playtest, every tier-locked feature is open to all testers so they
+  // can try Communities and the premium tools without paying. The tier definitions
+  // (FEATURE_MIN_TIER) are untouched — gating re-engages when PLAYTEST_MODE is off.
+  if (IS_PLAYTEST) return true
   const effective = tier ?? 'free'
   return tierMeetsMinimum(effective, FEATURE_MIN_TIER[feature])
 }

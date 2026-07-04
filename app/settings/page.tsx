@@ -16,6 +16,8 @@ export default function SettingsPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [tier, setTier] = useState<SubscriptionTier>('free')
   const [portalLoading, setPortalLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const check = async () => {
@@ -58,6 +60,38 @@ export default function SettingsPage() {
       }
     } catch {
       setPortalLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const res = await fetch('/api/account/export')
+      if (!res.ok) throw new Error()
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'rallypoint-my-data.json'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      alert('Export failed. Please try again.')
+    }
+    setExporting(false)
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('Permanently delete your account and all your data? This cannot be undone.')) return
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' })
+      if (!res.ok) throw new Error()
+      await supabase.auth.signOut()
+      router.push('/')
+    } catch {
+      alert('Account deletion failed. Please try again.')
+      setDeleting(false)
     }
   }
 
@@ -154,6 +188,22 @@ export default function SettingsPage() {
               <span className="text-gray-400">›</span>
             </button>
           </div>
+        </section>
+
+        {/* Data & privacy */}
+        <section className="mb-6">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Data &amp; privacy</h2>
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-200 dark:divide-gray-700 overflow-hidden">
+            <button onClick={handleExport} disabled={exporting} className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2b241c] transition disabled:opacity-60">
+              <span className="text-[#15110d] dark:text-[#fdf6ec]">{exporting ? 'Preparing…' : 'Export my data'}</span>
+              <span className="text-gray-400">›</span>
+            </button>
+            <button onClick={handleDeleteAccount} disabled={deleting} className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2b241c] transition disabled:opacity-60">
+              <span className="text-red-500">{deleting ? 'Deleting…' : 'Delete my account'}</span>
+              <span className="text-gray-400">›</span>
+            </button>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">Export downloads everything we hold on you as a file. Deleting removes your account and all your data permanently.</p>
         </section>
 
         {/* Subscription */}
