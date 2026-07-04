@@ -1,30 +1,37 @@
 # RallyPoint — Progress / Handoff
 
-Last updated: 2026-06-30
+Last updated: 2026-07-04
 
 Source of truth for current state. Session-by-session history (June 2026) lives in `PROGRESS_ARCHIVE.md` — don't load it unless you need historical detail. The auto-memory `MEMORY.md` index loads automatically each session and is the fastest orientation; `MASTER_PROMPT.md` is an optional fuller cold-start brief (no need to read it every session).
 
-## Most recent work (2026-06-30)
+## Most recent work (2026-07-04)
 
-**Home/Events consolidation + token cleanup (latest):**
-- `/feed` is now the home AND event screen. `middleware.ts` redirects logged-in users from `/` to `/feed`; the bottom-nav Events tab (`components/BottomNav.tsx`) points to `/feed`. The older `app/events/page.tsx` (social/venue events + Near-me) is now orphaned from the nav (still reachable by URL).
-- Opaque pastel background bubbles added to `/feed` and `app/events/page.tsx` (3 bubbles, `fixed inset-0 z-0 pointer-events-none`; content wrapped `relative z-[1]` so cards stay on top).
-- Steam-style "What's New" popup: `components/WhatsNewModal.tsx` + `lib/changelog.ts`. To publish an update: add an entry to the top of `RELEASES` and bump `CURRENT_VERSION`. Shows once per version per device (localStorage `rallypoint:whatsNewSeen`).
+**Map system overhaul (this is now the map "core"):**
+- Swapped Leaflet → **MapLibre GL JS**. Light style = OpenFreeMap, dark = Carto dark-matter (both keyless); optional MapTiler via `NEXT_PUBLIC_MAPTILER_KEY`. Markers are DOM overlays so they survive `setStyle` when the theme toggles. See `components/MapView.tsx`.
+- **Crowdsourced global venues:** `app/api/venues/route.ts` now pulls real POIs from the OpenStreetMap **Overpass API** (keyless) around any user's location worldwide, caching them into a new `cached_venues` table. (The old `venues` table has no lat/lng and is reserved for owner-registered hubs — that mismatch was why venue pins silently failed before.) Coverage grows as users open the app in new areas.
+- **Event Hubs:** select venue categories (bowling, cinema, amusement park, stadium, night club) render as Snapchat-style circular "ping" pins that pulse when they have live events. The hub panel lists events happening AT that establishment plus a "Host an event here" CTA. Curated for v1 (no owner self-registration yet).
+- **Discovery tabs** on `/map` (all / trending / popular / visited / liked), a **friends-attending badge** on event sheets, and per-user venue likes (`venue_likes` table, RLS user-scoped).
 
-**Emoji cleanup, build fix, caching fix, Events redesign (earlier same day):**
-- Removed remaining emoji app-wide (replaced with lucide-react icons).
-- Fixed a Vercel build break: invalid `Instagram` import in `app/profile/[id]/page.tsx` → `Camera` (lucide has no brand icons).
-- Fixed stale-page-on-tab-switch: `middleware.ts` sets `Cache-Control: private, no-store, must-revalidate` on app pages.
-- Redesigned `app/events/page.tsx` to the Bold & Expressive style.
+**Payments (Stripe):**
+- Subscription Price objects created via the Stripe plugin (test mode). Tiers/prices in `lib/subscription.ts`; Stripe price IDs read from `NEXT_PUBLIC_STRIPE_PRICE_*` env vars.
+- **Playtest unlock:** `hasFeature()` returns true for everything while `NEXT_PUBLIC_PLAYTEST_MODE !== 'false'`, so testers get Communities + all tier-locked tools free WITHOUT altering the tier→feature map (`FEATURE_MIN_TIER` is untouched, so Founders Edition perks stay intact). Gating re-engages when PLAYTEST_MODE is set to `false` at launch.
 
-## Pending git push (run from your machine — git isn't usable from the sandbox)
-Everything above is uncommitted. From `C:\RallyPoint\app`:
-```
-git add -A
-git commit -m "Feed as home/event screen, background bubbles, What's New popup; emoji cleanup, build + caching fixes"
-git push
-```
-After pushing, confirm the Vercel Deployments list shows the new commit actually deploying (auto-deploy has silently no-op'd before — manually "Create Deployment" if missing). Then do a live phone check of the Cache-Control fix and the Feed/Events redesign.
+**GDPR (EU-launch legal blocker — done):**
+- `app/api/account/export` downloads all of a user's data as JSON; `app/api/account/delete` clears the FK blockers via the `prepare_user_deletion()` DB function, then deletes the auth user so the rest cascades. Wired to a "Data & privacy" section in `app/settings/page.tsx`.
+
+**Security hardening (Fable find-and-fix pass):**
+- Found + fixed a **HIGH billing-portal IDOR** (`create-billing-portal` trusted `userId` from the body with no session check → anyone could open/cancel another user's Stripe portal). Added `requireMatchingUser` guards to `create-billing-portal`, `create-subscription-checkout`, `create-checkout`, plus a UUID-format check on `friends` `receiverId` (a `.or()` filter-injection surface). Committed as `86a76a2`.
+- Known follow-up (not done yet): the Stripe/checkout routes return raw `err.message` to the client — worth a "generic message to client, log detail server-side" pass.
+
+**Also since 2026-06-30:** geo-scoping for events (`lib/geo.ts`); an 18+ age-siloing scaffold (`lib/ageGating.ts`, OFF by default); a DB-advisor cleanup (RLS `(select auth.uid())` wrapping, permissive-policy consolidation, rate-limit triggers on events/messages/meetup_requests).
+
+## Git state
+All of the above is committed and pushed — HEAD `86a76a2`. Nothing pending.
+
+## Still open (near-term)
+- **Security probe + load simulation** — bulk-simulate the create→join→create cascade + adversarial probe (run on a Supabase branch, not prod). Not started.
+- **Trailer render** — deferred to a fresh art-only agent (see `TRAILER_AGENT_HANDOFF.md`).
+- Flip `NEXT_PUBLIC_PLAYTEST_MODE=false` + activate live Stripe at launch.
 
 ## What RallyPoint is
 A social app for spontaneous, low-pressure real-world meetups (casual hangouts, pickup sports, organizer-run events). Stack: Next.js (App Router) + Supabase (Postgres, Auth, RLS) + Stripe + Vercel. Deployed at https://rally-point-eb1q.vercel.app, auto-deploys from GitHub on push.
@@ -41,7 +48,7 @@ Phase 3 (end-to-end smoke test) → Phase 4 (launch polish). Phase 5 (public lau
 - Pricing (Phase 6/7) is John's call — see `PHASE_6_7_DRAFT.md`; don't treat draft numbers as approved.
 
 ## What's still blocked on you (not actionable by an agent)
-- #27: Google Places API key (map venue pins fall back to cache-only).
+- #27: Google Places API key (OPTIONAL now — the map runs on keyless Overpass/OpenStreetMap; a Places key would only add richer venue metadata/photos).
 - #30: Rotate the Stripe keys (flagged compromised in an earlier session).
 - #71: Anthropic API key (assistant bot runs in template mode — deliberate, deferred to launch).
 - #83: Register the business + activate live Stripe.
@@ -52,9 +59,14 @@ Phase 3 (end-to-end smoke test) → Phase 4 (launch polish). Phase 5 (public lau
 - `lib/sessionAuth.ts` — session-matches-claimed-user check for friends/report/assistant routes.
 - `lib/seedCheck.ts` — shared "this area looks empty → propose/seed event" trigger (fires from Feed/Events/Map, once/day).
 - `lib/changelog.ts` + `components/WhatsNewModal.tsx` — What's New popup.
+- `components/MapView.tsx` + `app/map/page.tsx` + `app/api/venues/route.ts` — MapLibre map, discovery tabs, Overpass venue/hub source.
+- `lib/subscription.ts` — tiers, prices, feature-gating + playtest unlock (`FEATURE_MIN_TIER` = the untouchable tier map).
+- `app/api/account/export/route.ts` + `app/api/account/delete/route.ts` + `prepare_user_deletion()` DB fn — GDPR export/deletion.
+- `lib/geo.ts` (radius/bounding-box), `lib/ageGating.ts` (18+ scaffold, OFF).
 - `supabase/rls_policies.sql` — RLS policy reference.
 
 ## Suggested next steps
-1. Push the pending changes (above) and verify live on a phone.
-2. Decide whether to surface the orphaned social/venue events (`/events`) inside the feed, or leave them URL-only.
-3. Continue Phase 4 launch polish.
+1. Run the security probe + load simulation (create→join→create at scale + adversarial), on a Supabase branch — not prod.
+2. Fresh art-only agent renders the trailer — see `TRAILER_AGENT_HANDOFF.md`.
+3. At launch: flip `NEXT_PUBLIC_PLAYTEST_MODE=false`, activate live Stripe, rotate keys (#30 / #83).
+4. Continue Phase 4 launch polish; decide whether to surface the orphaned `/events` inside the feed.
