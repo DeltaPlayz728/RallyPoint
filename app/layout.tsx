@@ -7,6 +7,7 @@ import FeedbackButton from "@/components/FeedbackButton";
 import { ThemeProvider, THEME_BOOTSTRAP_SCRIPT } from "@/components/ThemeProvider";
 import ErrorLogger from "@/components/ErrorLogger";
 import ReferralCapture from "@/components/ReferralCapture";
+import CriticalPatchBanner from "@/components/CriticalPatchBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -81,6 +82,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
+          <CriticalPatchBanner />
           {children}
           <BottomNavWrapper />
           <SubscriptionCelebrationWrapper />

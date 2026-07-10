@@ -50,6 +50,15 @@ type Feedback = {
   profiles: { username: string | null; full_name: string | null } | null
 }
 
+type PatchNote = {
+  id: string
+  version: string
+  title: string
+  body_markdown: string
+  severity: 'minor' | 'standard' | 'critical'
+  published_at: string
+}
+
 type BannerSubmission = {
   id: string
   community_id: string
@@ -67,9 +76,15 @@ export default function AdminPage() {
   const [suspensions, setSuspensions] = useState<Suspension[]>([])
   const [feedback, setFeedback]     = useState<Feedback[]>([])
   const [feedbackLoading, setFeedbackLoading] = useState(false)
-  const [tab, setTab]               = useState<'reports' | 'suspensions' | 'founding' | 'feedback' | 'communities'>('reports')
+  const [tab, setTab]               = useState<'reports' | 'suspensions' | 'founding' | 'feedback' | 'communities' | 'patchnotes'>('reports')
   const [bannerSubmissions, setBannerSubmissions] = useState<BannerSubmission[]>([])
   const [bannerBusyId, setBannerBusyId] = useState<string | null>(null)
+  const [patchNotes, setPatchNotes] = useState<PatchNote[]>([])
+  const [patchVersion, setPatchVersion] = useState('')
+  const [patchTitle, setPatchTitle] = useState('')
+  const [patchBody, setPatchBody] = useState('')
+  const [patchSeverity, setPatchSeverity] = useState<'minor' | 'standard' | 'critical'>('standard')
+  const [publishingPatch, setPublishingPatch] = useState(false)
   const [loading, setLoading]       = useState(true)
 
   // Founding members tab state
@@ -99,18 +114,20 @@ export default function AdminPage() {
       setAuthorized(true)
 
       // Fetch reports and suspensions via service role API
-      const [rRes, sRes, fRes, fbRes, cbRes] = await Promise.all([
+      const [rRes, sRes, fRes, fbRes, cbRes, pnRes] = await Promise.all([
         fetch('/api/admin/reports'),
         fetch('/api/admin/suspensions'),
         fetch('/api/admin/founding-member'),
         fetch('/api/feedback'),
         fetch('/api/admin/community-banners'),
+        fetch('/api/admin/patch-notes'),
       ])
       if (rRes.ok) setReports(await rRes.json())
       if (sRes.ok) setSuspensions(await sRes.json())
       if (fRes.ok) setFoundingMembers(await fRes.json())
       if (fbRes.ok) setFeedback(await fbRes.json())
       if (cbRes.ok) setBannerSubmissions(await cbRes.json())
+      if (pnRes.ok) setPatchNotes(await pnRes.json())
       setLoading(false)
     }
     init()
@@ -186,6 +203,25 @@ export default function AdminPage() {
     setBannerBusyId(null)
   }
 
+  const publishPatchNote = async () => {
+    if (!patchVersion.trim() || !patchTitle.trim() || !patchBody.trim()) return
+    setPublishingPatch(true)
+    const res = await fetch('/api/admin/patch-notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ version: patchVersion.trim(), title: patchTitle.trim(), body_markdown: patchBody.trim(), severity: patchSeverity }),
+    })
+    if (!res.ok) {
+      alert('Failed to publish. Please try again.')
+      setPublishingPatch(false)
+      return
+    }
+    const { patch } = await res.json()
+    setPatchNotes(prev => [patch, ...prev])
+    setPatchVersion(''); setPatchTitle(''); setPatchBody(''); setPatchSeverity('standard')
+    setPublishingPatch(false)
+  }
+
   const updateReport = async (id: string, status: string) => {
     const res = await fetch('/api/admin/reports', {
       method: 'PATCH',
@@ -240,7 +276,7 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {(['reports', 'suspensions', 'founding', 'feedback', 'communities'] as const).map(t => (
+        {(['reports', 'suspensions', 'founding', 'feedback', 'communities', 'patchnotes'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -250,7 +286,7 @@ export default function AdminPage() {
                 : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
             }`}
           >
-            {t}
+            {t === 'patchnotes' ? 'Patch notes' : t}
             {t === 'reports' && pendingReports.length > 0 && (
               <span className="ml-1.5 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
                 {pendingReports.length}
@@ -312,6 +348,80 @@ export default function AdminPage() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Patch notes tab */}
+      {tab === 'patchnotes' && (
+        <div className="space-y-5">
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 space-y-3">
+            <p className="text-sm font-semibold">Publish a patch note</p>
+            <input
+              value={patchVersion}
+              onChange={e => setPatchVersion(e.target.value)}
+              placeholder="Version, e.g. 2026.07.15"
+              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+            />
+            <input
+              value={patchTitle}
+              onChange={e => setPatchTitle(e.target.value)}
+              placeholder="Title"
+              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+            />
+            <textarea
+              value={patchBody}
+              onChange={e => setPatchBody(e.target.value)}
+              rows={4}
+              placeholder="What changed (markdown supported)"
+              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+            />
+            <div className="flex gap-2">
+              {(['minor', 'standard', 'critical'] as const).map(sev => (
+                <button
+                  key={sev}
+                  onClick={() => setPatchSeverity(sev)}
+                  className={`flex-1 px-3 py-2 rounded-xl text-xs font-medium border capitalize transition ${
+                    patchSeverity === sev
+                      ? 'bg-accent border-accent text-white'
+                      : 'bg-[#fdf6ec] dark:bg-[#15110d] border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  {sev}
+                </button>
+              ))}
+            </div>
+            {patchSeverity === 'critical' && (
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                Critical shows a banner every user sees until they acknowledge it — use sparingly.
+              </p>
+            )}
+            <button
+              onClick={publishPatchNote}
+              disabled={publishingPatch || !patchVersion.trim() || !patchTitle.trim() || !patchBody.trim()}
+              className="w-full bg-accent text-white rounded-xl py-2.5 text-sm font-medium disabled:opacity-60"
+            >
+              {publishingPatch ? 'Publishing…' : 'Publish to everyone'}
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {patchNotes.map(p => (
+              <div key={p.id} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold capitalize ${
+                    p.severity === 'critical'
+                      ? 'bg-red-100 text-red-600 border border-red-300'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+                  }`}>
+                    {p.severity}
+                  </span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">{p.version} · {new Date(p.published_at).toLocaleDateString()}</span>
+                </div>
+                <p className="text-sm font-medium text-[#15110d] dark:text-[#fdf6ec]">{p.title}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs mt-1 whitespace-pre-wrap">{p.body_markdown}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

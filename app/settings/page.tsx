@@ -18,6 +18,8 @@ export default function SettingsPage() {
   const [portalLoading, setPortalLoading] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [patchEmailOptOut, setPatchEmailOptOut] = useState(false)
+  const [savingPatchPref, setSavingPatchPref] = useState(false)
 
   useEffect(() => {
     const check = async () => {
@@ -27,15 +29,25 @@ export default function SettingsPage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_tier, subscription_status')
+        .select('subscription_tier, subscription_status, patch_email_opt_out')
         .eq('id', user.id)
         .maybeSingle()
 
       setTier(effectiveTier(profile))
+      setPatchEmailOptOut(profile?.patch_email_opt_out === true)
       setLoading(false)
     }
     check()
   }, [router])
+
+  const handleTogglePatchEmail = async () => {
+    if (!userId) return
+    setSavingPatchPref(true)
+    const next = !patchEmailOptOut
+    const { error } = await supabase.from('profiles').update({ patch_email_opt_out: next }).eq('id', userId)
+    if (!error) setPatchEmailOptOut(next)
+    setSavingPatchPref(false)
+  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -188,6 +200,30 @@ export default function SettingsPage() {
               <span className="text-gray-400">›</span>
             </button>
           </div>
+        </section>
+
+        {/* Notifications */}
+        <section className="mb-6">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Notifications</h2>
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-200 dark:divide-gray-700 overflow-hidden">
+            <Link href="/patch-notes" className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2b241c] transition">
+              <span className="text-[#15110d] dark:text-[#fdf6ec]">What's new</span>
+              <span className="text-gray-400">›</span>
+            </Link>
+            <button
+              onClick={handleTogglePatchEmail}
+              disabled={savingPatchPref}
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2b241c] transition disabled:opacity-60"
+            >
+              <span className="text-[#15110d] dark:text-[#fdf6ec]">Weekly product-update emails</span>
+              <span className={`text-xs font-semibold ${patchEmailOptOut ? 'text-gray-400' : 'text-accent'}`}>
+                {patchEmailOptOut ? 'OFF' : 'ON'}
+              </span>
+            </button>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
+            Critical announcements always show in-app regardless of this setting — this only controls the weekly email digest.
+          </p>
         </section>
 
         {/* Data & privacy */}
