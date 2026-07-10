@@ -11,6 +11,8 @@ import CopyLinkButton from '@/components/CopyLinkButton'
 import Logo from '@/components/Logo'
 import { ChevronLeft, Check, Sparkles, MapPin, Clock, Users, MessageCircle, Send } from 'lucide-react'
 import { reportConversionIfPending } from '@/lib/referral'
+import { sendNotification } from '@/lib/notify'
+import { checkCapacityMilestones } from '@/lib/eventCapacityNotify'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -207,6 +209,12 @@ export default function EventDetailPage() {
           setIsAttending(true)
           supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
           reportConversionIfPending('join')
+          sendNotification(supabase, {
+            userId,
+            type: 'rsvp_confirmed',
+            vars: { event_name: event.title, date_short: formatDate(event.starts_at), venue_name: event.location, event_id: event.id },
+          })
+          checkCapacityMilestones(supabase, event.id)
         })
     }
   }, [userId, event])
@@ -231,6 +239,12 @@ export default function EventDetailPage() {
       setAttendees(prev => [...prev, { user_id: userId, profiles: null }])
       await supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
       reportConversionIfPending('join')
+      await sendNotification(supabase, {
+        userId,
+        type: 'rsvp_confirmed',
+        vars: { event_name: event.title, date_short: formatDate(event.starts_at), venue_name: event.location, event_id: event.id },
+      })
+      await checkCapacityMilestones(supabase, event.id)
     }
     setActionLoading(false)
   }

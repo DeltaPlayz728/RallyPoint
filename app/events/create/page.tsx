@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { moderateEvent } from '@/lib/contentModeration'
+import { sendNotification } from '@/lib/notify'
 import Logo from '@/components/Logo'
 import { Smile, Users, Check } from 'lucide-react'
 
@@ -129,6 +130,17 @@ function CreateEventForm() {
 
     // Auto-create chat room
     await supabase.from('event_chats').insert({ event_id: data.id })
+
+    // Publish confirmation (V2 notification framework) — only for events that
+    // actually went live; pending_review events get flagged to the host once
+    // a moderator clears them, not here.
+    if (data.status === 'active') {
+      await sendNotification(supabase, {
+        userId: user.id,
+        type: 'event_published',
+        vars: { event_name: data.title, event_id: data.id },
+      })
+    }
 
     router.push(`/events/${data.id}`)
   }

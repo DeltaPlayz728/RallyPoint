@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSessionUserId } from '@/lib/sessionAuth'
 import { isRateLimited } from '@/lib/rateLimit'
+import { sendNotification } from '@/lib/notify'
 
 // Server-side only. Service-role key: conversion writes (converted_at,
 // reward_issued, referral_count, milestone rows) are deliberately excluded
@@ -118,6 +119,19 @@ export async function POST(req: NextRequest) {
         .upsert({ user_id: inviteToken.created_by, milestone }, { onConflict: 'user_id,milestone', ignoreDuplicates: true })
     }
   }
+
+  const { data: recipientProfile } = await supabaseAdmin
+    .from('profiles')
+    .select('full_name, username')
+    .eq('id', recipientId)
+    .maybeSingle()
+  const friendName = recipientProfile?.username ? `@${recipientProfile.username}` : recipientProfile?.full_name ?? 'Someone'
+
+  await sendNotification(supabaseAdmin, {
+    userId: inviteToken.created_by,
+    type: 'invite_converted',
+    vars: { friend_name: friendName },
+  })
 
   return NextResponse.json({ ok: true })
 }
