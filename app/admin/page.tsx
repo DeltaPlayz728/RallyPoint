@@ -50,6 +50,16 @@ type Feedback = {
   profiles: { username: string | null; full_name: string | null } | null
 }
 
+type BannerSubmission = {
+  id: string
+  community_id: string
+  asset_type: 'banner' | 'icon'
+  asset_url: string
+  submitted_at: string
+  communities: { name: string } | null
+  profiles: { username: string | null; full_name: string | null } | null
+}
+
 export default function AdminPage() {
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
@@ -57,7 +67,9 @@ export default function AdminPage() {
   const [suspensions, setSuspensions] = useState<Suspension[]>([])
   const [feedback, setFeedback]     = useState<Feedback[]>([])
   const [feedbackLoading, setFeedbackLoading] = useState(false)
-  const [tab, setTab]               = useState<'reports' | 'suspensions' | 'founding' | 'feedback'>('reports')
+  const [tab, setTab]               = useState<'reports' | 'suspensions' | 'founding' | 'feedback' | 'communities'>('reports')
+  const [bannerSubmissions, setBannerSubmissions] = useState<BannerSubmission[]>([])
+  const [bannerBusyId, setBannerBusyId] = useState<string | null>(null)
   const [loading, setLoading]       = useState(true)
 
   // Founding members tab state
@@ -87,16 +99,18 @@ export default function AdminPage() {
       setAuthorized(true)
 
       // Fetch reports and suspensions via service role API
-      const [rRes, sRes, fRes, fbRes] = await Promise.all([
+      const [rRes, sRes, fRes, fbRes, cbRes] = await Promise.all([
         fetch('/api/admin/reports'),
         fetch('/api/admin/suspensions'),
         fetch('/api/admin/founding-member'),
         fetch('/api/feedback'),
+        fetch('/api/admin/community-banners'),
       ])
       if (rRes.ok) setReports(await rRes.json())
       if (sRes.ok) setSuspensions(await sRes.json())
       if (fRes.ok) setFoundingMembers(await fRes.json())
       if (fbRes.ok) setFeedback(await fbRes.json())
+      if (cbRes.ok) setBannerSubmissions(await cbRes.json())
       setLoading(false)
     }
     init()
@@ -156,6 +170,22 @@ export default function AdminPage() {
     setFoundingBusyId(null)
   }
 
+  const decideBanner = async (id: string, decision: 'approve' | 'reject') => {
+    setBannerBusyId(id)
+    const res = await fetch('/api/admin/community-banners', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, decision }),
+    })
+    if (!res.ok) {
+      alert('Failed to record decision. Please try again.')
+      setBannerBusyId(null)
+      return
+    }
+    setBannerSubmissions(prev => prev.filter(b => b.id !== id))
+    setBannerBusyId(null)
+  }
+
   const updateReport = async (id: string, status: string) => {
     const res = await fetch('/api/admin/reports', {
       method: 'PATCH',
@@ -210,7 +240,7 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {(['reports', 'suspensions', 'founding', 'feedback'] as const).map(t => (
+        {(['reports', 'suspensions', 'founding', 'feedback', 'communities'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -231,9 +261,59 @@ export default function AdminPage() {
                 {newFeedback.length}
               </span>
             )}
+            {t === 'communities' && bannerSubmissions.length > 0 && (
+              <span className="ml-1.5 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                {bannerSubmissions.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
+
+      {/* Community banner/icon approvals tab */}
+      {tab === 'communities' && (
+        <div className="space-y-3">
+          {bannerSubmissions.length === 0 && (
+            <p className="text-gray-600 dark:text-gray-400 text-center py-12">No pending banner/icon submissions</p>
+          )}
+          {bannerSubmissions.map(b => {
+            const submitterName = b.profiles?.username ? `@${b.profiles.username}` : b.profiles?.full_name ?? 'Someone'
+            return (
+              <div key={b.id} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-yellow-100 text-yellow-700 border border-yellow-300 capitalize">
+                      {b.asset_type}
+                    </span>
+                    <span className="ml-2 text-xs text-gray-600 dark:text-gray-400">{b.communities?.name ?? 'Unknown community'}</span>
+                  </div>
+                  <span className="text-[10px] text-gray-700 dark:text-gray-300 dark:text-gray-400">
+                    {new Date(b.submitted_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <img src={b.asset_url} alt="" className="w-full max-h-40 object-cover rounded-xl mb-2 border border-gray-200 dark:border-gray-700" />
+                <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">Submitted by {submitterName}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => decideBanner(b.id, 'approve')}
+                    disabled={bannerBusyId === b.id}
+                    className="flex-1 text-xs bg-green-100 border border-green-300 text-green-700 py-2 rounded-xl hover:bg-green-200 transition disabled:opacity-60"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => decideBanner(b.id, 'reject')}
+                    disabled={bannerBusyId === b.id}
+                    className="flex-1 text-xs bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 py-2 rounded-xl hover:border-gray-600 transition disabled:opacity-60"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Reports tab */}
       {tab === 'reports' && (

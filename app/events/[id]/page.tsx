@@ -14,6 +14,8 @@ import { reportConversionIfPending } from '@/lib/referral'
 import { sendNotification } from '@/lib/notify'
 import { checkCapacityMilestones } from '@/lib/eventCapacityNotify'
 import EventRulesDisplay, { DisplayRule } from '@/components/EventRulesDisplay'
+import CommunityTag from '@/components/CommunityTag'
+import { getCommunityTags, CommunityTag as CommunityTagData } from '@/lib/communityTags'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -118,6 +120,7 @@ export default function EventDetailPage() {
   const [event, setEvent]               = useState<Event | null>(null)
   const [rules, setRules]               = useState<DisplayRule[]>([])
   const [attendees, setAttendees]       = useState<any[]>([])
+  const [communityTags, setCommunityTags] = useState<Record<string, CommunityTagData>>({})
   const [userId, setUserId]             = useState<string | null>(null)
   const [isAttending, setIsAttending]   = useState(false)
   const [isHost, setIsHost]             = useState(false)
@@ -170,6 +173,7 @@ export default function EventDetailPage() {
       setAttendees(attendeeData ?? [])
       const attending = attendeeData?.some((a: any) => a.user_id === user.id) ?? false
       setIsAttending(attending)
+      getCommunityTags((attendeeData ?? []).map((a: any) => a.user_id)).then(setCommunityTags)
 
       // Show rating prompt if: event ended 2+ hrs ago, user attended, hasn't rated yet
       if (attending && eventData) {
@@ -577,6 +581,7 @@ export default function EventDetailPage() {
                       )}
                       {isMe && <span className="ml-1.5 text-[10px] text-gray-600 dark:text-gray-400">you</span>}
                     </span>
+                    <CommunityTag tag={communityTags[a.user_id]} />
                   </Link>
 
                   {(isAttending || isHost) && !isMe && userId && (

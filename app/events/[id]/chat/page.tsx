@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
+import CommunityTag from '@/components/CommunityTag'
+import { getCommunityTags, CommunityTag as CommunityTagData } from '@/lib/communityTags'
 
 type Message = {
   id: string
@@ -24,6 +26,7 @@ export default function EventChatPage() {
   const [eventTitle, setEventTitle] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [communityTags, setCommunityTags] = useState<Record<string, CommunityTagData>>({})
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -81,6 +84,7 @@ export default function EventChatPage() {
         .order('created_at', { ascending: true })
 
       setMessages(msgs ?? [])
+      getCommunityTags((msgs ?? []).map(m => m.user_id)).then(setCommunityTags)
       setLoading(false)
     }
 
@@ -105,6 +109,7 @@ export default function EventChatPage() {
 
           if (msgWithProfile) {
             setMessages(prev => [...prev, msgWithProfile])
+            getCommunityTags([msgWithProfile.user_id]).then(tag => setCommunityTags(prev => ({ ...prev, ...tag })))
           }
         }
       )
@@ -207,7 +212,10 @@ export default function EventChatPage() {
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               {!isMe && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1">{name}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1 inline-flex items-center gap-1">
+                  {name}
+                  <CommunityTag tag={communityTags[msg.user_id]} />
+                </span>
               )}
               <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
                 isMe

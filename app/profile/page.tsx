@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { effectiveTier, hasFeature, TIER_LABELS, SubscriptionTier } from '@/lib/subscription'
 import TopBar from '@/components/TopBar'
 import { Settings, Users, Target, BatteryFull, BatteryMedium, BatteryLow, MapPin, Clock, Check } from 'lucide-react'
+import CommunityTag from '@/components/CommunityTag'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 const BANNER_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6', '#ef4444', '#eab308']
@@ -52,6 +53,7 @@ type Profile = {
   venue_name: string | null
   avatar_url: string | null
   created_at: string
+  primary_community_id: string | null
   subscription_tier?: string | null
   subscription_status?: string | null
   profile_banner_color?: string | null
@@ -94,6 +96,8 @@ export default function ProfilePage() {
   const [upgradingOrganizer, setUpgradingOrganizer] = useState(false)
   const [activeTab, setActiveTab] = useState<'hosting' | 'attending'>('hosting')
   const [savingBanner, setSavingBanner] = useState(false)
+  const [myCommunities, setMyCommunities] = useState<{ id: string; name: string; banner_color: string }[]>([])
+  const [savingCommunityTag, setSavingCommunityTag] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -101,13 +105,16 @@ export default function ProfilePage() {
       if (!user) { router.push('/auth/login'); return }
       setUserId(user.id)
 
-      const [profileRes, hostingRes, attendingRes, friendsRes, ratingsRes] = await Promise.all([
+      const [profileRes, hostingRes, attendingRes, friendsRes, ratingsRes, communityRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('events').select('*').eq('created_by', user.id).eq('status', 'active').order('starts_at', { ascending: true }),
         supabase.from('event_attendees').select('events(*)').eq('user_id', user.id),
         supabase.from('friendships').select('id').or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`).eq('status', 'accepted'),
         supabase.from('host_reputation').select('avg_rating, total_ratings').eq('host_id', user.id).maybeSingle(),
+        supabase.from('community_members').select('communities(id, name, banner_color)').eq('user_id', user.id),
       ])
+
+      setMyCommunities((communityRes.data ?? []).map((r: any) => r.communities).filter(Boolean))
 
       const profileData = profileRes.data
       setProfile(profileData)
@@ -164,6 +171,14 @@ export default function ProfilePage() {
     await supabase.from('profiles').update({ profile_banner_color: color }).eq('id', userId)
     setProfile(prev => prev ? { ...prev, profile_banner_color: color } : prev)
     setSavingBanner(false)
+  }
+
+  const handleSetCommunityTag = async (communityId: string | null) => {
+    if (!userId) return
+    setSavingCommunityTag(true)
+    const { error } = await supabase.from('profiles').update({ primary_community_id: communityId }).eq('id', userId)
+    if (!error) setProfile(prev => prev ? { ...prev, primary_community_id: communityId } : prev)
+    setSavingCommunityTag(false)
   }
 
   const avatarInitial = (profile?.full_name ?? profile?.username ?? '?')[0].toUpperCase()
@@ -258,6 +273,12 @@ export default function ProfilePage() {
                     <Target size={10} /> Organizer
                   </span>
                 )}
+                {profile?.primary_community_id && (() => {
+                  const tagCommunity = myCommunities.find(c => c.id === profile.primary_community_id)
+                  return tagCommunity ? (
+                    <CommunityTag tag={{ name: tagCommunity.name, banner_color: tagCommunity.banner_color, icon_url: null }} />
+                  ) : null
+                })()}
               </div>
               {profile?.username && <p className="text-gray-500 dark:text-gray-400 text-sm">@{profile.username}</p>}
               {profile?.city && (
@@ -339,6 +360,44 @@ export default function ProfilePage() {
             label={stats.totalRatings > 0 ? `${stats.totalRatings} ratings` : 'No ratings'}
           />
         </div>
+
+        {/* Community tag picker — the small badge shown next to your name elsewhere in the app */}
+        {myCommunities.length > 0 && (
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
+            <p className="text-sm font-medium mb-2">Community tag</p>
+            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
+              Shown next to your name in event attendee lists and chat. Pick one community you're a member of, or none.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleSetCommunityTag(null)}
+                disabled={savingCommunityTag}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                  !profile?.primary_community_id
+                    ? 'bg-accent border-accent text-white'
+                    : 'bg-white dark:bg-[#15110d] border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                None
+              </button>
+              {myCommunities.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => handleSetCommunityTag(c.id)}
+                  disabled={savingCommunityTag}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                    profile?.primary_community_id === c.id
+                      ? 'text-white border-black'
+                      : 'bg-white dark:bg-[#15110d] border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                  }`}
+                  style={profile?.primary_community_id === c.id ? { backgroundColor: c.banner_color } : undefined}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Banner color picker — Go Getter+ perk */}
         {canCustomizeBanner && (
