@@ -8,6 +8,7 @@ import { effectiveTier, hasFeature, TIER_LABELS, SubscriptionTier } from '@/lib/
 import TopBar from '@/components/TopBar'
 import { Settings, Users, Target, BatteryFull, BatteryMedium, BatteryLow, MapPin, Clock, Check } from 'lucide-react'
 import CommunityTag from '@/components/CommunityTag'
+import ReputationBadge from '@/components/ReputationBadge'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 const BANNER_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6', '#ef4444', '#eab308']
@@ -98,6 +99,9 @@ export default function ProfilePage() {
   const [savingBanner, setSavingBanner] = useState(false)
   const [myCommunities, setMyCommunities] = useState<{ id: string; name: string; banner_color: string }[]>([])
   const [savingCommunityTag, setSavingCommunityTag] = useState(false)
+  const [reputationTier, setReputationTier] = useState<string | null>(null)
+  const [accommodations, setAccommodations] = useState<{ id: string; name: string; endorsement_count: number; display_selected: boolean }[]>([])
+  const [savingAccommodationId, setSavingAccommodationId] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -115,6 +119,23 @@ export default function ProfilePage() {
       ])
 
       setMyCommunities((communityRes.data ?? []).map((r: any) => r.communities).filter(Boolean))
+
+      const { data: repScore } = await supabase
+        .from('reputation_scores').select('display_tier').eq('user_id', user.id).maybeSingle()
+      setReputationTier(repScore?.display_tier ?? null)
+
+      const { data: accs } = await supabase
+        .from('user_accommodations')
+        .select('id, endorsement_count, display_selected, accommodation_types(name)')
+        .eq('user_id', user.id)
+        .gt('endorsement_count', 0)
+        .order('endorsement_count', { ascending: false })
+      setAccommodations((accs ?? []).map((a: any) => ({
+        id: a.id,
+        name: a.accommodation_types?.name ?? 'Accommodation',
+        endorsement_count: a.endorsement_count,
+        display_selected: a.display_selected,
+      })))
 
       const profileData = profileRes.data
       setProfile(profileData)
@@ -171,6 +192,17 @@ export default function ProfilePage() {
     await supabase.from('profiles').update({ profile_banner_color: color }).eq('id', userId)
     setProfile(prev => prev ? { ...prev, profile_banner_color: color } : prev)
     setSavingBanner(false)
+  }
+
+  const handleToggleAccommodation = async (id: string, next: boolean) => {
+    setSavingAccommodationId(id)
+    const { error } = await supabase.from('user_accommodations').update({ display_selected: next }).eq('id', id)
+    if (!error) {
+      setAccommodations(prev => prev.map(a => a.id === id ? { ...a, display_selected: next } : a))
+    } else if (next) {
+      alert('You can only display 3 accommodations at once — deselect one first.')
+    }
+    setSavingAccommodationId(null)
   }
 
   const handleSetCommunityTag = async (communityId: string | null) => {
@@ -263,6 +295,7 @@ export default function ProfilePage() {
                     {TIER_LABELS[tier]}
                   </span>
                 )}
+                <ReputationBadge tier={reputationTier} />
                 {isFoundingMember && (
                   <span className="text-[10px] bg-accent text-white border border-black px-2 py-0.5 rounded-full font-semibold">
                     Founding Member
@@ -393,6 +426,33 @@ export default function ProfilePage() {
                   style={profile?.primary_community_id === c.id ? { backgroundColor: c.banner_color } : undefined}
                 >
                   {c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Accommodations — earned social endorsements, pick up to 3 to show publicly */}
+        {accommodations.length > 0 && (
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
+            <p className="text-sm font-medium mb-1">Accommodations</p>
+            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
+              What people who've shared an event with you say. Pick up to 3 to show on your profile.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {accommodations.map(a => (
+                <button
+                  key={a.id}
+                  onClick={() => handleToggleAccommodation(a.id, !a.display_selected)}
+                  disabled={savingAccommodationId === a.id}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition inline-flex items-center gap-1 ${
+                    a.display_selected
+                      ? 'bg-accent border-accent text-white'
+                      : 'bg-white dark:bg-[#15110d] border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                  }`}
+                >
+                  {a.display_selected && <Check size={11} className="shrink-0" />} {a.name}
+                  <span className="opacity-70">×{a.endorsement_count}</span>
                 </button>
               ))}
             </div>

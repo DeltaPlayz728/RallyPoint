@@ -14,6 +14,7 @@ import { reportConversionIfPending } from '@/lib/referral'
 import { sendNotification } from '@/lib/notify'
 import { checkCapacityMilestones } from '@/lib/eventCapacityNotify'
 import EventRulesDisplay, { DisplayRule } from '@/components/EventRulesDisplay'
+import EndorseModal from '@/components/EndorseModal'
 import CommunityTag from '@/components/CommunityTag'
 import { getCommunityTags, CommunityTag as CommunityTagData } from '@/lib/communityTags'
 
@@ -129,6 +130,7 @@ export default function EventDetailPage() {
   const [meetupRequests, setMeetupRequests] = useState<MeetupRequestMap>({})
   const [paymentStatus, setPaymentStatus] = useState<'success' | 'cancelled' | null>(null)
   const [requestModal, setRequestModal] = useState<{ userId: string; name: string } | null>(null)
+  const [endorseModal, setEndorseModal] = useState<{ userId: string; name: string } | null>(null)
   const [sendingRequest, setSendingRequest] = useState(false)
   const [showRating, setShowRating]         = useState(false)
   const [showShare, setShowShare]           = useState(false)
@@ -392,6 +394,15 @@ export default function EventDetailPage() {
         />
       )}
 
+      {/* Endorse modal */}
+      {endorseModal && userId && (
+        <EndorseModal
+          target={endorseModal}
+          currentUserId={userId}
+          onClose={() => setEndorseModal(null)}
+        />
+      )}
+
       {/* Cancel event confirmation */}
       {showCancelConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
@@ -591,6 +602,13 @@ export default function EventDetailPage() {
                         targetUserId={a.user_id}
                         size="sm"
                       />
+                      <button
+                        onClick={() => setEndorseModal({ userId: a.user_id, name })}
+                        title="Give an accommodation"
+                        className="text-xs text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 hover:border-accent hover:text-accent px-2 py-1 rounded-full transition"
+                      >
+                        Endorse
+                      </button>
                       {requestStatus === 'pending' ? (
                         <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full border border-yellow-300">Meetup sent</span>
                       ) : requestStatus === 'accepted' ? (
