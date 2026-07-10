@@ -7,6 +7,7 @@ import Link from 'next/link'
 import FriendButton from '@/components/FriendButton'
 import RatingModal from '@/components/RatingModal'
 import ShareCard from '@/components/ShareCard'
+import CopyLinkButton from '@/components/CopyLinkButton'
 import Logo from '@/components/Logo'
 import { ChevronLeft, Check, Sparkles, MapPin, Clock, Users, MessageCircle, Send } from 'lucide-react'
 
@@ -581,6 +582,7 @@ export default function EventDetailPage() {
             >
               <MessageCircle size={18} />
             </Link>
+            <CopyLinkButton eventId={event.id} />
             <button
               onClick={() => setShowCancelConfirm(true)}
               className="flex items-center justify-center px-4 border border-red-300 text-red-600 hover:bg-red-50 rounded-2xl transition text-sm font-medium"
@@ -597,6 +599,7 @@ export default function EventDetailPage() {
             >
               <MessageCircle size={16} className="shrink-0" /> Group Chat
             </Link>
+            <CopyLinkButton eventId={event.id} />
             <button
               onClick={() => setShowShare(true)}
               className="px-4 border border-gray-300 dark:border-gray-700 hover:border-accent text-gray-500 dark:text-gray-400 hover:text-accent rounded-2xl transition text-lg"

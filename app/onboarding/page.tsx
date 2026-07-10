@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { consumePendingRedirect } from '@/lib/postAuthRedirect'
 import {
   Home, Calendar, Map as MapIcon, MessageCircle, Handshake, Camera,
   type LucideIcon,
@@ -175,7 +176,7 @@ export default function OnboardingPage() {
       if (selectedVibe) update.vibe = selectedVibe
       await supabase.from('profiles').update(update).eq('id', user.id)
     }
-    window.location.href = '/feed'
+    window.location.href = consumePendingRedirect()
   }
 
   const handleNext = async () => {
