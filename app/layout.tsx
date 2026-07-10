@@ -6,6 +6,7 @@ import SubscriptionCelebrationWrapper from "@/components/SubscriptionCelebration
 import FeedbackButton from "@/components/FeedbackButton";
 import { ThemeProvider, THEME_BOOTSTRAP_SCRIPT } from "@/components/ThemeProvider";
 import ErrorLogger from "@/components/ErrorLogger";
+import ReferralCapture from "@/components/ReferralCapture";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,6 +86,7 @@ export default function RootLayout({
           <SubscriptionCelebrationWrapper />
           <FeedbackButton />
           <ErrorLogger />
+          <ReferralCapture />
         </ThemeProvider>
       </body>
     </html>

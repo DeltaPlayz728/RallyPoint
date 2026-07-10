@@ -10,6 +10,7 @@ import ShareCard from '@/components/ShareCard'
 import CopyLinkButton from '@/components/CopyLinkButton'
 import Logo from '@/components/Logo'
 import { ChevronLeft, Check, Sparkles, MapPin, Clock, Users, MessageCircle, Send } from 'lucide-react'
+import { reportConversionIfPending } from '@/lib/referral'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -205,6 +206,7 @@ export default function EventDetailPage() {
         .then(() => {
           setIsAttending(true)
           supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
+          reportConversionIfPending('join')
         })
     }
   }, [userId, event])
@@ -228,6 +230,7 @@ export default function EventDetailPage() {
       setIsAttending(true)
       setAttendees(prev => [...prev, { user_id: userId, profiles: null }])
       await supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
+      reportConversionIfPending('join')
     }
     setActionLoading(false)
   }
@@ -340,6 +343,7 @@ export default function EventDetailPage() {
       {/* Share card — shows after rating, or manually triggered */}
       {showShare && event && (
         <ShareCard
+          eventId={event.id}
           eventTitle={event.title}
           eventLocation={event.location}
           eventDate={event.starts_at}

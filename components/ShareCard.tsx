@@ -2,8 +2,10 @@
 
 import { useRef, useState } from 'react'
 import { MapPin, Calendar } from 'lucide-react'
+import { mintReferralLink } from '@/lib/referral'
 
 interface Props {
+  eventId: string
   eventTitle: string
   eventLocation: string
   eventDate: string   // ISO string
@@ -16,17 +18,23 @@ function formatShareDate(iso: string) {
   })
 }
 
-export default function ShareCard({ eventTitle, eventLocation, eventDate, onClose }: Props) {
+export default function ShareCard({ eventId, eventTitle, eventLocation, eventDate, onClose }: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [shared, setShared] = useState(false)
 
   const handleShare = async () => {
+    // Mint an attributed invite link (V2 share engine) so this brag-share
+    // also counts toward the sender's referral count, same as the copy-link
+    // button. Falls back to a plain link if minting fails.
+    const url = (await mintReferralLink({ eventId })) ?? `${window.location.origin}/e/${eventId}`
+
     // Try Web Share API first (works on iOS Safari, Android Chrome)
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'I showed up.',
-          text: `Just attended "${eventTitle}" on RallyPoint. rally-point.app`,
+          text: `Just attended "${eventTitle}" on RallyPoint.`,
+          url,
         })
         setShared(true)
         return

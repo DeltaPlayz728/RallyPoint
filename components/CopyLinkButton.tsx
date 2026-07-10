@@ -2,12 +2,17 @@
 
 import { useState } from 'react'
 import { Link2, Check } from 'lucide-react'
+import { mintReferralLink } from '@/lib/referral'
 
 export default function CopyLinkButton({ eventId, className }: { eventId: string; className?: string }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
-    const url = `${window.location.origin}/e/${eventId}`
+    // Mint a fresh attributed invite link so this share counts toward the
+    // sender's referral count (V2 share engine). Falls back to a plain,
+    // unattributed link if minting fails for any reason (e.g. offline) so
+    // sharing never just breaks.
+    const url = (await mintReferralLink({ eventId })) ?? `${window.location.origin}/e/${eventId}`
     try {
       await navigator.clipboard.writeText(url)
     } catch {

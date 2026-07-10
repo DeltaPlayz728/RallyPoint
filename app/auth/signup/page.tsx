@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { reportConversionIfPending } from '@/lib/referral'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -67,6 +68,11 @@ export default function SignupPage() {
         setLoading(false)
         return
       }
+
+      // Fire-and-forget: report a pending referral conversion (V2 share
+      // engine), if this signup arrived via a shared invite link. Never
+      // blocks navigation — see reportConversionIfPending's error handling.
+      reportConversionIfPending('signup')
 
       window.location.href = '/profile/setup'
     }
