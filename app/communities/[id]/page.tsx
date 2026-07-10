@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { setPendingRedirect } from '@/lib/postAuthRedirect'
 import { Camera, Pin, ClipboardList, MessageCircle, Users, Check, Settings, Home, Calendar, type LucideIcon } from 'lucide-react'
 
 type Community = {
@@ -90,6 +91,8 @@ export default function CommunityDetailPage() {
   const [pendingBanner, setPendingBanner] = useState(false)
   const [pendingIcon, setPendingIcon] = useState(false)
 
+  const [linkCopied, setLinkCopied] = useState(false)
+
   const [nameDraft, setNameDraft] = useState('')
   const [descDraft, setDescDraft] = useState('')
   const [rulesDraft, setRulesDraft] = useState('')
@@ -98,7 +101,15 @@ export default function CommunityDetailPage() {
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login'); return }
+      if (!user) {
+        // sessionStorage, not a query param — consumePendingRedirect() is
+        // already checked at the end of both the login flow AND the signup
+        // → onboarding chain (see postAuthRedirect.ts / SharedEventCta.tsx),
+        // so this gets a shared invite link back to the community either way.
+        setPendingRedirect(`/communities/${communityId}`)
+        router.push('/auth/login')
+        return
+      }
       setUserId(user.id)
 
       const { data: c } = await supabase
@@ -232,6 +243,20 @@ export default function CommunityDetailPage() {
     if (!userId) return
     await supabase.from('community_members').delete().eq('community_id', communityId).eq('user_id', userId)
     router.push('/communities')
+  }
+
+  // Plain deep link — communities are open-join today, so this doesn't mint
+  // an attributed token like the event share flow does. If communities ever
+  // get gated (private/invite-only), this is the spot to swap in a token.
+  const handleCopyInviteLink = async () => {
+    const url = `${window.location.origin}/communities/${communityId}`
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      window.prompt('Copy this link:', url)
+    }
+    setLinkCopied(true)
+    setTimeout(() => setLinkCopied(false), 1800)
   }
 
   const handleSend = async () => {
@@ -414,6 +439,12 @@ export default function CommunityDetailPage() {
 
         {showMenu && (
           <div className="absolute top-12 right-3 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl shadow-md overflow-hidden z-20 text-sm">
+            <button
+              onClick={handleCopyInviteLink}
+              className="block w-full text-left px-4 py-2.5 text-[#15110d] dark:text-[#fdf6ec] hover:bg-gray-50 dark:hover:bg-[#2b241c]"
+            >
+              {linkCopied ? 'Link copied!' : 'Copy invite link'}
+            </button>
             {isMember && !isOwner && (
               <button
                 onClick={() => { setShowMenu(false); handleLeave() }}
