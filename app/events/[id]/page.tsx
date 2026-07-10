@@ -635,9 +635,18 @@ export default function EventDetailPage() {
       <div className="fixed bottom-20 left-0 right-0 z-50 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm border-t border-gray-300 dark:border-gray-700 px-4 pt-3 pb-4">
         {isHost ? (
           <div className="flex gap-2">
-            <div className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-              You're hosting this event
-            </div>
+            {new Date(event.starts_at).getTime() < Date.now() ? (
+              <Link
+                href={`/events/${event.id}/feedback`}
+                className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 hover:border-accent rounded-2xl px-4 py-3 text-sm text-accent text-center font-medium"
+              >
+                View feedback
+              </Link>
+            ) : (
+              <div className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                You're hosting this event
+              </div>
+            )}
             <Link
               href={`/events/${event.id}/chat`}
               className="flex items-center justify-center gap-1.5 px-4 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec] rounded-2xl transition text-sm font-medium"
