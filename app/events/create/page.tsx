@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { moderateEvent } from '@/lib/contentModeration'
 import { sendNotification } from '@/lib/notify'
+import RulePicker, { SelectedRule } from '@/components/RulePicker'
 import Logo from '@/components/Logo'
 import { Smile, Users, Check } from 'lucide-react'
 
@@ -28,6 +29,7 @@ function CreateEventForm() {
   const [maxAttendees, setMaxAttendees] = useState('')
   const [sizebracket, setSizeBracket] = useState('small')
   const [ageRestricted, setAgeRestricted] = useState(false)
+  const [selectedRules, setSelectedRules] = useState<SelectedRule[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -81,6 +83,14 @@ function CreateEventForm() {
       return
     }
 
+    // Refund policy is required on paid (social) events — the composition
+    // rule from the Rule Picker spec (Master Plan §10 / Launch Kit Part 4).
+    if (type === 'social' && !selectedRules.some(r => r.category === 'refund')) {
+      setError('Pick a refund policy before publishing a paid event.')
+      setLoading(false)
+      return
+    }
+
     // Use pre-filled coords from map venue pin if available, otherwise geocode
     let lat: number | null = prefillLat
     let lng: number | null = prefillLng
@@ -130,6 +140,18 @@ function CreateEventForm() {
 
     // Auto-create chat room
     await supabase.from('event_chats').insert({ event_id: data.id })
+
+    // Attach rules: behave_standard is always included (not user-toggleable —
+    // see RulePicker), followed by whatever the host selected/customized.
+    const { data: standardRule } = await supabase
+      .from('rule_templates').select('id, body_text').eq('key', 'behave_standard').maybeSingle()
+    const ruleRows = [
+      ...(standardRule ? [{ event_id: data.id, rule_template_id: standardRule.id, custom_text: standardRule.body_text, position: 0 }] : []),
+      ...selectedRules.map((r, i) => ({ event_id: data.id, rule_template_id: r.templateId, custom_text: r.text, position: i + 1 })),
+    ]
+    if (ruleRows.length > 0) {
+      await supabase.from('event_rules').insert(ruleRows)
+    }
 
     // Publish confirmation (V2 notification framework) — only for events that
     // actually went live; pending_review events get flagged to the host once
@@ -270,6 +292,17 @@ function CreateEventForm() {
               <span className="text-xs font-semibold">{ageRestricted ? 'ON' : 'OFF'}</span>
             </button>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Flags this event as 18+. Age verification isn't enforced yet — this just marks it.</p>
+          </div>
+
+          {/* Rule Picker — replaces free-text rules with toggleable templates */}
+          <div>
+            <label className="block text-sm text-gray-500 dark:text-gray-400 mb-2">Event Rules</label>
+            <RulePicker
+              eventType={type}
+              ageRestricted={ageRestricted}
+              value={selectedRules}
+              onChange={setSelectedRules}
+            />
           </div>
 
           {/* Social event pricing */}

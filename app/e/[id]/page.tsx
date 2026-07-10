@@ -6,6 +6,7 @@ import Logo from '@/components/Logo'
 import { MapPin, Clock, Users, Lock } from 'lucide-react'
 import CopyLinkButton from '@/components/CopyLinkButton'
 import SharedEventCta from '@/components/SharedEventCta'
+import EventRulesDisplay from '@/components/EventRulesDisplay'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rally-point-eb1q.vercel.app'
 
@@ -117,6 +118,13 @@ export default async function PublicEventPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      {event.rules.length > 0 && (
+        <div className="px-4 py-5 border-b border-gray-300 dark:border-gray-700">
+          <h2 className="font-semibold mb-3">Rules</h2>
+          <EventRulesDisplay rules={event.rules} />
+        </div>
+      )}
 
       <div className="px-4 py-6 space-y-3">
         <SharedEventCta eventId={event.id} isFull={isFull} />

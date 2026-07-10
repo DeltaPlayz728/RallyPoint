@@ -13,6 +13,7 @@ import { ChevronLeft, Check, Sparkles, MapPin, Clock, Users, MessageCircle, Send
 import { reportConversionIfPending } from '@/lib/referral'
 import { sendNotification } from '@/lib/notify'
 import { checkCapacityMilestones } from '@/lib/eventCapacityNotify'
+import EventRulesDisplay, { DisplayRule } from '@/components/EventRulesDisplay'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -115,6 +116,7 @@ export default function EventDetailPage() {
   const router = useRouter()
 
   const [event, setEvent]               = useState<Event | null>(null)
+  const [rules, setRules]               = useState<DisplayRule[]>([])
   const [attendees, setAttendees]       = useState<any[]>([])
   const [userId, setUserId]             = useState<string | null>(null)
   const [isAttending, setIsAttending]   = useState(false)
@@ -191,6 +193,17 @@ export default function EventDetailPage() {
       const requestMap: MeetupRequestMap = {}
       for (const r of requests ?? []) requestMap[r.receiver_id] = r.status
       setMeetupRequests(requestMap)
+
+      const { data: ruleRows } = await supabase
+        .from('event_rules')
+        .select('id, custom_text, position, rule_templates(category, body_text)')
+        .eq('event_id', id)
+        .order('position', { ascending: true })
+      setRules((ruleRows ?? []).map((r: any) => ({
+        id: r.id,
+        text: r.custom_text ?? r.rule_templates?.body_text ?? '',
+        category: r.rule_templates?.category ?? null,
+      })))
 
       setLoading(false)
     }
@@ -502,6 +515,14 @@ export default function EventDetailPage() {
           </p>
         </div>
       </div>
+
+      {/* ── Rules ────────────────────────────────────────────────────────── */}
+      {rules.length > 0 && (
+        <div className="px-4 py-5 border-b border-gray-300 dark:border-gray-700">
+          <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-semibold mb-3">Rules</h2>
+          <EventRulesDisplay rules={rules} />
+        </div>
+      )}
 
       {/* ── Attendees ────────────────────────────────────────────────────── */}
       {attendees.length > 0 && (

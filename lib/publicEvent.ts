@@ -25,6 +25,7 @@ export type PublicEvent = {
   is_suggested?: boolean
   hostName: string
   attendeeCount: number
+  rules: { id: string; text: string; category: string | null }[]
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -47,12 +48,18 @@ export async function getPublicEvent(id: string): Promise<PublicEvent | null> {
 
   if (!event) return null
 
-  const [{ data: host }, { count }] = await Promise.all([
+  const [{ data: host }, { count }, { data: ruleRows }] = await Promise.all([
     supabaseAdmin.from('profiles').select('full_name, username').eq('id', event.created_by).maybeSingle(),
     supabaseAdmin.from('event_attendees').select('*', { count: 'exact', head: true }).eq('event_id', id),
+    supabaseAdmin.from('event_rules').select('id, custom_text, position, rule_templates(category, body_text)').eq('event_id', id).order('position', { ascending: true }),
   ])
 
   const hostName = host?.username ? `@${host.username}` : host?.full_name ?? 'A RallyPoint host'
+  const rules = (ruleRows ?? []).map((r: any) => ({
+    id: r.id,
+    text: r.custom_text ?? r.rule_templates?.body_text ?? '',
+    category: r.rule_templates?.category ?? null,
+  }))
 
   return {
     id: event.id,
@@ -66,5 +73,6 @@ export async function getPublicEvent(id: string): Promise<PublicEvent | null> {
     is_suggested: event.is_suggested,
     hostName,
     attendeeCount: count ?? 0,
+    rules,
   }
 }
