@@ -54,6 +54,7 @@ type BannedUser = {
 type Channel = {
   id: string
   name: string
+  type: 'chat' | 'forum'
 }
 
 type CommunityEvent = {
@@ -63,6 +64,36 @@ type CommunityEvent = {
   location: string
   city: string
 }
+
+type ForumPost = {
+  id: string
+  channel_id: string
+  author_id: string
+  authorName: string
+  title: string
+  body: string | null
+  image_url: string | null
+  tags: string[]
+  pinned: boolean
+  created_at: string
+  starCount: number
+  myStar: boolean
+  replyCount: number
+}
+
+type ForumReply = {
+  id: string
+  post_id: string
+  author_id: string
+  authorName: string
+  content: string
+  created_at: string
+}
+
+// Fixed tag set surfaced as chips on new posts — kept small and
+// church/community-appropriate rather than the gaming-forum tag set this
+// was modeled after (Discord forum channels, e.g. #build-ideas).
+const FORUM_TAGS = ['Idea', 'Question', 'Feedback', 'Volunteer', 'Logistics']
 
 type MainTab = 'home' | 'chat' | 'events' | 'you' | 'settings'
 type HomeView = 'list' | 'announcements' | 'about'
@@ -91,7 +122,20 @@ export default function CommunityDetailPage() {
   const [communityEvents, setCommunityEvents] = useState<CommunityEvent[]>([])
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null)
   const [newChannelName, setNewChannelName] = useState('')
+  const [newChannelType, setNewChannelType] = useState<'chat' | 'forum'>('chat')
   const [draft, setDraft] = useState('')
+
+  // Forum channel state
+  const [forumPosts, setForumPosts] = useState<ForumPost[]>([])
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [forumReplies, setForumReplies] = useState<ForumReply[]>([])
+  const [showNewPost, setShowNewPost] = useState(false)
+  const [newPostTitle, setNewPostTitle] = useState('')
+  const [newPostBody, setNewPostBody] = useState('')
+  const [newPostImageUrl, setNewPostImageUrl] = useState('')
+  const [newPostTags, setNewPostTags] = useState<string[]>([])
+  const [postingForum, setPostingForum] = useState(false)
+  const [forumReplyDraft, setForumReplyDraft] = useState('')
   const [announcementDraft, setAnnouncementDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [uploadingBanner, setUploadingBanner] = useState(false)
@@ -175,7 +219,7 @@ export default function CommunityDetailPage() {
           .eq('community_id', communityId),
         supabase
           .from('community_channels')
-          .select('id, name')
+          .select('id, name, type')
           .eq('community_id', communityId)
           .order('created_at', { ascending: true }),
         supabase
@@ -215,7 +259,7 @@ export default function CommunityDetailPage() {
         role: m.role ?? 'member',
       })))
 
-      setChannels((chans ?? []).map((c: any) => ({ id: c.id, name: c.name })))
+      setChannels((chans ?? []).map((c: any) => ({ id: c.id, name: c.name, type: c.type === 'forum' ? 'forum' : 'chat' })))
 
       setBans((banned ?? []).map((b: any) => ({
         user_id: b.user_id,
@@ -248,6 +292,123 @@ export default function CommunityDetailPage() {
   useEffect(() => {
     if (mainTab === 'chat') bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, mainTab, activeChannelId])
+
+  const activeChannelForForum = channels.find((c) => c.id === activeChannelId)
+  const isForumChannel = activeChannelForForum?.type === 'forum'
+
+  // Forum data — only fetched/subscribed while a forum-type channel is active,
+  // since plain chat channels never touch these tables.
+  useEffect(() => {
+    if (!isForumChannel || !activeChannelId || !userId) return
+
+    const loadForum = async () => {
+      const [{ data: posts }, { data: reactions }, { data: replies }] = await Promise.all([
+        supabase
+          .from('community_forum_posts')
+          .select('id, channel_id, author_id, title, body, image_url, tags, pinned, created_at, profiles(full_name, username)')
+          .eq('channel_id', activeChannelId)
+          .order('pinned', { ascending: false })
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('community_forum_reactions')
+          .select('post_id, user_id'),
+        supabase
+          .from('community_forum_replies')
+          .select('id, post_id, author_id, content, created_at, profiles(full_name, username)')
+          .eq('community_id', communityId)
+          .order('created_at', { ascending: true }),
+      ])
+
+      const postIds = new Set((posts ?? []).map((p: any) => p.id))
+      const relevantReactions = (reactions ?? []).filter((r: any) => postIds.has(r.post_id))
+      const relevantReplies = (replies ?? []).filter((r: any) => postIds.has(r.post_id))
+
+      setForumPosts((posts ?? []).map((p: any) => ({
+        id: p.id,
+        channel_id: p.channel_id,
+        author_id: p.author_id,
+        authorName: p.profiles?.username ? `@${p.profiles.username}` : (p.profiles?.full_name ?? 'Someone'),
+        title: p.title,
+        body: p.body,
+        image_url: p.image_url,
+        tags: p.tags ?? [],
+        pinned: p.pinned,
+        created_at: p.created_at,
+        starCount: relevantReactions.filter((r: any) => r.post_id === p.id).length,
+        myStar: relevantReactions.some((r: any) => r.post_id === p.id && r.user_id === userId),
+        replyCount: relevantReplies.filter((r: any) => r.post_id === p.id).length,
+      })))
+
+      setForumReplies(relevantReplies.map((r: any) => ({
+        id: r.id,
+        post_id: r.post_id,
+        author_id: r.author_id,
+        authorName: r.profiles?.username ? `@${r.profiles.username}` : (r.profiles?.full_name ?? 'Someone'),
+        content: r.content,
+        created_at: r.created_at,
+      })))
+    }
+
+    loadForum()
+
+    const forumChannel = supabase
+      .channel(`community-forum-${activeChannelId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'community_forum_posts', filter: `channel_id=eq.${activeChannelId}` }, () => loadForum())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'community_forum_replies', filter: `community_id=eq.${communityId}` }, () => loadForum())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'community_forum_reactions' }, () => loadForum())
+      .subscribe()
+
+    return () => { supabase.removeChannel(forumChannel) }
+  }, [isForumChannel, activeChannelId, userId, communityId])
+
+  const handleCreateForumPost = async () => {
+    if (!userId || !activeChannelId || !newPostTitle.trim()) return
+    setPostingForum(true)
+    const { error } = await supabase.from('community_forum_posts').insert({
+      channel_id: activeChannelId,
+      community_id: communityId,
+      author_id: userId,
+      title: newPostTitle.trim(),
+      body: newPostBody.trim() || null,
+      image_url: newPostImageUrl.trim() || null,
+      tags: newPostTags,
+    })
+    if (error) alert('Could not create post. Please try again.')
+    else {
+      setNewPostTitle('')
+      setNewPostBody('')
+      setNewPostImageUrl('')
+      setNewPostTags([])
+      setShowNewPost(false)
+    }
+    setPostingForum(false)
+  }
+
+  const handleToggleStar = async (postId: string, currentlyStarred: boolean) => {
+    if (!userId) return
+    if (currentlyStarred) {
+      await supabase.from('community_forum_reactions').delete().eq('post_id', postId).eq('user_id', userId).eq('emoji', 'star')
+    } else {
+      await supabase.from('community_forum_reactions').insert({ post_id: postId, user_id: userId, emoji: 'star' })
+    }
+  }
+
+  const handlePostForumReply = async () => {
+    if (!userId || !selectedPostId || !forumReplyDraft.trim()) return
+    await supabase.from('community_forum_replies').insert({
+      post_id: selectedPostId,
+      community_id: communityId,
+      author_id: userId,
+      content: forumReplyDraft.trim(),
+    })
+    setForumReplyDraft('')
+  }
+
+  const handleDeleteForumPost = async (postId: string) => {
+    if (!confirm('Delete this post? Its replies will be deleted too.')) return
+    await supabase.from('community_forum_posts').delete().eq('id', postId)
+    if (selectedPostId === postId) setSelectedPostId(null)
+  }
 
   const isOwner = community?.owner_id === userId
   const currentMember = members.find((m) => m.user_id === userId)
@@ -392,11 +553,13 @@ export default function CommunityDetailPage() {
       community_id: communityId,
       name: newChannelName.trim().toLowerCase().replace(/\s+/g, '-'),
       created_by: userId,
+      type: newChannelType,
     })
     if (error) {
       alert('Could not create channel — name may already be taken.')
     } else {
       setNewChannelName('')
+      setNewChannelType('chat')
     }
   }
 
@@ -614,17 +777,24 @@ export default function CommunityDetailPage() {
             </div>
             {channels.map((ch) => {
               const preview = lastMessageByChannel(ch.id)
+              const forumPostCount = ch.type === 'forum' ? forumPosts.filter((p) => p.channel_id === ch.id).length : 0
               return (
                 <button
                   key={ch.id}
-                  onClick={() => { setSelectedChannelId(ch.id); setMainTab('chat') }}
+                  onClick={() => { setSelectedChannelId(ch.id); setSelectedPostId(null); setMainTab('chat') }}
                   className="flex items-center gap-3 mx-2 mb-1.5 px-3 py-2.5 bg-orange-50 dark:bg-[#2b241c] rounded-2xl w-[calc(100%-1rem)] text-left"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0 text-white"><MessageCircle size={16} /></div>
+                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm shrink-0 text-white">
+                    {ch.type === 'forum' ? <ClipboardList size={16} /> : <MessageCircle size={16} />}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">#{ch.name}</p>
+                    <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec]">
+                      {ch.type === 'forum' ? '' : '#'}{ch.name}
+                    </p>
                     <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
-                      {preview ? `${preview.senderName}: ${preview.content}` : 'No messages yet'}
+                      {ch.type === 'forum'
+                        ? (activeChannelId === ch.id && forumPostCount > 0 ? `${forumPostCount} post${forumPostCount === 1 ? '' : 's'}` : 'Forum channel')
+                        : (preview ? `${preview.senderName}: ${preview.content}` : 'No messages yet')}
                     </p>
                   </div>
                   <span className="text-gray-300 dark:text-gray-600">›</span>
@@ -734,36 +904,206 @@ export default function CommunityDetailPage() {
                 {channels.map((ch) => (
                   <button
                     key={ch.id}
-                    onClick={() => setSelectedChannelId(ch.id)}
+                    onClick={() => { setSelectedChannelId(ch.id); setSelectedPostId(null); setShowNewPost(false) }}
                     className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
                       ch.id === activeChannelId
                         ? 'bg-accent text-white'
                         : 'bg-white dark:bg-[#221c16] text-gray-500 border border-gray-200 dark:border-gray-700'
                     }`}
                   >
-                    #{ch.name}
+                    {ch.type === 'forum' ? '' : '#'}{ch.name}
                   </button>
                 ))}
               </div>
             )}
-            <div className="space-y-3 mb-3">
-              {channelMessages.length === 0 && (
-                <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-6">No messages yet in #{activeChannel?.name ?? 'general'}.</p>
-              )}
-              {channelMessages.map((m) => (
-                <div key={m.id} className={`flex flex-col ${m.sender_id === userId ? 'items-end' : 'items-start'}`}>
-                  <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">{m.senderName}</span>
-                  <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                    m.sender_id === userId
-                      ? 'bg-accent text-white'
-                      : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700'
-                  }`}>
-                    {m.content}
+
+            {isForumChannel ? (
+              <div className="pb-4">
+                {selectedPostId ? (
+                  (() => {
+                    const post = forumPosts.find((p) => p.id === selectedPostId)
+                    if (!post) return null
+                    const replies = forumReplies.filter((r) => r.post_id === post.id)
+                    return (
+                      <div>
+                        <button onClick={() => setSelectedPostId(null)} className="text-sm text-accent mb-3">‹ Back to posts</button>
+                        <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-4">
+                          {post.tags.length > 0 && (
+                            <div className="flex gap-1.5 flex-wrap mb-2">
+                              {post.tags.map((t) => (
+                                <span key={t} className="text-[10px] font-semibold bg-accent/10 text-accent rounded-full px-2 py-0.5">{t}</span>
+                              ))}
+                            </div>
+                          )}
+                          <p className="font-bold text-[#15110d] dark:text-[#fdf6ec] mb-1">{post.title}</p>
+                          {post.body && <p className="text-sm text-[#15110d] dark:text-[#fdf6ec] whitespace-pre-wrap mb-2">{post.body}</p>}
+                          {post.image_url && (
+                            <img src={post.image_url} alt="" className="w-full rounded-xl mb-2 object-cover max-h-64" />
+                          )}
+                          <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 mt-2">
+                            <span>{post.authorName} · {new Date(post.created_at).toLocaleDateString()}</span>
+                            <div className="flex items-center gap-3">
+                              <button onClick={() => handleToggleStar(post.id, post.myStar)} className={`inline-flex items-center gap-1 ${post.myStar ? 'text-amber-500 font-semibold' : ''}`}>
+                                ★ {post.starCount}
+                              </button>
+                              {(post.author_id === userId || canModerate) && (
+                                <button onClick={() => handleDeleteForumPost(post.id)} className="text-red-500">Delete</button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">
+                          Replies · {replies.length}
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          {replies.length === 0 && <p className="text-gray-400 dark:text-gray-500 text-sm">No replies yet.</p>}
+                          {replies.map((r) => (
+                            <div key={r.id} className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+                              <p className="text-sm text-[#15110d] dark:text-[#fdf6ec]">{r.content}</p>
+                              <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">{r.authorName} · {new Date(r.created_at).toLocaleDateString()}</p>
+                            </div>
+                          ))}
+                        </div>
+                        {isMember && (
+                          <div className="flex gap-2">
+                            <input
+                              value={forumReplyDraft}
+                              onChange={(e) => setForumReplyDraft(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Enter') handlePostForumReply() }}
+                              placeholder="Reply..."
+                              className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm outline-none"
+                            />
+                            <button
+                              onClick={handlePostForumReply}
+                              disabled={!forumReplyDraft.trim()}
+                              className="bg-accent text-white rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
+                            >
+                              Reply
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()
+                ) : (
+                  <>
+                    {isMember && !showNewPost && (
+                      <button
+                        onClick={() => setShowNewPost(true)}
+                        className="w-full bg-accent text-white rounded-lg py-2.5 text-sm font-medium mb-4"
+                      >
+                        + New post
+                      </button>
+                    )}
+                    {showNewPost && (
+                      <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-4 space-y-2.5">
+                        <input
+                          value={newPostTitle}
+                          onChange={(e) => setNewPostTitle(e.target.value)}
+                          placeholder="Post title"
+                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                        />
+                        <textarea
+                          value={newPostBody}
+                          onChange={(e) => setNewPostBody(e.target.value)}
+                          rows={3}
+                          placeholder="What's the idea? (optional)"
+                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                        />
+                        <input
+                          value={newPostImageUrl}
+                          onChange={(e) => setNewPostImageUrl(e.target.value)}
+                          placeholder="Image URL (optional)"
+                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                        />
+                        <div className="flex gap-1.5 flex-wrap">
+                          {FORUM_TAGS.map((tag) => (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => setNewPostTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag])}
+                              className={`text-xs font-semibold rounded-full px-2.5 py-1 ${
+                                newPostTags.includes(tag) ? 'bg-accent text-white' : 'bg-[#fdf6ec] dark:bg-[#15110d] text-gray-500 border border-gray-200 dark:border-gray-700'
+                              }`}
+                            >
+                              {tag}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                          <button
+                            onClick={() => setShowNewPost(false)}
+                            className="flex-1 bg-gray-100 dark:bg-[#2b241c] text-gray-600 dark:text-gray-300 rounded-xl py-2 text-sm font-medium"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleCreateForumPost}
+                            disabled={postingForum || !newPostTitle.trim()}
+                            className="flex-1 bg-accent text-white rounded-xl py-2 text-sm font-medium disabled:opacity-60"
+                          >
+                            {postingForum ? 'Posting…' : 'Post'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {forumPosts.length === 0 ? (
+                      <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-6">No posts yet in #{activeChannel?.name}.</p>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {forumPosts.map((p) => (
+                          <button
+                            key={p.id}
+                            onClick={() => setSelectedPostId(p.id)}
+                            className="w-full text-left bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4"
+                          >
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="text-xs text-gray-400 dark:text-gray-500">{p.authorName}</span>
+                              {p.pinned && <Pin size={10} className="text-accent" />}
+                            </div>
+                            <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec] mb-1.5">{p.title}</p>
+                            {p.image_url && (
+                              <img src={p.image_url} alt="" className="w-full rounded-xl mb-2 object-cover max-h-40" />
+                            )}
+                            {p.tags.length > 0 && (
+                              <div className="flex gap-1.5 flex-wrap mb-2">
+                                {p.tags.map((t) => (
+                                  <span key={t} className="text-[10px] font-semibold bg-accent/10 text-accent rounded-full px-2 py-0.5">{t}</span>
+                                ))}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                              <span className="inline-flex items-center gap-1"><MessageCircle size={11} /> {p.replyCount}</span>
+                              <span className={`inline-flex items-center gap-1 ${p.myStar ? 'text-amber-500 font-semibold' : ''}`}>★ {p.starCount}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3 mb-3">
+                {channelMessages.length === 0 && (
+                  <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-6">No messages yet in #{activeChannel?.name ?? 'general'}.</p>
+                )}
+                {channelMessages.map((m) => (
+                  <div key={m.id} className={`flex flex-col ${m.sender_id === userId ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">{m.senderName}</span>
+                    <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+                      m.sender_id === userId
+                        ? 'bg-accent text-white'
+                        : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700'
+                    }`}>
+                      {m.content}
+                    </div>
                   </div>
-                </div>
-              ))}
-              <div ref={bottomRef} />
-            </div>
+                ))}
+                <div ref={bottomRef} />
+              </div>
+            )}
           </div>
         )}
 
@@ -904,7 +1244,10 @@ export default function CommunityDetailPage() {
               <div className="space-y-2 mb-3">
                 {channels.map((ch) => (
                   <div key={ch.id} className="flex items-center justify-between bg-[#fdf6ec] dark:bg-[#15110d] rounded-xl px-3 py-2">
-                    <span className="text-sm text-[#15110d] dark:text-[#fdf6ec]">#{ch.name}</span>
+                    <span className="text-sm text-[#15110d] dark:text-[#fdf6ec]">
+                      {ch.type === 'forum' ? '' : '#'}{ch.name}
+                      {ch.type === 'forum' && <span className="ml-1.5 text-[10px] font-semibold text-accent">FORUM</span>}
+                    </span>
                     {ch.name !== 'general' && (
                       <button onClick={() => handleDeleteChannel(ch.id, ch.name)} className="text-red-500 text-xs font-medium">
                         Delete
@@ -913,12 +1256,26 @@ export default function CommunityDetailPage() {
                   </div>
                 ))}
               </div>
+              <div className="flex gap-2 mb-2">
+                <button
+                  onClick={() => setNewChannelType('chat')}
+                  className={`flex-1 rounded-lg py-1.5 text-xs font-semibold ${newChannelType === 'chat' ? 'bg-accent text-white' : 'bg-[#fdf6ec] dark:bg-[#15110d] text-gray-500 border border-gray-200 dark:border-gray-700'}`}
+                >
+                  Chat channel
+                </button>
+                <button
+                  onClick={() => setNewChannelType('forum')}
+                  className={`flex-1 rounded-lg py-1.5 text-xs font-semibold ${newChannelType === 'forum' ? 'bg-accent text-white' : 'bg-[#fdf6ec] dark:bg-[#15110d] text-gray-500 border border-gray-200 dark:border-gray-700'}`}
+                >
+                  Forum channel
+                </button>
+              </div>
               <div className="flex gap-2">
                 <input
                   value={newChannelName}
                   onChange={(e) => setNewChannelName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleCreateChannel() }}
-                  placeholder="e.g. photography"
+                  placeholder={newChannelType === 'forum' ? 'e.g. Event Ideas' : 'e.g. photography'}
                   className="flex-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm outline-none"
                 />
                 <button
@@ -981,8 +1338,8 @@ export default function CommunityDetailPage() {
         )}
       </div>
 
-      {/* Chat input — only on the Chat tab, while a member */}
-      {mainTab === 'chat' && isMember && (
+      {/* Chat input — only on the Chat tab, while a member, and only for plain chat channels (forum channels compose via the post/reply UI above) */}
+      {mainTab === 'chat' && isMember && !isForumChannel && (
         <div className="flex gap-2 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-[#fdf6ec] dark:bg-[#15110d] shrink-0">
           <input
             value={draft}
