@@ -56,6 +56,14 @@ type Channel = {
   name: string
 }
 
+type CommunityEvent = {
+  id: string
+  title: string
+  starts_at: string
+  location: string
+  city: string
+}
+
 type MainTab = 'home' | 'chat' | 'events' | 'you' | 'settings'
 type HomeView = 'list' | 'announcements' | 'about'
 
@@ -80,6 +88,7 @@ export default function CommunityDetailPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [bans, setBans] = useState<BannedUser[]>([])
   const [channels, setChannels] = useState<Channel[]>([])
+  const [communityEvents, setCommunityEvents] = useState<CommunityEvent[]>([])
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null)
   const [newChannelName, setNewChannelName] = useState('')
   const [draft, setDraft] = useState('')
@@ -148,7 +157,7 @@ export default function CommunityDetailPage() {
     }
 
     const refreshAll = async () => {
-      const [{ data: msgs }, { data: ann }, { data: mem }, { data: chans }, { data: banned }] = await Promise.all([
+      const [{ data: msgs }, { data: ann }, { data: mem }, { data: chans }, { data: banned }, { data: evts }] = await Promise.all([
         supabase
           .from('community_messages')
           .select('id, sender_id, content, created_at, channel_id, profiles(full_name, username)')
@@ -173,6 +182,13 @@ export default function CommunityDetailPage() {
           .from('community_bans')
           .select('user_id, reason, profiles(full_name, username)')
           .eq('community_id', communityId),
+        supabase
+          .from('events')
+          .select('id, title, starts_at, location, city')
+          .eq('community_id', communityId)
+          .eq('status', 'active')
+          .gte('starts_at', new Date().toISOString())
+          .order('starts_at', { ascending: true }),
       ])
 
       setMessages((msgs ?? []).map((m: any) => ({
@@ -206,6 +222,10 @@ export default function CommunityDetailPage() {
         name: b.profiles?.username ? `@${b.profiles.username}` : (b.profiles?.full_name ?? 'User'),
         reason: b.reason ?? null,
       })))
+
+      setCommunityEvents((evts ?? []).map((e: any) => ({
+        id: e.id, title: e.title, starts_at: e.starts_at, location: e.location, city: e.city,
+      })))
     }
 
     load()
@@ -216,6 +236,7 @@ export default function CommunityDetailPage() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_announcements', filter: `community_id=eq.${communityId}` }, () => refreshAll())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'community_channels', filter: `community_id=eq.${communityId}` }, () => refreshAll())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'community_members', filter: `community_id=eq.${communityId}` }, () => refreshAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events', filter: `community_id=eq.${communityId}` }, () => refreshAll())
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
@@ -611,10 +632,35 @@ export default function CommunityDetailPage() {
               )
             })}
 
-            <p className="px-4 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-              Upcoming events
-            </p>
-            <p className="px-4 text-gray-400 dark:text-gray-500 text-sm">No events linked to this community yet.</p>
+            <div className="flex items-center justify-between px-4 pt-5 pb-1.5">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                Upcoming events
+              </p>
+              {canModerate && (
+                <a href={`/events/create?community=${communityId}`} className="text-[11px] font-semibold text-accent">
+                  + Create event
+                </a>
+              )}
+            </div>
+            {communityEvents.length === 0 ? (
+              <p className="px-4 text-gray-400 dark:text-gray-500 text-sm">No events linked to this community yet.</p>
+            ) : (
+              communityEvents.map((e) => (
+                <a
+                  key={e.id}
+                  href={`/events/${e.id}`}
+                  className="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl hover:bg-white dark:hover:bg-[#221c16] transition"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center shrink-0"><Calendar size={16} /></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec] truncate">{e.title}</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
+                      {new Date(e.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · {new Date(e.starts_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} · {e.location}
+                    </p>
+                  </div>
+                </a>
+              ))
+            )}
 
             <button
               onClick={() => setShowMembers(true)}
@@ -722,8 +768,36 @@ export default function CommunityDetailPage() {
         )}
 
         {mainTab === 'events' && (
-          <div className="px-4 pt-6 text-center">
-            <p className="text-gray-400 dark:text-gray-500 text-sm">No events linked to this community yet.</p>
+          <div className="px-4 pt-4">
+            {canModerate && (
+              <a
+                href={`/events/create?community=${communityId}`}
+                className="block w-full text-center bg-accent text-white rounded-lg py-2.5 text-sm font-medium mb-4"
+              >
+                + Create event
+              </a>
+            )}
+            {communityEvents.length === 0 ? (
+              <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-4">No events linked to this community yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {communityEvents.map((e) => (
+                  <a
+                    key={e.id}
+                    href={`/events/${e.id}`}
+                    className="flex items-center gap-3 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-3"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center shrink-0"><Calendar size={16} /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-[#15110d] dark:text-[#fdf6ec] truncate">{e.title}</p>
+                      <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
+                        {new Date(e.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · {new Date(e.starts_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} · {e.location}, {e.city}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

@@ -32,6 +32,8 @@ function CreateEventForm() {
   const [selectedRules, setSelectedRules] = useState<SelectedRule[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [communityId, setCommunityId] = useState<string | null>(null)
+  const [communityName, setCommunityName] = useState<string | null>(null)
 
   // Pre-fill location if coming from map venue pin
   useEffect(() => {
@@ -41,6 +43,17 @@ function CreateEventForm() {
     if (venue) setLocation(venue)
     if (lat)   setPrefillLat(parseFloat(lat))
     if (lng)   setPrefillLng(parseFloat(lng))
+  }, [searchParams])
+
+  // Pre-fill + lock the community link if arriving from a community's "create
+  // event" shortcut (?community=<id>). Only trusts the id enough to look up
+  // its name for display — the actual insert still runs through normal RLS.
+  useEffect(() => {
+    const community = searchParams.get('community')
+    if (!community) return
+    setCommunityId(community)
+    supabase.from('communities').select('name').eq('id', community).maybeSingle()
+      .then(({ data }) => setCommunityName(data?.name ?? null))
   }, [searchParams])
 
   const price = type === 'social' ? PRICE_MAP[sizebracket] : 0
@@ -121,6 +134,7 @@ function CreateEventForm() {
         age_restricted: ageRestricted,
         lat,
         lng,
+        community_id: communityId,
         status: (!modResult.allowed && modResult.action === 'hold') ? 'pending_review' : 'active',
       })
       .select()
@@ -175,6 +189,12 @@ function CreateEventForm() {
           <Logo size={26} />
         </div>
         <p className="text-gray-500 dark:text-gray-400 mb-6">Get people together.</p>
+
+        {communityName && (
+          <div className="bg-accent/10 border border-accent/30 text-accent rounded-xl px-4 py-2.5 text-sm mb-6">
+            Linked to <span className="font-semibold">{communityName}</span> — it'll show in that community's event hub.
+          </div>
+        )}
 
         {/* Event Type Toggle */}
         <div className="flex gap-2 mb-6">
