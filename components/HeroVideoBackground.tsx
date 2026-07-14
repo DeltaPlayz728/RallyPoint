@@ -7,14 +7,12 @@ import { useEffect, useRef, useState } from 'react'
 // it reads as a living backdrop rather than an autoplay wallpaper stuck to
 // the viewport.
 //
-// PLACEHOLDER SCAFFOLDING: this looks for /public/hero-footage.mp4 (and
-// optionally /public/hero-footage.webm for broader codec support). Neither
-// file exists yet — drop a real montage clip in there (ideally footage from
-// an actual RallyPoint meetup, ~15-20s, looped, no audio needed, H.264 mp4,
-// compressed under ~5MB for mobile) and it activates automatically. Until
-// then, the <video> silently fails via onError and this component renders
-// nothing, leaving the existing gradient-blob hero background untouched —
-// nothing breaks with no video present.
+// Looks for /public/hero-footage.mp4 (mp4-only for now — no webm source,
+// since a missing/broken alternate source can itself trigger the <video>
+// element's error state in some browsers before the working source is ever
+// tried, which is what silently hid this the first time around). If the mp4
+// is ever removed, the <video> fails via onError and this component renders
+// nothing, leaving the gradient-blob hero background untouched.
 export default function HeroVideoBackground() {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [videoFailed, setVideoFailed] = useState(false)
@@ -66,7 +64,6 @@ export default function HeroVideoBackground() {
         poster="/hero-poster.jpg"
         onError={() => setVideoFailed(true)}
       >
-        <source src="/hero-footage.webm" type="video/webm" />
         <source src="/hero-footage.mp4" type="video/mp4" />
       </video>
       {/* Warm scrim so hero text stays legible over any footage and the

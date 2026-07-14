@@ -37,8 +37,12 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative px-6 pt-12 pb-24 sm:pt-20 sm:pb-32">
+      {/* Hero — z-0 is load-bearing, not decorative: `relative` alone doesn't
+          create a stacking context, so without an explicit z-index here the
+          -z-10/-z-20 decorative children below (video, blobs, bubbles) get
+          pushed behind the page's own background instead of just behind the
+          hero copy, and silently never render. */}
+      <section className="relative z-0 px-6 pt-12 pb-24 sm:pt-20 sm:pb-32">
         {/* Background video montage (real footage once available — see
             HeroVideoBackground.tsx) sits behind the gradient blobs, which
             stay on regardless so the hero still looks intentional with no
