@@ -432,13 +432,20 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Accommodations — earned social endorsements, pick up to 3 to show publicly */}
-        {accommodations.length > 0 && (
-          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
-            <p className="text-sm font-medium mb-1">Accommodations</p>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
-              What people who've shared an event with you say. Pick up to 3 to show on your profile.
+        {/* Accommodations — earned social endorsements, pick up to 3 to show publicly.
+            Always rendered (not gated on accommodations.length > 0) so a brand-new
+            user sees an explanation of what this section is for instead of the
+            section just silently not existing. */}
+        <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
+          <p className="text-sm font-medium mb-1">Accommodations</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
+            What people who've shared an event with you say. Pick up to 3 to show on your profile.
+          </p>
+          {accommodations.length === 0 ? (
+            <p className="text-gray-400 dark:text-gray-500 text-xs italic">
+              None yet — these show up once someone you've met at an event endorses you.
             </p>
+          ) : (
             <div className="flex flex-wrap gap-2">
               {accommodations.map(a => (
                 <button
@@ -456,8 +463,8 @@ export default function ProfilePage() {
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Banner color picker — Go Getter+ perk */}
         {canCustomizeBanner && (

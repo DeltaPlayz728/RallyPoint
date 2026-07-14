@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Lock, MapPin, Clock, Search } from 'lucide-react'
-import WhatsNewModal from '@/components/WhatsNewModal'
 import { boundingBox, CASUAL_RADIUS_KM } from '@/lib/geo'
 import { canSeeAgeRestricted } from '@/lib/ageGating'
 
@@ -344,9 +343,6 @@ export default function FeedPage() {
         <div className="absolute top-[56%] -right-12 w-32 h-32 rounded-full bg-[#cfeede] dark:bg-teal-500/10" />
         <div className="absolute -bottom-12 left-[18%] w-44 h-44 rounded-full bg-[#dcd2ef] dark:bg-purple-500/10" />
       </div>
-
-      {/* What's New — Steam-style update popup, shown once per release */}
-      <WhatsNewModal />
 
       {/* Minor mode banner */}
       {isMinor && (

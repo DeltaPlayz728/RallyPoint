@@ -13,9 +13,13 @@ const TIER_STYLE: Record<string, { bg: string; text: string }> = {
 }
 
 export default function ReputationBadge({ tier }: { tier: string | null | undefined }) {
-  if (!tier) return null
-  const style = TIER_STYLE[tier] ?? TIER_STYLE['New Explorer']
-  const isVeteran = tier === 'Platform Veteran'
+  // No row in reputation_scores yet (cron hasn't run for this user, e.g. a
+  // brand-new signup) reads as `tier == null` — rather than hiding the badge
+  // entirely, default to the bottom tier's own label so new users still see
+  // something instead of a blank gap where a badge should be.
+  const resolvedTier = tier ?? 'New Explorer'
+  const style = TIER_STYLE[resolvedTier] ?? TIER_STYLE['New Explorer']
+  const isVeteran = resolvedTier === 'Platform Veteran'
 
   return (
     <span
@@ -23,7 +27,7 @@ export default function ReputationBadge({ tier }: { tier: string | null | undefi
       style={{ backgroundColor: style.bg, color: style.text }}
     >
       {isVeteran && <Sparkles size={11} className="shrink-0" />}
-      {tier}
+      {resolvedTier}
     </span>
   )
 }
