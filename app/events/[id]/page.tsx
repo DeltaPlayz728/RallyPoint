@@ -12,6 +12,7 @@ import Logo from '@/components/Logo'
 import { ChevronLeft, Check, Sparkles, MapPin, Clock, Users, MessageCircle, Send } from 'lucide-react'
 import { reportConversionIfPending } from '@/lib/referral'
 import { sendNotification } from '@/lib/notify'
+import { playJoinSound } from '@/lib/sounds'
 import { checkCapacityMilestones } from '@/lib/eventCapacityNotify'
 import EventRulesDisplay, { DisplayRule } from '@/components/EventRulesDisplay'
 import EndorseModal from '@/components/EndorseModal'
@@ -255,6 +256,7 @@ export default function EventDetailPage() {
     const { error } = await supabase.from('event_attendees').insert({ event_id: event.id, user_id: userId })
     if (!error) {
       setIsAttending(true)
+      playJoinSound()
       setAttendees(prev => [...prev, { user_id: userId, profiles: null }])
       await supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
       reportConversionIfPending('join')

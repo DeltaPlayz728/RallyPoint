@@ -26,3 +26,45 @@
      instead of only the handful of spots that had bespoke inline styles. */
   --color-accent: var(--accent);
 }
+
+/* ── Landing page motion ──────────────────────────────────────
+   Kept in global CSS (rather than inline <style> per component) so the
+   keyframes are defined once and any page can reach for them. */
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(3%, -4%) scale(1.05); }
+  66%      { transform: translate(-3%, 3%) scale(0.97); }
+}
+.animate-blob-float {
+  animation: blob-float 14s ease-in-out infinite;
+}
+.animate-blob-float-slow {
+  animation: blob-float 20s ease-in-out infinite reverse;
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee-scroll 28s linear infinite;
+}
+
+@keyframes gentle-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.animate-gentle-bob {
+  animation: gentle-bob 4s ease-in-out infinite;
+}
+
+/* Reveal-on-scroll base state — Reveal.tsx toggles the `is-visible` class. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

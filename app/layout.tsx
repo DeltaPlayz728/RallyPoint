@@ -8,6 +8,7 @@ import { ThemeProvider, THEME_BOOTSTRAP_SCRIPT } from "@/components/ThemeProvide
 import ErrorLogger from "@/components/ErrorLogger";
 import ReferralCapture from "@/components/ReferralCapture";
 import CriticalPatchBanner from "@/components/CriticalPatchBanner";
+import SoundCueListener from "@/components/SoundCueListener";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,6 +90,7 @@ export default function RootLayout({
           <FeedbackButton />
           <ErrorLogger />
           <ReferralCapture />
+          <SoundCueListener />
         </ThemeProvider>
       </body>
     </html>

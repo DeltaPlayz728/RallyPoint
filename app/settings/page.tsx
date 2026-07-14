@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { useTheme, ACCENT_PRESETS } from '@/components/ThemeProvider'
 import { effectiveTier, TIER_LABELS, nextTier, SubscriptionTier, IS_PLAYTEST } from '@/lib/subscription'
+import { isSoundEnabled, setSoundEnabled, playNotificationSound } from '@/lib/sounds'
 import { Check, AlertTriangle } from 'lucide-react'
 
 export default function SettingsPage() {
@@ -20,6 +21,7 @@ export default function SettingsPage() {
   const [deleting, setDeleting] = useState(false)
   const [patchEmailOptOut, setPatchEmailOptOut] = useState(false)
   const [savingPatchPref, setSavingPatchPref] = useState(false)
+  const [soundsOn, setSoundsOn] = useState(true)
 
   useEffect(() => {
     const check = async () => {
@@ -38,7 +40,15 @@ export default function SettingsPage() {
       setLoading(false)
     }
     check()
+    setSoundsOn(isSoundEnabled())
   }, [router])
+
+  const handleToggleSounds = () => {
+    const next = !soundsOn
+    setSoundEnabled(next)
+    setSoundsOn(next)
+    if (next) playNotificationSound()
+  }
 
   const handleTogglePatchEmail = async () => {
     if (!userId) return
@@ -220,9 +230,19 @@ export default function SettingsPage() {
                 {patchEmailOptOut ? 'OFF' : 'ON'}
               </span>
             </button>
+            <button
+              onClick={handleToggleSounds}
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2b241c] transition"
+            >
+              <span className="text-[#15110d] dark:text-[#fdf6ec]">Sound cues</span>
+              <span className={`text-xs font-semibold ${!soundsOn ? 'text-gray-400' : 'text-accent'}`}>
+                {soundsOn ? 'ON' : 'OFF'}
+              </span>
+            </button>
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
             Critical announcements always show in-app regardless of this setting — this only controls the weekly email digest.
+            Sound cues play a short chime for new messages, notifications, and when someone joins your event.
           </p>
         </section>
 
