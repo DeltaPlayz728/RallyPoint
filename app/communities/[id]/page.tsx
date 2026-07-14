@@ -141,8 +141,6 @@ export default function CommunityDetailPage() {
   const [uploadingBanner, setUploadingBanner] = useState(false)
   const [uploadingIcon, setUploadingIcon] = useState(false)
   const [savingAccent, setSavingAccent] = useState(false)
-  const [pendingBanner, setPendingBanner] = useState(false)
-  const [pendingIcon, setPendingIcon] = useState(false)
 
   const [linkCopied, setLinkCopied] = useState(false)
 
@@ -184,17 +182,6 @@ export default function CommunityDetailPage() {
         .eq('user_id', user.id)
         .maybeSingle()
       setIsMember(!!membership)
-
-      if (c.owner_id === user.id) {
-        const { data: pending } = await supabase
-          .from('community_banner_submissions')
-          .select('asset_type')
-          .eq('community_id', communityId)
-          .eq('approved', false)
-          .eq('rejected', false)
-        setPendingBanner((pending ?? []).some((p: any) => p.asset_type === 'banner'))
-        setPendingIcon((pending ?? []).some((p: any) => p.asset_type === 'icon'))
-      }
 
       await refreshAll()
       setLoading(false)
@@ -468,11 +455,10 @@ export default function CommunityDetailPage() {
 
   const handleBannerPick = () => bannerInputRef.current?.click()
 
-  // Uploads still go straight to storage (unchanged), but the URL now goes
-  // into an approval queue (community_banner_submissions) instead of
-  // straight into communities.banner_url — a DB trigger actively blocks a
-  // direct client update to that column now, so this is enforced, not just
-  // a UI convention. See supabase/community_tag_and_banner_approval_schema.sql.
+  // Uploads go straight to storage, then straight into communities.banner_url
+  // — no approval queue. (Previously routed through community_banner_submissions
+  // with a DB trigger blocking direct writes; that trigger's been dropped and
+  // this now matches how name/description/rules already worked.)
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !community || !userId) return
@@ -486,11 +472,9 @@ export default function CommunityDetailPage() {
     if (!uploadError) {
       const { data: pub } = supabase.storage.from('community-banners').getPublicUrl(path)
       const bannerUrl = `${pub.publicUrl}?t=${Date.now()}`
-      const { error: submitError } = await supabase.from('community_banner_submissions').insert({
-        community_id: community.id, asset_type: 'banner', asset_url: bannerUrl, submitted_by: userId,
-      })
-      if (submitError) alert('Could not submit banner for approval. Please try again.')
-      else setPendingBanner(true)
+      const { error: updateError } = await supabase.from('communities').update({ banner_url: bannerUrl }).eq('id', community.id)
+      if (updateError) alert('Could not save banner. Please try again.')
+      else setCommunity({ ...community, banner_url: bannerUrl })
     } else {
       alert('Could not upload banner. Please try again.')
     }
@@ -513,11 +497,9 @@ export default function CommunityDetailPage() {
     if (!uploadError) {
       const { data: pub } = supabase.storage.from('community-icons').getPublicUrl(path)
       const iconUrl = `${pub.publicUrl}?t=${Date.now()}`
-      const { error: submitError } = await supabase.from('community_banner_submissions').insert({
-        community_id: community.id, asset_type: 'icon', asset_url: iconUrl, submitted_by: userId,
-      })
-      if (submitError) alert('Could not submit picture for approval. Please try again.')
-      else setPendingIcon(true)
+      const { error: updateError } = await supabase.from('communities').update({ icon_url: iconUrl }).eq('id', community.id)
+      if (updateError) alert('Could not save community picture. Please try again.')
+      else setCommunity({ ...community, icon_url: iconUrl })
     } else {
       alert('Could not upload community picture. Please try again.')
     }
@@ -679,11 +661,6 @@ export default function CommunityDetailPage() {
             >
               {uploadingBanner ? '…' : <Camera size={14} />}
             </button>
-            {pendingBanner && (
-              <span className="absolute top-2.5 right-11 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full">
-                Pending approval
-              </span>
-            )}
           </>
         )}
         <div className="px-4 pb-2.5 flex items-center gap-2.5">
@@ -717,7 +694,6 @@ export default function CommunityDetailPage() {
             <h1 className="text-lg font-semibold text-white drop-shadow">{community.name}</h1>
             <p className="text-[11px] text-white/90 drop-shadow">
               {members.length} member{members.length === 1 ? '' : 's'}
-              {pendingIcon && <span className="ml-1.5">· picture pending approval</span>}
             </p>
           </div>
         </div>

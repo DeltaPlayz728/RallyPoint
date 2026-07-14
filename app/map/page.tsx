@@ -406,6 +406,7 @@ export default function MapPage() {
   const [citySearching, setCitySearching]   = useState(false)
   const [citySheet, setCitySheet]           = useState<{ name: string; events: EventPin[] } | null>(null)
   const [mapCenter, setMapCenter]           = useState<[number, number]>(FALLBACK_CENTER)
+  const [showLocationHint, setShowLocationHint] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -521,7 +522,10 @@ export default function MapPage() {
           // Location denied — we don't actually know where this user is, so showing
           // hardcoded Breda, NL venues to someone anywhere else in the world was just
           // wrong (and meant the seed-event bot never even ran for these users). Leave
-          // the venue layer empty rather than silently lying about location.
+          // the venue layer empty rather than silently lying about location — but tell
+          // the user WHY the map looks empty and point them at the city search bar,
+          // instead of leaving them staring at a blank map with no explanation.
+          setShowLocationHint(true)
         },
         { timeout: 6000, maximumAge: 60000 }
       )
@@ -633,16 +637,30 @@ export default function MapPage() {
       }
       const { lat, lon, display_name } = data[0]
       const center: [number, number] = [parseFloat(lat), parseFloat(lon)]
+      const shortName = display_name.split(',')[0]
       setMapCenter(center)
+      setShowLocationHint(false)
+
       // Events within 25km of the city center
       const cityEvents = events.filter(
         (ev) => distanceM(center[0], center[1], ev.lat, ev.lng) < 25000
       )
-      const shortName = display_name.split(',')[0]
       setCitySheet({ name: shortName, events: cityEvents })
       setSelectedEvent(null)
       setSelectedVenue(null)
       searchRef.current?.blur()
+
+      // Venue/POI layer — this was previously only ever fetched off the
+      // browser's live geolocation, so searching a city (the fallback path
+      // for anyone who denied location, or is looking up somewhere they
+      // aren't) left the map showing zero venue pins even though events
+      // could still show. Fetch venues for the searched city too so "what's
+      // around here" actually works regardless of how you got centered.
+      try {
+        const venueRes = await fetch(`/api/venues?lat=${center[0]}&lng=${center[1]}&city=${encodeURIComponent(shortName)}`)
+        const venueData = await venueRes.json()
+        if (venueData.venues) setVenues(venueData.venues)
+      } catch { /* venue layer optional */ }
     } catch {
       alert('Search failed. Please try again.')
     }
@@ -673,6 +691,18 @@ export default function MapPage() {
     <div className="flex flex-col h-dvh bg-[#fdf6ec] dark:bg-[#15110d] overflow-hidden">
 
       <TopBar title={`${filteredEvents.length} event${filteredEvents.length !== 1 ? 's' : ''}${venues.length > 0 ? ` · ${venues.length} venues` : ''}`} />
+
+      {/* Shown when the browser denies/lacks location — tells people why the
+          map looks empty instead of leaving them to guess, and points at the
+          one thing that actually fixes it (search a city). */}
+      {showLocationHint && (
+        <div className="mx-4 mt-2 flex items-center justify-between gap-2 bg-orange-50 dark:bg-orange-500/10 border border-orange-300 dark:border-orange-500/30 text-accent text-xs rounded-xl px-3 py-2 shrink-0">
+          <span>Can't see your location — search a city above to find what's around there.</span>
+          <button onClick={() => setShowLocationHint(false)} className="shrink-0 hover:opacity-70">
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* City search bar */}
       <form onSubmit={handleCitySearch} className="px-4 pt-2 pb-1 shrink-0 z-10">
