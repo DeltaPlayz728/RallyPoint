@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Logo from '@/components/Logo'
 import Reveal from '@/components/Reveal'
 import HeroPhoneMockup from '@/components/HeroPhoneMockup'
+import HeroVideoBackground from '@/components/HeroVideoBackground'
 import {
   Zap, MapPin, PartyPopper, Handshake, Home, MessageCircle,
   Map as MapIcon, Camera, Lock, Gift, ArrowRight,
@@ -38,6 +39,12 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative px-6 pt-12 pb-24 sm:pt-20 sm:pb-32">
+        {/* Background video montage (real footage once available — see
+            HeroVideoBackground.tsx) sits behind the gradient blobs, which
+            stay on regardless so the hero still looks intentional with no
+            video file present yet. */}
+        <HeroVideoBackground />
+
         {/* Ambient gradient blobs — the thing that actually stops this from
             reading as a bare Tailwind template. Purely decorative, so they're
             aria-hidden and absolutely positioned behind everything. */}
