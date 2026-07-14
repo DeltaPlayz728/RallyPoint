@@ -63,6 +63,7 @@ export default function HeroVideoBackground() {
         muted
         loop
         playsInline
+        poster="/hero-poster.jpg"
         onError={() => setVideoFailed(true)}
       >
         <source src="/hero-footage.webm" type="video/webm" />

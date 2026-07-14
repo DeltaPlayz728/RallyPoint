@@ -54,6 +54,19 @@ export default function LandingPage() {
           <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-purple-400/10 rounded-full blur-3xl animate-blob-float" />
         </div>
 
+        {/* Transparent depth bubbles — same pastel motif used behind content
+            on the feed/events/friends pages (see the "Background depth
+            bubbles" comment in app/feed/page.tsx), brought to the landing
+            hero for visual continuity between the marketing page and the
+            actual app. Rendered translucent + blurred here (vs. solid pastel
+            in-app) so they read as glass floating over the video instead of
+            flat shapes covering it. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute top-[10%] left-[6%] w-36 h-36 rounded-full bg-[#f6d9bf]/50 dark:bg-accent/15 backdrop-blur-sm animate-gentle-bob" />
+          <div className="absolute top-[52%] right-[8%] w-28 h-28 rounded-full bg-[#cfeede]/50 dark:bg-teal-500/15 backdrop-blur-sm animate-gentle-bob" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute bottom-[8%] left-[22%] w-32 h-32 rounded-full bg-[#dcd2ef]/50 dark:bg-purple-500/15 backdrop-blur-sm animate-gentle-bob" style={{ animationDelay: '0.8s' }} />
+        </div>
+
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           {/* Copy */}
           <div className="text-center lg:text-left">
