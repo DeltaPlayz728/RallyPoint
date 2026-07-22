@@ -11,6 +11,7 @@ import { X, Reply } from 'lucide-react'
 import HoverActions from '@/components/chat/HoverActions'
 import ReactionPills from '@/components/chat/ReactionPills'
 import { useMessageReactions } from '@/lib/useMessageReactions'
+import { moderateContent, flagForReview } from '@/lib/contentModeration'
 
 type Message = {
   id: string
@@ -144,17 +145,28 @@ export default function EventChatPage() {
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newMessage.trim() || !chatId || !userId) return
-    setSending(true)
 
     const rawText = newMessage.trim()
     const quotePrefix = replyingTo ? `[[REPLYTO:${replyingTo.content.slice(0, 80).replace(/[\[\]]/g, '')}]]` : ''
     const content = quotePrefix + rawText
+
+    const modResult = moderateContent(content)
+    if (!modResult.allowed && modResult.action === 'block') {
+      alert('This message can\'t be sent — please rephrase it.')
+      return
+    }
+
+    setSending(true)
 
     const { data: inserted, error } = await supabase
       .from('messages')
       .insert({ chat_id: chatId, user_id: userId, content })
       .select('*, profiles(username, full_name)')
       .single()
+
+    if (!error && !modResult.allowed && inserted) {
+      flagForReview(userId, 'message', inserted.id, modResult.reason)
+    }
 
     if (error) {
       console.error('Send error:', error.message)

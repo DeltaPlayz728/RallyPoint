@@ -9,6 +9,7 @@ import ErrorLogger from "@/components/ErrorLogger";
 import ReferralCapture from "@/components/ReferralCapture";
 import CriticalPatchBanner from "@/components/CriticalPatchBanner";
 import SoundCueListener from "@/components/SoundCueListener";
+import CookieConsent from "@/components/CookieConsent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -103,6 +104,7 @@ export default function RootLayout({
           <ErrorLogger />
           <ReferralCapture />
           <SoundCueListener />
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>

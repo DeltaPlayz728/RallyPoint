@@ -9,6 +9,7 @@ import { MapPin, Check, X, Reply } from 'lucide-react'
 import HoverActions from '@/components/chat/HoverActions'
 import ReactionPills from '@/components/chat/ReactionPills'
 import { useMessageReactions } from '@/lib/useMessageReactions'
+import { moderateContent, flagForReview } from '@/lib/contentModeration'
 
 type Message = {
   id: string
@@ -154,6 +155,13 @@ export default function DmThreadPage() {
     // ([[PROPOSAL:...]]), so no schema change is needed to support replies.
     const quotePrefix = replyingTo ? `[[REPLYTO:${replyingTo.content.slice(0, 80).replace(/[\[\]]/g, '')}]]` : ''
     const content = quotePrefix + newMessage.trim()
+
+    const modResult = moderateContent(content)
+    if (!modResult.allowed && modResult.action === 'block') {
+      alert('This message can\'t be sent — please rephrase it.')
+      return
+    }
+
     setSending(true)
     setNewMessage('')
     setReplyingTo(null)
@@ -178,11 +186,15 @@ export default function DmThreadPage() {
         }])
       }
     } else {
-      const { error } = await supabase.from('dm_messages').insert({
+      const { data: inserted, error } = await supabase.from('dm_messages').insert({
         thread_id: threadId,
         sender_id: userId,
         content,
-      })
+      }).select('id').single()
+
+      if (!error && !modResult.allowed && inserted) {
+        flagForReview(userId, 'dm_message', inserted.id, modResult.reason)
+      }
 
       if (!error) {
         const { data: sender } = await supabase

@@ -8,6 +8,7 @@ import { Camera, Pin, ClipboardList, MessageCircle, Users, Check, Settings, Home
 import HoverActions from '@/components/chat/HoverActions'
 import ReactionPills from '@/components/chat/ReactionPills'
 import { useMessageReactions } from '@/lib/useMessageReactions'
+import { moderateContent, flagForReview } from '@/lib/contentModeration'
 
 type Community = {
   id: string
@@ -377,8 +378,13 @@ export default function CommunityDetailPage() {
 
   const handleCreateForumPost = async () => {
     if (!userId || !activeChannelId || !newPostTitle.trim()) return
+    const modResult = moderateContent(`${newPostTitle} ${newPostBody}`)
+    if (!modResult.allowed && modResult.action === 'block') {
+      alert('This post can\'t be created — please rephrase it.')
+      return
+    }
     setPostingForum(true)
-    const { error } = await supabase.from('community_forum_posts').insert({
+    const { data: inserted, error } = await supabase.from('community_forum_posts').insert({
       channel_id: activeChannelId,
       community_id: communityId,
       author_id: userId,
@@ -386,7 +392,10 @@ export default function CommunityDetailPage() {
       body: newPostBody.trim() || null,
       image_url: newPostImageUrl.trim() || null,
       tags: newPostTags,
-    })
+    }).select('id').single()
+    if (!error && !modResult.allowed && inserted) {
+      flagForReview(userId, 'community_message', inserted.id, modResult.reason)
+    }
     if (error) alert('Could not create post. Please try again.')
     else {
       setNewPostTitle('')
@@ -409,12 +418,20 @@ export default function CommunityDetailPage() {
 
   const handlePostForumReply = async () => {
     if (!userId || !selectedPostId || !forumReplyDraft.trim()) return
-    await supabase.from('community_forum_replies').insert({
+    const modResult = moderateContent(forumReplyDraft)
+    if (!modResult.allowed && modResult.action === 'block') {
+      alert('This reply can\'t be sent — please rephrase it.')
+      return
+    }
+    const { data: inserted, error } = await supabase.from('community_forum_replies').insert({
       post_id: selectedPostId,
       community_id: communityId,
       author_id: userId,
       content: forumReplyDraft.trim(),
-    })
+    }).select('id').single()
+    if (!error && !modResult.allowed && inserted) {
+      flagForReview(userId, 'community_message', inserted.id, modResult.reason)
+    }
     setForumReplyDraft('')
   }
 
@@ -457,14 +474,23 @@ export default function CommunityDetailPage() {
 
   const handleSend = async () => {
     if (!userId || !draft.trim() || !activeChannelId) return
-    setSending(true)
     const quotePrefix = replyingTo ? `[[REPLYTO:${replyingTo.content.replace(REPLY_RE, '').slice(0, 80).replace(/[\[\]]/g, '')}]]` : ''
-    await supabase.from('community_messages').insert({
+    const content = quotePrefix + draft.trim()
+    const modResult = moderateContent(content)
+    if (!modResult.allowed && modResult.action === 'block') {
+      alert('This message can\'t be sent — please rephrase it.')
+      return
+    }
+    setSending(true)
+    const { data: inserted, error } = await supabase.from('community_messages').insert({
       community_id: communityId,
       sender_id: userId,
       channel_id: activeChannelId,
-      content: quotePrefix + draft.trim(),
-    })
+      content,
+    }).select('id').single()
+    if (!error && !modResult.allowed && inserted) {
+      flagForReview(userId, 'community_message', inserted.id, modResult.reason)
+    }
     setDraft('')
     setReplyingTo(null)
     setSending(false)
@@ -472,12 +498,20 @@ export default function CommunityDetailPage() {
 
   const handlePostAnnouncement = async () => {
     if (!userId || !announcementDraft.trim()) return
+    const modResult = moderateContent(announcementDraft)
+    if (!modResult.allowed && modResult.action === 'block') {
+      alert('This announcement can\'t be posted — please rephrase it.')
+      return
+    }
     setSending(true)
-    await supabase.from('community_announcements').insert({
+    const { data: inserted, error } = await supabase.from('community_announcements').insert({
       community_id: communityId,
       author_id: userId,
       content: announcementDraft.trim(),
-    })
+    }).select('id').single()
+    if (!error && !modResult.allowed && inserted) {
+      flagForReview(userId, 'community_message', inserted.id, modResult.reason)
+    }
     setAnnouncementDraft('')
     setSending(false)
   }

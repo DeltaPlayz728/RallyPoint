@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Logo from '@/components/Logo'
+import { moderateContent, flagForReview } from '@/lib/contentModeration'
 import {
   Camera, Lock, BatteryFull, BatteryMedium, BatteryLow,
   type LucideIcon,
@@ -138,6 +139,13 @@ function ProfileSetupForm() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
+    const modResult = moderateContent(bio)
+    if (!modResult.allowed && modResult.action === 'block') {
+      setError('Your bio can\'t be saved as written — please rephrase it.')
+      setLoading(false)
+      return
+    }
+
     // Upload avatar if a new file was selected
     let finalAvatarUrl = avatarUrl
     if (avatarFile) {
@@ -175,6 +183,10 @@ function ProfileSetupForm() {
       setError(updateError.message)
       setLoading(false)
       return
+    }
+
+    if (!modResult.allowed) {
+      flagForReview(user.id, 'profile', user.id, modResult.reason)
     }
 
     // After initial setup → onboarding; after edit → profile

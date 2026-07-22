@@ -1,16 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/Logo'
 
-// Admin-only page — uses service role on client only for this page.
-// In production, this should be a server component or behind a separate admin auth.
-// For MVP: gate by checking if user is the owner account.
-
-const ADMIN_EMAIL = 'rallypoint.admin@gmail.com' // change to your email
+// Admin-only page. The real security boundary is getAdminUser() (lib/
+// adminAuth.ts) on every /api/admin/* route, checked against the admin_users
+// table — this page-level check is just so non-admins get redirected instead
+// of seeing a broken UI full of 401s.
 
 type Report = {
   id: string
@@ -99,14 +97,15 @@ export default function AdminPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
 
-      // Check if admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', user.id)
+      // Check if admin — admin_users has a self-select-only RLS policy, so
+      // this only ever reveals whether *you* are an admin, never the full list.
+      const { data: adminRow } = await supabase
+        .from('admin_users')
+        .select('user_id')
+        .eq('user_id', user.id)
         .maybeSingle()
 
-      if (user.email !== ADMIN_EMAIL) {
+      if (!adminRow) {
         router.push('/feed')
         return
       }
