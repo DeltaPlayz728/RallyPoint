@@ -606,6 +606,10 @@ export default function CommunityDetailPage() {
     await supabase.from('community_members').update({ role }).eq('community_id', communityId).eq('user_id', memberId)
   }
 
+  const channelMessages = messages.filter((m) => m.channel_id === activeChannelId)
+  const channelMessageIds = useMemo(() => channelMessages.map((m) => m.id), [channelMessages])
+  const { forMessage, toggle: toggleReaction } = useMessageReactions('community', channelMessageIds, userId)
+
   if (loading || !community) return (
     <div className="min-h-screen bg-[#fdf6ec] dark:bg-[#15110d] flex flex-col">
       <div className="h-12 bg-accent flex items-center px-4">
@@ -616,9 +620,6 @@ export default function CommunityDetailPage() {
   )
 
   const activeChannel = channels.find((c) => c.id === activeChannelId)
-  const channelMessages = messages.filter((m) => m.channel_id === activeChannelId)
-  const channelMessageIds = useMemo(() => channelMessages.map((m) => m.id), [channelMessages])
-  const { forMessage, toggle: toggleReaction } = useMessageReactions('community', channelMessageIds, userId)
   const latestAnnouncement = announcements[0]
   const lastMessageByChannel = (channelId: string) => {
     const msgs = messages.filter((m) => m.channel_id === channelId)
