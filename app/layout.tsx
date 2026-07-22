@@ -29,7 +29,7 @@ const fraunces = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
   axes: ["opsz", "SOFT"],
-  weight: ["500", "600"],
+  weight: "variable",
 });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://rally-point-eb1q.vercel.app";
