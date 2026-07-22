@@ -9,8 +9,15 @@
   --foreground: #171717;
   /* Fallback for the brief window before ThemeProvider's bootstrap script
      runs (see THEME_BOOTSTRAP_SCRIPT) — same hex as the "Rally (default)"
-     accent preset, so nothing flashes a different color on first paint. */
-  --accent: #f97316;
+     accent preset, so nothing flashes a different color on first paint.
+     This is the exact terracotta from the brand mark (Logo.tsx), not a
+     stock Tailwind swatch. */
+  --accent: #e4572e;
+  /* Fixed secondary brand color, independent of the user's accent choice —
+     the teal dot from the logo. Used where a second identity color should
+     read as "RallyPoint" regardless of which accent someone's picked
+     (the Interested RSVP state, the signature rally-pulse animation). */
+  --accent-secondary: #3ad6c4;
 }
 
 @theme inline {
@@ -25,6 +32,47 @@
      lets the accent picker actually reach buttons, chips, and badges
      instead of only the handful of spots that had bespoke inline styles. */
   --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
+}
+
+/* ── Typographic identity ─────────────────────────────────────
+   Headings get the display face; everything else (buttons, labels, body)
+   stays on Geist for legibility. This is deliberately a blanket h1/h2 rule
+   rather than a per-component className so every existing and future page
+   title picks it up automatically. */
+h1, h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Felt motion ───────────────────────────────────────────────
+   A tap should have weight. This is the single cheapest, broadest fix for
+   an app that otherwise changes state instantly with zero physical feedback. */
+button, a {
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+button:active:not(:disabled), a:active {
+  transform: scale(0.97);
+}
+
+/* ── Signature interaction: the Rally Pulse ───────────────────
+   Three dots converging to a point, echoing the logo mark — played once
+   when someone commits to "Going" on an event. This is the one animation
+   that's ownably RallyPoint's rather than a generic checkmark/confetti burst. */
+@keyframes rally-pulse-ring {
+  0%   { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes rally-pulse-dot {
+  0%   { transform: translate(var(--dx0), var(--dy0)) scale(1); opacity: 1; }
+  100% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+}
+.rally-pulse-ring {
+  animation: rally-pulse-ring 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.rally-pulse-dot {
+  animation: rally-pulse-dot 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* ── Landing page motion ──────────────────────────────────────

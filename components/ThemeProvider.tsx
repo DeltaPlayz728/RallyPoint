@@ -9,13 +9,18 @@ type Theme = 'light' | 'dark'
 // they saw before this feature existed.
 export type Accent = 'orange' | 'teal' | 'purple' | 'pink' | 'blue' | 'green'
 
+// Hand-mixed, not stock Tailwind swatches — "Rally" is the exact terracotta
+// from the brand mark (Logo.tsx's stroke color), and every other option is
+// shifted off its raw Tailwind default (teal-500, purple-500, etc.) toward
+// something a little dustier/warmer so the whole picker reads as chosen
+// rather than defaulted.
 export const ACCENT_PRESETS: { id: Accent; label: string; hex: string }[] = [
-  { id: 'orange', label: 'Rally (default)', hex: '#f97316' },
-  { id: 'teal', label: 'Teal', hex: '#14b8a6' },
-  { id: 'purple', label: 'Purple', hex: '#a855f7' },
-  { id: 'pink', label: 'Pink', hex: '#ec4899' },
-  { id: 'blue', label: 'Blue', hex: '#3b82f6' },
-  { id: 'green', label: 'Green', hex: '#22c55e' },
+  { id: 'orange', label: 'Rally (default)', hex: '#e4572e' },
+  { id: 'teal', label: 'Lagoon', hex: '#1fa39a' },
+  { id: 'purple', label: 'Plum', hex: '#7c4585' },
+  { id: 'pink', label: 'Rose', hex: '#d6456c' },
+  { id: 'blue', label: 'Harbor', hex: '#2c6e9b' },
+  { id: 'green', label: 'Moss', hex: '#4c7a52' },
 ]
 const DEFAULT_ACCENT_HEX = ACCENT_PRESETS[0].hex
 

@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { effectiveTier, hasFeature, SubscriptionTier } from '@/lib/subscription'
-import { Users2 } from 'lucide-react'
 import EmptyState from '@/components/EmptyState'
 
 type CommunityRow = {
@@ -99,7 +98,7 @@ export default function CommunitiesPage() {
 
         {communities.length === 0 ? (
           <EmptyState
-            icon={Users2}
+            illustration="community"
             title="No communities yet"
             description="Communities are where people with shared interests hang out, chat, and plan events together. Be the first to start one."
             ctaLabel="Explore events instead"

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import TopBar from '@/components/TopBar'
 import {
   Search, Building2, MessageCircle, PartyPopper, Music, Pizza, Palette,
-  Trophy, Drama, MapPin, Hand, X, Users, type LucideIcon,
+  Trophy, Drama, MapPin, Hand, X, type LucideIcon,
 } from 'lucide-react'
 import EmptyState from '@/components/EmptyState'
 
@@ -365,7 +365,7 @@ export default function FriendsPage() {
                 <p className="text-gray-600 dark:text-gray-400 text-sm text-center px-4 py-4">No friends match your search</p>
               ) : (
                 <EmptyState
-                  icon={Users}
+                  illustration="friends"
                   title="No friends yet"
                   description="Join an event or a community to start meeting people nearby."
                   ctaLabel="Find an event"

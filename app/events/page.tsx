@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Building2, MapPin, Clock, Users } from 'lucide-react'
+import EmptyIllustration from '@/components/EmptyIllustration'
 import { boundingBox, EVENT_RADIUS_KM } from '@/lib/geo'
 import { AGE_GATING_ENABLED, canSeeAgeRestricted } from '@/lib/ageGating'
 
@@ -304,8 +305,8 @@ export default function EventsPage() {
           </div>
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-              <Users size={28} className="text-accent" />
+            <div className="mb-4">
+              <EmptyIllustration variant="events" />
             </div>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">No events yet</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">

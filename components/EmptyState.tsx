@@ -2,21 +2,25 @@
 
 import { type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
+import EmptyIllustration from './EmptyIllustration'
 
-// Shared warm empty-state: illustration (icon-in-a-soft-accent-circle rather than
-// a plain gray placeholder) + one-line explanation + a single primary CTA.
-// Pattern lifted straight from the UI/UX panel's Monzo/Headspace/Shopify-Polaris
-// findings — every real empty state in the app should route through this instead
-// of a bare "Nothing here yet" line with no visual warmth or next step.
+// Shared warm empty-state. Prefer the `illustration` prop (hand-felt SVG
+// badge matching the Logo.tsx brand mark) over the older `icon` prop — the
+// generic Lucide-icon-in-a-tinted-circle pattern was the single most
+// obvious "built by an AI scaffold" tell in the app, since it's the default
+// first result for "nice empty state" from every AI page-builder. `icon`
+// is kept only for any caller not yet migrated to an illustration variant.
 export default function EmptyState({
   icon: Icon,
+  illustration,
   title,
   description,
   ctaLabel,
   ctaHref,
   onCtaClick,
 }: {
-  icon: LucideIcon
+  icon?: LucideIcon
+  illustration?: 'friends' | 'community' | 'caughtup' | 'events' | 'search'
   title: string
   description: string
   ctaLabel?: string
@@ -25,9 +29,13 @@ export default function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center text-center py-10 px-6">
-      <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-        <Icon size={28} className="text-accent" />
-      </div>
+      {illustration ? (
+        <div className="mb-4"><EmptyIllustration variant={illustration} /></div>
+      ) : Icon ? (
+        <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+          <Icon size={28} className="text-accent" />
+        </div>
+      ) : null}
       <p className="font-semibold text-[#15110d] dark:text-[#fdf6ec] text-sm mb-1">{title}</p>
       <p className="text-gray-500 dark:text-gray-400 text-xs max-w-xs mb-4">{description}</p>
       {ctaLabel && ctaHref && (

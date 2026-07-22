@@ -94,7 +94,7 @@ export default function InboxPage() {
 
         {notifications.length === 0 ? (
           <EmptyState
-            icon={Bell}
+            illustration="caughtup"
             title="All caught up"
             description="Notifications will appear here — RSVPs, messages, and community activity."
           />

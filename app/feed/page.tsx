@@ -4,7 +4,8 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
-import { Bell, Lock, MapPin, Clock, Search } from 'lucide-react'
+import { Bell, Lock, MapPin, Clock } from 'lucide-react'
+import EmptyIllustration from '@/components/EmptyIllustration'
 import { boundingBox, CASUAL_RADIUS_KM } from '@/lib/geo'
 import { canSeeAgeRestricted } from '@/lib/ageGating'
 
@@ -425,10 +426,8 @@ export default function FeedPage() {
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-              {activeFilter === 'all'
-                ? <MapPin size={28} className="text-accent" />
-                : <Search size={28} className="text-accent" />}
+            <div className="mb-4">
+              <EmptyIllustration variant={activeFilter === 'all' ? 'events' : 'search'} />
             </div>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">
               {activeFilter === 'all' ? 'No events yet' : `Nothing ${activeFilter === 'today' ? 'today' : activeFilter === 'tomorrow' ? 'tomorrow' : 'this week'}`}

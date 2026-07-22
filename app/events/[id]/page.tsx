@@ -18,6 +18,7 @@ import EventRulesDisplay, { DisplayRule } from '@/components/EventRulesDisplay'
 import EndorseModal from '@/components/EndorseModal'
 import CommunityTag from '@/components/CommunityTag'
 import { getCommunityTags, CommunityTag as CommunityTagData } from '@/lib/communityTags'
+import RallyPulse from '@/components/RallyPulse'
 
 const AVATAR_COLORS = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6']
 
@@ -126,6 +127,7 @@ export default function EventDetailPage() {
   const [userId, setUserId]             = useState<string | null>(null)
   const [isAttending, setIsAttending]   = useState(false)
   const [myRsvpStatus, setMyRsvpStatus] = useState<'going' | 'interested' | 'declined' | null>(null)
+  const [showRallyPulse, setShowRallyPulse] = useState(false)
   const [isHost, setIsHost]             = useState(false)
   const [loading, setLoading]           = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
@@ -279,6 +281,7 @@ export default function EventDetailPage() {
 
       if (status === 'going' && !wasGoing) {
         playJoinSound()
+        setShowRallyPulse(true)
         await supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
         reportConversionIfPending('join')
         await sendNotification(supabase, {
@@ -718,7 +721,8 @@ export default function EventDetailPage() {
             </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 relative">
+            <RallyPulse show={showRallyPulse} onDone={() => setShowRallyPulse(false)} />
             {/* Facebook Events-style three-state RSVP — replaces the old binary
                 Join/Leave. Going is the only state gated by capacity/payment;
                 Interested and Can't Go are always free, no-payment-wall taps. */}

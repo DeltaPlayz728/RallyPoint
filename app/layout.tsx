@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import BottomNavWrapper from "@/components/BottomNavWrapper";
 import SubscriptionCelebrationWrapper from "@/components/SubscriptionCelebrationWrapper";
@@ -18,6 +18,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Display face for headings, event titles, and the wordmark — Fraunces'
+// "soft"/optical-size character pairs with the hand-felt sticker logo
+// instead of leaving every heading in the same UI-chrome sans as buttons
+// and labels. This is the single highest-leverage typography change for
+// making the app read as designed rather than scaffolded.
+const fraunces = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT"],
+  weight: ["500", "600"],
 });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://rally-point-eb1q.vercel.app";
@@ -75,7 +87,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <head>
         {/* Runs before paint so dark mode doesn't flash light first */}
