@@ -63,7 +63,9 @@ export default function SoundCueListener() {
         .channel('sound-cues-attendees')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'event_attendees' }, (payload: any) => {
           const row = payload.new
-          if (row && hostedEventIds.has(row.event_id) && row.user_id !== user.id) playJoinSound()
+          // Interested/Can't Go RSVPs also insert a row now (three-state RSVP) —
+          // only an actual "going" join should chime for the host.
+          if (row && row.rsvp_status === 'going' && hostedEventIds.has(row.event_id) && row.user_id !== user.id) playJoinSound()
         })
         .subscribe()
       channels.push(attendeeChannel)

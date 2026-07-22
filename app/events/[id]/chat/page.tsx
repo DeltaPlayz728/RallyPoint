@@ -1,12 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
 import CommunityTag from '@/components/CommunityTag'
 import { getCommunityTags, CommunityTag as CommunityTagData } from '@/lib/communityTags'
+import { X, Reply } from 'lucide-react'
+import HoverActions from '@/components/chat/HoverActions'
+import ReactionPills from '@/components/chat/ReactionPills'
+import { useMessageReactions } from '@/lib/useMessageReactions'
 
 type Message = {
   id: string
@@ -27,7 +31,11 @@ export default function EventChatPage() {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [communityTags, setCommunityTags] = useState<Record<string, CommunityTagData>>({})
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const seenAtLoadRef = useRef<Set<string> | null>(null)
+  const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null)
+  const REPLY_RE = /^\[\[REPLYTO:([^\]]*)\]\]/
 
   useEffect(() => {
     const load = async () => {
@@ -35,12 +43,16 @@ export default function EventChatPage() {
       if (!user) { router.push('/auth/login'); return }
       setUserId(user.id)
 
-      // Check user is an attendee
+      // Check user is a *going* attendee — "Interested"/"Can't Go" no longer
+      // qualify for chat access (the messages_select/insert RLS policies enforce
+      // this same rule server-side; this check just gives a friendlier redirect
+      // instead of an empty/broken chat).
       const { data: attendee } = await supabase
         .from('event_attendees')
         .select('id')
         .eq('event_id', id)
         .eq('user_id', user.id)
+        .eq('rsvp_status', 'going')
         .maybeSingle()
 
       if (!attendee) { router.push(`/events/${id}`); return }
@@ -84,6 +96,7 @@ export default function EventChatPage() {
         .order('created_at', { ascending: true })
 
       setMessages(msgs ?? [])
+      seenAtLoadRef.current = new Set((msgs ?? []).map(m => m.id))
       getCommunityTags((msgs ?? []).map(m => m.user_id)).then(setCommunityTags)
       setLoading(false)
     }
@@ -109,6 +122,9 @@ export default function EventChatPage() {
 
           if (msgWithProfile) {
             setMessages(prev => [...prev, msgWithProfile])
+            if (seenAtLoadRef.current && !seenAtLoadRef.current.has(msgWithProfile.id) && msgWithProfile.user_id !== userId) {
+              setFirstUnreadId((prev) => prev ?? msgWithProfile.id)
+            }
             getCommunityTags([msgWithProfile.user_id]).then(tag => setCommunityTags(prev => ({ ...prev, ...tag })))
           }
         }
@@ -116,7 +132,10 @@ export default function EventChatPage() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [chatId])
+  }, [chatId, userId])
+
+  const messageIds = useMemo(() => messages.map(m => m.id), [messages])
+  const { forMessage, toggle: toggleReaction } = useMessageReactions('event', messageIds, userId)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -127,7 +146,9 @@ export default function EventChatPage() {
     if (!newMessage.trim() || !chatId || !userId) return
     setSending(true)
 
-    const content = newMessage.trim()
+    const rawText = newMessage.trim()
+    const quotePrefix = replyingTo ? `[[REPLYTO:${replyingTo.content.slice(0, 80).replace(/[\[\]]/g, '')}]]` : ''
+    const content = quotePrefix + rawText
 
     const { data: inserted, error } = await supabase
       .from('messages')
@@ -139,6 +160,7 @@ export default function EventChatPage() {
       console.error('Send error:', error.message)
     } else {
       setNewMessage('')
+      setReplyingTo(null)
 
       // Show it immediately rather than waiting on the realtime subscription —
       // dedupe in case the realtime event also delivers it.
@@ -167,7 +189,7 @@ export default function EventChatPage() {
             user_id: a.user_id,
             type: 'group_chat',
             title: `${senderName} sent a message in ${eventTitle}`,
-            body: content.length > 60 ? content.slice(0, 60) + '…' : content,
+            body: rawText.length > 60 ? rawText.slice(0, 60) + '…' : rawText,
             link: `/events/${id}/chat`,
           }))
         )
@@ -196,8 +218,14 @@ export default function EventChatPage() {
         <Logo size={22} className="ml-auto" />
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      {/* Messages — same subtle dot texture + full-row hover highlight as the DM view */}
+      <div
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[#fdf6ec] dark:bg-[#15110d]"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(128,128,128,0.18) 1px, transparent 1px)',
+          backgroundSize: '22px 22px',
+        }}
+      >
         {messages.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">
             No messages yet. Say hi!
@@ -208,23 +236,52 @@ export default function EventChatPage() {
           const name = msg.profiles?.username
             ? `@${msg.profiles.username}`
             : msg.profiles?.full_name ?? 'Someone'
+          const replyMatch = msg.content.match(REPLY_RE)
+          const quoted = replyMatch?.[1]
+          const displayContent = replyMatch ? msg.content.replace(REPLY_RE, '').trim() : msg.content
 
           return (
-            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-              {!isMe && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1 inline-flex items-center gap-1">
-                  {name}
-                  <CommunityTag tag={communityTags[msg.user_id]} />
-                </span>
+            <div key={msg.id}>
+              {firstUnreadId === msg.id && (
+                <div className="flex items-center gap-2 my-2">
+                  <div className="flex-1 h-px bg-accent/40" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent">New messages</span>
+                  <div className="flex-1 h-px bg-accent/40" />
+                </div>
               )}
-              <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
-                isMe
-                  ? 'bg-accent text-white rounded-br-sm'
-                  : 'bg-gray-200 dark:bg-gray-700 dark:bg-[#2b241c] text-[#15110d] dark:text-[#fdf6ec] rounded-bl-sm'
-              }`}>
-                {msg.content}
+              <div
+                className="group relative flex flex-col -mx-4 px-4 py-1 rounded-lg transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
+                style={{ alignItems: isMe ? 'flex-end' : 'flex-start' }}
+              >
+                <HoverActions
+                  isMe={isMe}
+                  content={displayContent}
+                  onReply={() => setReplyingTo(msg)}
+                  onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                />
+                {!isMe && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1 inline-flex items-center gap-1">
+                    {name}
+                    <CommunityTag tag={communityTags[msg.user_id]} />
+                  </span>
+                )}
+                {quoted && (
+                  <div className="max-w-xs text-xs text-gray-500 dark:text-gray-400 border-l-2 border-gray-300 dark:border-gray-600 pl-2 mb-1 truncate">
+                    {quoted}
+                  </div>
+                )}
+                <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
+                  isMe
+                    ? 'bg-accent text-white rounded-br-sm'
+                    : 'bg-gray-200 dark:bg-gray-700 dark:bg-[#2b241c] text-[#15110d] dark:text-[#fdf6ec] rounded-bl-sm'
+                }`}>
+                  {displayContent}
+                </div>
+                <ReactionPills reactions={forMessage(msg.id)} currentUserId={userId} onToggle={(emoji) => toggleReaction(msg.id, emoji)} />
+                <span className="text-xs text-gray-600 dark:text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {formatTime(msg.created_at)}
+                </span>
               </div>
-              <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">{formatTime(msg.created_at)}</span>
             </div>
           )
         })}
@@ -232,6 +289,15 @@ export default function EventChatPage() {
       </div>
 
       {/* Input */}
+      {replyingTo && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-[#221c16] border-t border-gray-200 dark:border-gray-700 text-xs">
+          <Reply size={12} className="text-accent shrink-0" />
+          <span className="flex-1 truncate text-gray-600 dark:text-gray-400">Replying to: {replyingTo.content.replace(REPLY_RE, '').slice(0, 60)}</span>
+          <button onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-black dark:hover:text-white shrink-0">
+            <X size={14} />
+          </button>
+        </div>
+      )}
       <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#221c16] flex gap-2 pb-20">
         <input
           type="text"

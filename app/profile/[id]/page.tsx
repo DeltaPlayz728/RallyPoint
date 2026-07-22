@@ -61,6 +61,7 @@ export default function PublicProfilePage() {
         .from('event_attendees')
         .select('event_id')
         .eq('user_id', user.id)
+        .eq('rsvp_status', 'going')
 
       const myEventIds = (myEvents ?? []).map((e: any) => e.event_id)
 
@@ -69,6 +70,7 @@ export default function PublicProfilePage() {
           .from('event_attendees')
           .select('event_id')
           .eq('user_id', id)
+          .eq('rsvp_status', 'going')
           .in('event_id', myEventIds)
 
         setSharedEvent((shared ?? []).length > 0)

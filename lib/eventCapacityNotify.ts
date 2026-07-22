@@ -24,6 +24,7 @@ export async function checkCapacityMilestones(client: SupabaseClient, eventId: s
     .from('event_attendees')
     .select('*', { count: 'exact', head: true })
     .eq('event_id', eventId)
+    .eq('rsvp_status', 'going')
 
   const attendeeCount = count ?? 0
   const ratio = attendeeCount / event.max_attendees
@@ -43,6 +44,7 @@ export async function checkCapacityMilestones(client: SupabaseClient, eventId: s
       .from('event_attendees')
       .select('user_id')
       .eq('event_id', eventId)
+      .eq('rsvp_status', 'going')
     for (const a of attendees ?? []) {
       await sendNotification(client, {
         userId: a.user_id,

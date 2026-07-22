@@ -112,7 +112,7 @@ export default function ProfilePage() {
       const [profileRes, hostingRes, attendingRes, friendsRes, ratingsRes, communityRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('events').select('*').eq('created_by', user.id).eq('status', 'active').order('starts_at', { ascending: true }),
-        supabase.from('event_attendees').select('events(*)').eq('user_id', user.id),
+        supabase.from('event_attendees').select('events(*)').eq('user_id', user.id).eq('rsvp_status', 'going'),
         supabase.from('friendships').select('id').or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`).eq('status', 'accepted'),
         supabase.from('host_reputation').select('avg_rating, total_ratings').eq('host_id', user.id).maybeSingle(),
         supabase.from('community_members').select('communities(id, name, banner_color)').eq('user_id', user.id),

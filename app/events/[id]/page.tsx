@@ -125,6 +125,7 @@ export default function EventDetailPage() {
   const [communityTags, setCommunityTags] = useState<Record<string, CommunityTagData>>({})
   const [userId, setUserId]             = useState<string | null>(null)
   const [isAttending, setIsAttending]   = useState(false)
+  const [myRsvpStatus, setMyRsvpStatus] = useState<'going' | 'interested' | 'declined' | null>(null)
   const [isHost, setIsHost]             = useState(false)
   const [loading, setLoading]           = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
@@ -171,11 +172,13 @@ export default function EventDetailPage() {
 
       const { data: attendeeData } = await supabase
         .from('event_attendees')
-        .select('user_id, profiles(full_name, username)')
+        .select('user_id, rsvp_status, profiles(full_name, username)')
         .eq('event_id', id)
       setAttendees(attendeeData ?? [])
-      const attending = attendeeData?.some((a: any) => a.user_id === user.id) ?? false
+      const myRow = attendeeData?.find((a: any) => a.user_id === user.id)
+      const attending = myRow?.rsvp_status === 'going'
       setIsAttending(attending)
+      setMyRsvpStatus(myRow?.rsvp_status ?? null)
       getCommunityTags((attendeeData ?? []).map((a: any) => a.user_id)).then(setCommunityTags)
 
       // Show rating prompt if: event ended 2+ hrs ago, user attended, hasn't rated yet
@@ -224,9 +227,10 @@ export default function EventDetailPage() {
     if (params.get('payment') === 'success' && userId && event) {
       setPaymentStatus('success')
       supabase.from('event_attendees')
-        .upsert({ event_id: event.id, user_id: userId }, { onConflict: 'event_id,user_id' })
+        .upsert({ event_id: event.id, user_id: userId, rsvp_status: 'going' }, { onConflict: 'event_id,user_id' })
         .then(() => {
           setIsAttending(true)
+          setMyRsvpStatus('going')
           supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
           reportConversionIfPending('join')
           sendNotification(supabase, {
@@ -239,10 +243,15 @@ export default function EventDetailPage() {
     }
   }, [userId, event])
 
-  const handleJoin = async () => {
+  // Three-state RSVP (Going / Interested / Can't Go) replaces the old binary
+  // Join/Leave — matches Facebook Events' vocabulary, which is the one most
+  // people already know. Only "Going" on a paid event routes through Stripe;
+  // Interested/Can't Go are always free, no-payment-wall actions.
+  const handleSetStatus = async (status: 'going' | 'interested' | 'declined') => {
     if (!userId || !event) return
     setActionLoading(true)
-    if (event.price > 0) {
+
+    if (status === 'going' && event.price > 0 && myRsvpStatus !== 'going') {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -253,28 +262,44 @@ export default function EventDetailPage() {
       setActionLoading(false)
       return
     }
-    const { error } = await supabase.from('event_attendees').insert({ event_id: event.id, user_id: userId })
+
+    const { error } = await supabase
+      .from('event_attendees')
+      .upsert({ event_id: event.id, user_id: userId, rsvp_status: status }, { onConflict: 'event_id,user_id' })
+
     if (!error) {
-      setIsAttending(true)
-      playJoinSound()
-      setAttendees(prev => [...prev, { user_id: userId, profiles: null }])
-      await supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
-      reportConversionIfPending('join')
-      await sendNotification(supabase, {
-        userId,
-        type: 'rsvp_confirmed',
-        vars: { event_name: event.title, date_short: formatDate(event.starts_at), venue_name: event.location, event_id: event.id },
+      const wasGoing = myRsvpStatus === 'going'
+      setMyRsvpStatus(status)
+      setIsAttending(status === 'going')
+      setAttendees(prev => {
+        const existing = prev.find(a => a.user_id === userId)
+        if (existing) return prev.map(a => a.user_id === userId ? { ...a, rsvp_status: status } : a)
+        return [...prev, { user_id: userId, rsvp_status: status, profiles: null }]
       })
-      await checkCapacityMilestones(supabase, event.id)
+
+      if (status === 'going' && !wasGoing) {
+        playJoinSound()
+        await supabase.from('event_chats').upsert({ event_id: event.id }, { onConflict: 'event_id' })
+        reportConversionIfPending('join')
+        await sendNotification(supabase, {
+          userId,
+          type: 'rsvp_confirmed',
+          vars: { event_name: event.title, date_short: formatDate(event.starts_at), venue_name: event.location, event_id: event.id },
+        })
+        await checkCapacityMilestones(supabase, event.id)
+      }
     }
     setActionLoading(false)
   }
 
-  const handleLeave = async () => {
+  // Fully remove your RSVP row (distinct from "Can't Go", which keeps a record
+  // that you were invited/considered and declined — this erases it entirely).
+  const handleRemoveRsvp = async () => {
     if (!userId || !event || isHost) return
     setActionLoading(true)
     await supabase.from('event_attendees').delete().eq('event_id', event.id).eq('user_id', userId)
     setIsAttending(false)
+    setMyRsvpStatus(null)
     setAttendees(prev => prev.filter(a => a.user_id !== userId))
     setActionLoading(false)
   }
@@ -360,7 +385,9 @@ export default function EventDetailPage() {
 
   if (!event) return null
 
-  const isFull = event.max_attendees !== null && attendees.length >= event.max_attendees
+  const goingAttendees = attendees.filter((a: any) => a.rsvp_status === 'going')
+  const interestedAttendees = attendees.filter((a: any) => a.rsvp_status === 'interested')
+  const isFull = event.max_attendees !== null && goingAttendees.length >= event.max_attendees
   const isCasual = event.type === 'casual'
 
   return (
@@ -525,9 +552,9 @@ export default function EventDetailPage() {
             <Users size={16} />
           </div>
           <p className="text-[#15110d] dark:text-[#fdf6ec] text-sm">
-            {attendees.length} going
+            {goingAttendees.length} going{interestedAttendees.length > 0 ? ` · ${interestedAttendees.length} interested` : ''}
             {event.max_attendees
-              ? ` · ${Math.max(0, event.max_attendees - attendees.length)} spots left`
+              ? ` · ${Math.max(0, event.max_attendees - goingAttendees.length)} spots left`
               : ' · Open to all'}
           </p>
         </div>
@@ -542,35 +569,37 @@ export default function EventDetailPage() {
       )}
 
       {/* ── Attendees ────────────────────────────────────────────────────── */}
-      {attendees.length > 0 && (
+      {(goingAttendees.length > 0 || interestedAttendees.length > 0) && (
         <div className="px-4 py-5 border-b border-gray-300 dark:border-gray-700">
+          {goingAttendees.length > 0 && (
+          <>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-semibold">Who's going</h2>
             {event.max_attendees && (
               <span className="text-gray-600 dark:text-gray-400 text-xs">
-                {attendees.length} / {event.max_attendees}
+                {goingAttendees.length} / {event.max_attendees}
               </span>
             )}
           </div>
 
-          {/* Avatar stack */}
+          {/* Avatar stack — Facebook/Meetup-style "+N going" social proof */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex -space-x-2.5">
-              {attendees.slice(0, 6).map((a: any, i) => {
+              {goingAttendees.slice(0, 6).map((a: any, i) => {
                 const name = a.profiles?.full_name ?? a.profiles?.username ?? '?'
                 return (
                   <Avatar key={a.user_id} name={name} index={i} size="md" />
                 )
               })}
             </div>
-            {attendees.length > 6 && (
-              <span className="text-gray-500 dark:text-gray-400 text-sm">+{attendees.length - 6} more</span>
+            {goingAttendees.length > 6 && (
+              <span className="text-gray-500 dark:text-gray-400 text-sm">+{goingAttendees.length - 6} more</span>
             )}
           </div>
 
           {/* Individual rows with meetup buttons */}
           <div className="space-y-2.5">
-            {attendees.map((a: any, i: number) => {
+            {goingAttendees.map((a: any, i: number) => {
               const isMe        = a.user_id === userId
               const isEventHost = a.user_id === event.created_by
               const name        = a.profiles?.username
@@ -629,6 +658,30 @@ export default function EventDetailPage() {
               )
             })}
           </div>
+          </>
+          )}
+
+          {/* Interested — lighter-weight, no meetup/endorse actions since they
+              haven't committed to attending yet (Facebook Events' distinction) */}
+          {interestedAttendees.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2.5">Interested ({interestedAttendees.length})</h3>
+              <div className="flex flex-col gap-2">
+                {interestedAttendees.map((a: any, i: number) => {
+                  const isMe = a.user_id === userId
+                  const name = a.profiles?.username ? `@${a.profiles.username}` : a.profiles?.full_name ?? 'Someone'
+                  return (
+                    <Link key={a.user_id} href={isMe ? '/profile' : `/profile/${a.user_id}`} className="flex items-center gap-2.5 hover:opacity-75 transition min-w-0">
+                      <Avatar name={a.profiles?.full_name ?? a.profiles?.username ?? '?'} index={i} size="sm" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        {name}{isMe && <span className="ml-1.5 text-[10px] text-gray-500 dark:text-gray-500">you</span>}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -664,50 +717,74 @@ export default function EventDetailPage() {
               Cancel
             </button>
           </div>
-        ) : isAttending ? (
-          <div className="flex gap-2">
-            <Link
-              href={`/events/${event.id}/chat`}
-              className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec] font-semibold py-3.5 rounded-2xl transition text-sm"
-            >
-              <MessageCircle size={16} className="shrink-0" /> Group Chat
-            </Link>
-            <CopyLinkButton eventId={event.id} />
-            <button
-              onClick={() => setShowShare(true)}
-              className="px-4 border border-gray-300 dark:border-gray-700 hover:border-accent text-gray-500 dark:text-gray-400 hover:text-accent rounded-2xl transition text-lg"
-              title="Share this event"
-            >
-              <Send size={18} />
-            </button>
-            <button
-              onClick={handleLeave}
-              disabled={actionLoading}
-              className="px-4 border border-red-300 text-red-600 hover:bg-red-50 rounded-2xl transition disabled:opacity-50 text-sm font-medium"
-            >
-              Leave
-            </button>
-          </div>
-        ) : isFull ? (
-          <button disabled className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold py-3.5 rounded-2xl cursor-not-allowed">
-            Event Full
-          </button>
         ) : (
-          <button
-            onClick={handleJoin}
-            disabled={actionLoading}
-            className={`w-full font-bold py-3.5 rounded-2xl transition active:scale-[0.98] disabled:opacity-50 ${
-              isCasual
-                ? 'bg-green-600 hover:bg-green-500 text-white'
-                : 'bg-accent hover:brightness-110 text-white'
-            }`}
-          >
-            {actionLoading
-              ? 'Joining…'
-              : event.price > 0
-              ? `Pay €${event.price} & Join →`
-              : `Join ${isCasual ? 'Meetup' : 'Event'} →`}
-          </button>
+          <div className="flex flex-col gap-2">
+            {/* Facebook Events-style three-state RSVP — replaces the old binary
+                Join/Leave. Going is the only state gated by capacity/payment;
+                Interested and Can't Go are always free, no-payment-wall taps. */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleSetStatus('going')}
+                disabled={actionLoading || (isFull && myRsvpStatus !== 'going')}
+                className={`flex-1 font-bold py-3 rounded-2xl transition active:scale-[0.98] disabled:opacity-50 text-sm ${
+                  myRsvpStatus === 'going'
+                    ? (isCasual ? 'bg-green-600 text-white' : 'bg-accent text-white')
+                    : 'bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec]'
+                }`}
+              >
+                {actionLoading
+                  ? '…'
+                  : isFull && myRsvpStatus !== 'going'
+                  ? 'Full'
+                  : myRsvpStatus === 'going'
+                  ? 'Going ✓'
+                  : event.price > 0
+                  ? `Pay €${event.price} & Go`
+                  : 'Going'}
+              </button>
+              <button
+                onClick={() => handleSetStatus('interested')}
+                disabled={actionLoading}
+                className={`flex-1 font-semibold py-3 rounded-2xl transition active:scale-[0.98] disabled:opacity-50 text-sm border ${
+                  myRsvpStatus === 'interested'
+                    ? 'bg-accent/10 border-accent text-accent'
+                    : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec]'
+                }`}
+              >
+                Interested
+              </button>
+              <button
+                onClick={() => handleSetStatus('declined')}
+                disabled={actionLoading}
+                className={`px-4 font-semibold py-3 rounded-2xl transition active:scale-[0.98] disabled:opacity-50 text-sm border ${
+                  myRsvpStatus === 'declined'
+                    ? 'bg-gray-200 dark:bg-gray-700 border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300'
+                    : 'bg-white dark:bg-[#221c16] border-gray-300 dark:border-gray-700 hover:border-gray-500 text-gray-500 dark:text-gray-400'
+                }`}
+              >
+                Can't Go
+              </button>
+            </div>
+
+            {isAttending && (
+              <div className="flex gap-2">
+                <Link
+                  href={`/events/${event.id}/chat`}
+                  className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 hover:border-accent text-[#15110d] dark:text-[#fdf6ec] font-semibold py-3 rounded-2xl transition text-sm"
+                >
+                  <MessageCircle size={16} className="shrink-0" /> Group Chat
+                </Link>
+                <CopyLinkButton eventId={event.id} />
+                <button
+                  onClick={() => setShowShare(true)}
+                  className="px-4 border border-gray-300 dark:border-gray-700 hover:border-accent text-gray-500 dark:text-gray-400 hover:text-accent rounded-2xl transition text-lg"
+                  title="Share this event"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

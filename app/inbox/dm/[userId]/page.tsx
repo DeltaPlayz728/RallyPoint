@@ -1,11 +1,14 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
-import { MapPin, Check } from 'lucide-react'
+import { MapPin, Check, X, Reply } from 'lucide-react'
+import HoverActions from '@/components/chat/HoverActions'
+import ReactionPills from '@/components/chat/ReactionPills'
+import { useMessageReactions } from '@/lib/useMessageReactions'
 
 type Message = {
   id: string
@@ -34,7 +37,15 @@ export default function DmThreadPage() {
   const [sending, setSending] = useState(false)
   const [respondingTo, setRespondingTo] = useState<string | null>(null)
   const [resolvedProposals, setResolvedProposals] = useState<Set<string>>(new Set())
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  // The set of message ids already on screen the moment this thread finished its
+  // initial load. Anything that arrives afterward (via realtime) and isn't from
+  // me gets a "New messages" divider rendered before the first one — a session-
+  // scoped approximation of Discord's unread marker (no persisted read-cursor
+  // exists yet, so this resets on next visit rather than surviving a reload).
+  const seenAtLoadRef = useRef<Set<string> | null>(null)
+  const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -63,12 +74,28 @@ export default function DmThreadPage() {
         .maybeSingle()
 
       if (!thread) {
-        const { data: newThread } = await supabase
+        const { data: newThread, error: insertError } = await supabase
           .from('dm_threads')
           .insert({ user_a: userA, user_b: userB })
           .select('id')
           .single()
-        thread = newThread
+
+        if (insertError) {
+          // Two people can open this DM for the first time at nearly the same
+          // moment — both see "no thread yet" and both try to create one. The
+          // (user_a, user_b) unique constraint lets exactly one insert win;
+          // the loser used to just get stuck on the loading screen forever.
+          // Re-fetch instead of giving up — the row is there now either way.
+          const { data: existing } = await supabase
+            .from('dm_threads')
+            .select('id')
+            .eq('user_a', userA)
+            .eq('user_b', userB)
+            .maybeSingle()
+          thread = existing
+        } else {
+          thread = newThread
+        }
       }
 
       if (!thread) { setLoading(false); return }
@@ -81,6 +108,7 @@ export default function DmThreadPage() {
         .order('created_at', { ascending: true })
 
       setMessages(msgs ?? [])
+      seenAtLoadRef.current = new Set((msgs ?? []).map(m => m.id))
       setLoading(false)
     }
 
@@ -99,12 +127,20 @@ export default function DmThreadPage() {
         (payload) => {
           const msg = payload.new as Message
           setMessages(prev => (prev.some(m => m.id === msg.id) ? prev : [...prev, msg]))
+          if (seenAtLoadRef.current && !seenAtLoadRef.current.has(msg.id) && msg.sender_id !== userId) {
+            setFirstUnreadId((prev) => prev ?? msg.id)
+          }
         }
       )
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [threadId])
+  }, [threadId, userId])
+
+  const messageIds = useMemo(() => messages.map(m => m.id), [messages])
+  const { forMessage, toggle: toggleReaction } = useMessageReactions('dm', messageIds, userId)
+
+  const REPLY_RE = /^\[\[REPLYTO:([^\]]*)\]\]/
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -113,9 +149,14 @@ export default function DmThreadPage() {
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newMessage.trim() || !threadId || !userId || !other) return
-    const content = newMessage.trim()
+    // No reply-to column on dm_messages — quote the source line inline with the
+    // same bracket-marker convention the bot proposal flow already uses
+    // ([[PROPOSAL:...]]), so no schema change is needed to support replies.
+    const quotePrefix = replyingTo ? `[[REPLYTO:${replyingTo.content.slice(0, 80).replace(/[\[\]]/g, '')}]]` : ''
+    const content = quotePrefix + newMessage.trim()
     setSending(true)
     setNewMessage('')
+    setReplyingTo(null)
 
     if (other.is_bot) {
       // Route through the assistant API so it can store + generate a reply
@@ -220,8 +261,16 @@ export default function DmThreadPage() {
         <Logo size={22} className="ml-auto" />
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      {/* Messages — subtle repeating dot texture behind the bubbles (WhatsApp-style
+          depth) instead of a flat page color. Kept as a CSS background-image so it
+          costs nothing at runtime and follows the theme via two different SVGs. */}
+      <div
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[#fdf6ec] dark:bg-[#15110d]"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(128,128,128,0.18) 1px, transparent 1px)',
+          backgroundSize: '22px 22px',
+        }}
+      >
         {messages.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">
             {other.is_bot ? "Say hi — I can help you find or plan something to do." : 'No messages yet. Say hi!'}
@@ -230,41 +279,74 @@ export default function DmThreadPage() {
         {messages.map(msg => {
           const isMe = msg.sender_id === userId
           const proposalMatch = msg.content.match(PROPOSAL_RE)
-          const displayContent = msg.content.replace(PROPOSAL_RE, '').trim()
+          let displayContent = msg.content.replace(PROPOSAL_RE, '').trim()
           const proposalId = proposalMatch?.[1]
           const resolved = proposalId ? resolvedProposals.has(proposalId) : false
+          const replyMatch = displayContent.match(REPLY_RE)
+          const quoted = replyMatch?.[1]
+          if (replyMatch) displayContent = displayContent.replace(REPLY_RE, '').trim()
 
           return (
-            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-              <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
-                isMe
-                  ? 'bg-accent text-white rounded-br-sm'
-                  : 'bg-gray-200 dark:bg-gray-700 text-[#15110d] dark:text-[#fdf6ec] rounded-bl-sm'
-              }`}>
-                {displayContent}
-              </div>
-              {proposalId && !resolved && (
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => respondToProposal(proposalId, true)}
-                    disabled={respondingTo === proposalId}
-                    className="text-xs bg-accent hover:brightness-90 text-white px-3 py-1.5 rounded-xl font-semibold transition disabled:opacity-50"
-                  >
-                    {respondingTo === proposalId ? 'Creating…' : 'Yes, set it up'}
-                  </button>
-                  <button
-                    onClick={() => respondToProposal(proposalId, false)}
-                    disabled={respondingTo === proposalId}
-                    className="text-xs border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-xl transition hover:border-gray-500 disabled:opacity-50"
-                  >
-                    No thanks
-                  </button>
+            <div key={msg.id}>
+              {firstUnreadId === msg.id && (
+                <div className="flex items-center gap-2 my-2">
+                  <div className="flex-1 h-px bg-accent/40" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent">New messages</span>
+                  <div className="flex-1 h-px bg-accent/40" />
                 </div>
               )}
-              {proposalId && resolved && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-flex items-center gap-1"><Check size={11} /> Responded</span>
-              )}
-              <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">{formatTime(msg.created_at)}</span>
+              {/* Discord-style hover: the highlight spans the FULL row width (bleeds past
+                  the message bubble to the container edges via -mx-4/px-4), not just the
+                  bubble itself, the timestamp fades in on hover, and a hover action
+                  toolbar (react/reply/copy) appears at the row's outer edge. */}
+              <div
+                className="group relative flex flex-col -mx-4 px-4 py-1 rounded-lg transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
+                style={{ alignItems: isMe ? 'flex-end' : 'flex-start' }}
+              >
+                <HoverActions
+                  isMe={isMe}
+                  content={displayContent}
+                  onReply={() => setReplyingTo(msg)}
+                  onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                />
+                {quoted && (
+                  <div className="max-w-xs text-xs text-gray-500 dark:text-gray-400 border-l-2 border-gray-300 dark:border-gray-600 pl-2 mb-1 truncate">
+                    {quoted}
+                  </div>
+                )}
+                <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm text-[#15110d] dark:text-[#fdf6ec] ${
+                  isMe
+                    ? 'bg-accent text-white rounded-br-sm'
+                    : 'bg-gray-200 dark:bg-gray-700 rounded-bl-sm'
+                }`}>
+                  {displayContent}
+                </div>
+                <ReactionPills reactions={forMessage(msg.id)} currentUserId={userId} onToggle={(emoji) => toggleReaction(msg.id, emoji)} />
+                {proposalId && !resolved && (
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => respondToProposal(proposalId, true)}
+                      disabled={respondingTo === proposalId}
+                      className="text-xs bg-accent hover:brightness-90 text-white px-3 py-1.5 rounded-xl font-semibold transition disabled:opacity-50"
+                    >
+                      {respondingTo === proposalId ? 'Creating…' : 'Yes, set it up'}
+                    </button>
+                    <button
+                      onClick={() => respondToProposal(proposalId, false)}
+                      disabled={respondingTo === proposalId}
+                      className="text-xs border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-xl transition hover:border-gray-500 disabled:opacity-50"
+                    >
+                      No thanks
+                    </button>
+                  </div>
+                )}
+                {proposalId && resolved && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-flex items-center gap-1"><Check size={11} /> Responded</span>
+                )}
+                <span className="text-xs text-gray-600 dark:text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {formatTime(msg.created_at)}
+                </span>
+              </div>
             </div>
           )
         })}
@@ -272,6 +354,15 @@ export default function DmThreadPage() {
       </div>
 
       {/* Input */}
+      {replyingTo && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-[#221c16] border-t border-gray-200 dark:border-gray-700 text-xs">
+          <Reply size={12} className="text-accent shrink-0" />
+          <span className="flex-1 truncate text-gray-600 dark:text-gray-400">Replying to: {replyingTo.content.replace(REPLY_RE, '').slice(0, 60)}</span>
+          <button onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-black dark:hover:text-white shrink-0">
+            <X size={14} />
+          </button>
+        </div>
+      )}
       <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#221c16] flex gap-2 pb-20">
         <input
           type="text"

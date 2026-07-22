@@ -7,8 +7,9 @@ import { useRouter } from 'next/navigation'
 import TopBar from '@/components/TopBar'
 import {
   Search, Building2, MessageCircle, PartyPopper, Music, Pizza, Palette,
-  Trophy, Drama, MapPin, Hand, X, type LucideIcon,
+  Trophy, Drama, MapPin, Hand, X, Users, type LucideIcon,
 } from 'lucide-react'
+import EmptyState from '@/components/EmptyState'
 
 const EVENT_CHAT_ICONS: LucideIcon[] = [Trophy, Music, Pizza, Palette, Trophy, Drama]
 
@@ -135,6 +136,7 @@ export default function FriendsPage() {
         .from('event_attendees')
         .select('event_id, events(id, title)')
         .eq('user_id', user.id)
+        .eq('rsvp_status', 'going')
         .order('created_at', { ascending: false })
         .limit(10)
 
@@ -359,11 +361,17 @@ export default function FriendsPage() {
                 ))}
               </div>
             ) : filteredFriends.length === 0 ? (
-              <div className="px-4 py-4 text-center">
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {search ? 'No friends match your search' : 'No friends yet — join events to meet people'}
-                </p>
-              </div>
+              search ? (
+                <p className="text-gray-600 dark:text-gray-400 text-sm text-center px-4 py-4">No friends match your search</p>
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="No friends yet"
+                  description="Join an event or a community to start meeting people nearby."
+                  ctaLabel="Find an event"
+                  ctaHref="/feed"
+                />
+              )
             ) : (
               <div>
                 {filteredFriends.map((f, i) => (

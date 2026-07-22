@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
 import { Handshake, CheckCircle2, XCircle, PartyPopper, Clock, MessageCircle, Bell, type LucideIcon } from 'lucide-react'
+import EmptyState from '@/components/EmptyState'
 
 type Notification = {
   id: string
@@ -92,11 +93,11 @@ export default function InboxPage() {
         </div>
 
         {notifications.length === 0 ? (
-          <div className="text-center py-20">
-            <Bell size={32} className="mx-auto mb-3 text-gray-400" />
-            <p className="text-[#15110d] dark:text-[#fdf6ec] font-medium mb-1">All caught up</p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Notifications will appear here.</p>
-          </div>
+          <EmptyState
+            icon={Bell}
+            title="All caught up"
+            description="Notifications will appear here — RSVPs, messages, and community activity."
+          />
         ) : (
           <div className="space-y-2">
             {notifications.map(n => {

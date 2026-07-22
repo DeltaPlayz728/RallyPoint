@@ -414,10 +414,12 @@ export default function MapPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
 
-      // Fetch events with attendee counts
+      // Fetch events with attendee counts. Filters the embedded aggregate to
+      // "going" only — "Interested"/"Can't Go" RSVPs shouldn't inflate the pin count.
       const { data: eventData } = await supabase
         .from('events')
         .select('id, title, type, location, price, starts_at, lat, lng, event_attendees(count)')
+        .eq('event_attendees.rsvp_status', 'going')
         .eq('status', 'active')
         .not('lat', 'is', null)
         .not('lng', 'is', null)
@@ -425,11 +427,13 @@ export default function MapPage() {
         .limit(200)
 
       // Which of these events has the current user already joined? Drives the
-      // map pin's "planted flag" state (see MapView's createEventIcon).
+      // map pin's "planted flag" state (see MapView's createEventIcon). Only a
+      // "going" RSVP counts as joined — interested/declined shouldn't plant the flag.
       const { data: attendeeRows } = await supabase
         .from('event_attendees')
         .select('event_id')
         .eq('user_id', user.id)
+        .eq('rsvp_status', 'going')
       const joinedIds = new Set((attendeeRows ?? []).map((r: any) => r.event_id))
 
       const mapped: EventPin[] = (eventData ?? []).map((e: any) => ({
@@ -446,6 +450,7 @@ export default function MapPage() {
         const { data: vData } = await supabase
           .from('events')
           .select('id, title, type, location, price, starts_at, lat, lng, event_attendees(count)')
+          .eq('event_attendees.rsvp_status', 'going')
           .in('id', joinedEventIds)
           .lt('starts_at', new Date().toISOString())
           .not('lat', 'is', null)
@@ -479,6 +484,7 @@ export default function MapPage() {
         const { data: fa } = await supabase
           .from('event_attendees')
           .select('event_id, user_id')
+          .eq('rsvp_status', 'going')
           .in('user_id', friendIds)
           .in('event_id', eventIds)
         const byEvent: Record<string, FriendAtt[]> = {}

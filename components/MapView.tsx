@@ -145,6 +145,15 @@ function userDotHtml(): string {
   return `<div class="rp-user-dot" style="width:16px;height:16px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(59,130,246,0.3),0 2px 8px rgba(0,0,0,0.5);"></div>`
 }
 
+// Cluster pin — shown instead of individual venue pins when several would
+// otherwise overlap at the current zoom (the "8 bars stacked into one dark
+// blob" problem). Tapping it zooms in until the group fans out on its own,
+// same behavior as Google Maps / Snap Map clustering.
+function clusterPinHtml(count: number): string {
+  const size = count >= 10 ? 46 : 40
+  return `<div style="width:${size}px;height:${size}px;background:#f97316;border:3px solid #15110d;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:${count >= 10 ? 15 : 14}px;box-shadow:0 3px 10px rgba(0,0,0,0.4);font-family:system-ui,-apple-system,sans-serif;">${count > 99 ? '99+' : count}</div>`
+}
+
 // MapLibre sets a positioning transform on the marker element itself, so the
 // animated pin lives in a child wrapper to avoid transform conflicts.
 function markerEl(innerHtml: string, onClick?: () => void): HTMLElement {
@@ -240,28 +249,85 @@ export default function MapView({
     mapRef.current.setStyle(url)
   }, [theme])
 
-  // (Re)render markers when data changes
+  // Latest props, readable from the zoomend listener below without re-binding it.
+  const latestRef = useRef({ events, venues, selectedVenueId, userDot, onVenueClick, onEventClick })
+  latestRef.current = { events, venues, selectedVenueId, userDot, onVenueClick, onEventClick }
+
+  // (Re)render markers when data changes, or when the map finishes zooming
+  // (non-hub venue pins re-cluster/de-cluster based on their new pixel spacing).
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-    markersRef.current.forEach((m) => m.remove())
-    markersRef.current = []
 
-    venues.forEach((v) => {
-      const html = v.is_hub ? hubPinHtml(v) : venuePinHtml(v.types, v.place_id === selectedVenueId)
-      const el = markerEl(html, () => onVenueClick(v))
-      markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([v.lng, v.lat]).addTo(map))
-    })
+    const draw = () => {
+      const { events, venues, selectedVenueId, userDot, onVenueClick, onEventClick } = latestRef.current
+      markersRef.current.forEach((m) => m.remove())
+      markersRef.current = []
 
-    events.forEach((e) => {
-      const el = markerEl(eventPinHtml(e.type, e.attendee_count, e.id, !!e.joined), () => onEventClick(e))
-      markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([e.lng, e.lat]).addTo(map))
-    })
+      // Hubs (bowling alleys, theaters, etc.) always render individually — they're
+      // meant to stand out and are already spaced apart. Only the small, frequently-
+      // clustered everyday pins (bars/cafes/restaurants) get grouped, the way Google
+      // Maps/Snap Map decline to cluster "destination" POIs but do cluster dense ones.
+      const hubs = venues.filter((v) => v.is_hub)
+      const plain = venues.filter((v) => !v.is_hub)
 
-    if (userDot) {
-      const el = markerEl(userDotHtml())
-      markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([userDot[1], userDot[0]]).addTo(map))
+      hubs.forEach((v) => {
+        const el = markerEl(hubPinHtml(v), () => onVenueClick(v))
+        markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([v.lng, v.lat]).addTo(map))
+      })
+
+      // Greedy pixel-distance clustering: project each plain venue to screen space
+      // at the current zoom, group anything within CLUSTER_PX of an already-placed
+      // group. Cheap (O(n^2) over a handful of nearby venues) and re-runs on zoomend.
+      const CLUSTER_PX = 42
+      const used = new Array(plain.length).fill(false)
+      const points = plain.map((v) => map.project([v.lng, v.lat]))
+
+      plain.forEach((v, i) => {
+        if (used[i]) return
+        const group = [i]
+        used[i] = true
+        for (let j = i + 1; j < plain.length; j++) {
+          if (used[j]) continue
+          const dx = points[i].x - points[j].x
+          const dy = points[i].y - points[j].y
+          if (Math.sqrt(dx * dx + dy * dy) < CLUSTER_PX) {
+            group.push(j)
+            used[j] = true
+          }
+        }
+
+        if (group.length === 1) {
+          const el = markerEl(venuePinHtml(v.types, v.place_id === selectedVenueId), () => onVenueClick(v))
+          markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([v.lng, v.lat]).addTo(map))
+          return
+        }
+
+        // Cluster center = average lng/lat of the group. Tap to zoom in until it
+        // fans out (capped at 18 so it can't zoom past street level pointlessly).
+        const groupVenues = group.map((idx) => plain[idx])
+        const clat = groupVenues.reduce((s, gv) => s + gv.lat, 0) / groupVenues.length
+        const clng = groupVenues.reduce((s, gv) => s + gv.lng, 0) / groupVenues.length
+        const el = markerEl(clusterPinHtml(groupVenues.length), () => {
+          map.easeTo({ center: [clng, clat], zoom: Math.min(map.getZoom() + 2.5, 18) })
+        })
+        markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([clng, clat]).addTo(map))
+      })
+
+      events.forEach((e) => {
+        const el = markerEl(eventPinHtml(e.type, e.attendee_count, e.id, !!e.joined), () => onEventClick(e))
+        markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([e.lng, e.lat]).addTo(map))
+      })
+
+      if (userDot) {
+        const el = markerEl(userDotHtml())
+        markersRef.current.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([userDot[1], userDot[0]]).addTo(map))
+      }
     }
+
+    draw()
+    map.on('zoomend', draw)
+    return () => { map.off('zoomend', draw) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events, venues, selectedVenueId, userDot])
 

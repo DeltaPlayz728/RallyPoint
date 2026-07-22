@@ -29,7 +29,7 @@ Source of truth for current state. Session-by-session history (June 2026) lives 
 All of the above is committed and pushed — HEAD `86a76a2`. Nothing pending.
 
 ## Still open (near-term)
-- **Security probe + load simulation** — bulk-simulate the create→join→create cascade + adversarial probe (run on a Supabase branch, not prod). Not started.
+- **Security probe — DONE (2026-07-05).** Fixed a CRITICAL: internal `SECURITY DEFINER` RPCs (`prepare_user_deletion`, `seed_test_data`, `teardown_test_data`) were anon-callable via `/rest/v1/rpc`; locked down with migration `lockdown_definer_functions_from_client_roles`. RLS isolation verified sound. A true high-volume load sim still needs Pro (throwaway branch).
 - **Trailer render** — deferred to a fresh art-only agent (see `TRAILER_AGENT_HANDOFF.md`).
 - Flip `NEXT_PUBLIC_PLAYTEST_MODE=false` + activate live Stripe at launch.
 
@@ -66,7 +66,7 @@ Phase 3 (end-to-end smoke test) → Phase 4 (launch polish). Phase 5 (public lau
 - `supabase/rls_policies.sql` — RLS policy reference.
 
 ## Suggested next steps
-1. Run the security probe + load simulation (create→join→create at scale + adversarial), on a Supabase branch — not prod.
+1. Security probe done (see above). Remaining hardening (needs your action, not code): enable leaked-password protection in Auth settings; tighten public storage-bucket listing; consider Pro for a real load-sim branch.
 2. Fresh art-only agent renders the trailer — see `TRAILER_AGENT_HANDOFF.md`.
 3. At launch: flip `NEXT_PUBLIC_PLAYTEST_MODE=false`, activate live Stripe, rotate keys (#30 / #83).
 4. Continue Phase 4 launch polish; decide whether to surface the orphaned `/events` inside the feed.

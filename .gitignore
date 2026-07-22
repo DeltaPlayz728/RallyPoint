@@ -45,3 +45,6 @@ scripts/_tmp-*
 
 # editor/filesystem temp artifacts — never real source
 .fuse_hidden*
+
+.vercel
+.env*

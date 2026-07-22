@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { isRateLimited } from '@/lib/rateLimit'
 
+// Overpass's public instance is frequently slow (10-25s+ for a first-time
+// query in a new area) — the platform default function timeout is well
+// under that, so a cold lookup could get killed mid-request with nothing
+// logged. Give it real headroom.
+export const maxDuration = 30
+
 // Server-side only. Service-role key so it can read/write the shared venues table
 // regardless of RLS (venues are no longer anon-readable).
 const supabase = createClient(
@@ -83,8 +89,14 @@ export async function GET(req: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: query,
+      signal: AbortSignal.timeout(28000),
     })
+    if (!res.ok) {
+      console.error(`venues: Overpass returned ${res.status} for (${lat},${lng})`)
+      return NextResponse.json({ venues: nearby ?? [] })
+    }
     const data = await res.json()
+    console.log(`venues: Overpass returned ${data.elements?.length ?? 0} raw elements for (${lat},${lng})`)
     const seen = new Set<string>()
     for (const el of data.elements ?? []) {
       const tags = el.tags ?? {}
@@ -109,7 +121,8 @@ export async function GET(req: NextRequest) {
         cached_at: new Date().toISOString(),
       })
     }
-  } catch {
+  } catch (e: any) {
+    console.error(`venues: Overpass fetch failed for (${lat},${lng}):`, e?.message ?? e)
     return NextResponse.json({ venues: nearby ?? [] })
   }
 

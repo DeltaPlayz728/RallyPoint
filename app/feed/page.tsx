@@ -261,6 +261,9 @@ export default function FeedPage() {
       let query = supabase
         .from('events')
         .select('*, event_attendees(count)')
+        // Filters the embedded aggregate too, not just top-level rows — otherwise
+        // "Interested"/"Can't Go" RSVPs would inflate the attendee count shown here.
+        .eq('event_attendees.rsvp_status', 'going')
         .eq('status', 'active')
         .eq('type', 'casual')
         .gte('starts_at', new Date().toISOString())
@@ -422,10 +425,10 @@ export default function FeedPage() {
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
               {activeFilter === 'all'
-                ? <MapPin size={28} className="text-gray-400" />
-                : <Search size={28} className="text-gray-400" />}
+                ? <MapPin size={28} className="text-accent" />
+                : <Search size={28} className="text-accent" />}
             </div>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">
               {activeFilter === 'all' ? 'No events yet' : `Nothing ${activeFilter === 'today' ? 'today' : activeFilter === 'tomorrow' ? 'tomorrow' : 'this week'}`}

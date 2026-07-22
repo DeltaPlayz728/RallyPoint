@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
         .from('event_attendees')
         .select('*', { count: 'exact', head: true })
         .eq('event_id', event.id)
+        .eq('rsvp_status', 'going')
         .neq('user_id', event.created_by)
 
       if ((nonHostAttendees ?? 0) > 0) continue

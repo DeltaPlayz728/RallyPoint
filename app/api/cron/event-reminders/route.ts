@@ -55,6 +55,7 @@ async function runWindow(type: 'event_reminder_24h' | 'event_reminder_2h', windo
       .from('event_attendees')
       .select('user_id')
       .eq('event_id', event.id)
+      .eq('rsvp_status', 'going')
 
     for (const a of attendees ?? []) {
       if (await alreadySent(a.user_id, type, event.id)) continue

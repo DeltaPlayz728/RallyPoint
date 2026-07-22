@@ -172,6 +172,9 @@ export default function EventsPage() {
           organizer:profiles!events_created_by_fkey(full_name, username, account_type, venue_name),
           event_attendees(count)
         `)
+        // Filters the embedded aggregate, not the parent rows — "Interested"/
+        // "Can't Go" RSVPs shouldn't inflate the attendee count shown here.
+        .eq('event_attendees.rsvp_status', 'going')
         .eq('status', 'active')
         .eq('type', 'social')
         .gte('starts_at', new Date().toISOString())
@@ -301,8 +304,8 @@ export default function EventsPage() {
           </div>
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-center px-6">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#221c16] border-2 border-black dark:border-gray-600 flex items-center justify-center mb-4">
-              <Users size={28} className="text-gray-400" />
+            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+              <Users size={28} className="text-accent" />
             </div>
             <h2 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg mb-1">No events yet</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">

@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { setPendingRedirect } from '@/lib/postAuthRedirect'
-import { Camera, Pin, ClipboardList, MessageCircle, Users, Check, Settings, Home, Calendar, type LucideIcon } from 'lucide-react'
+import { Camera, Pin, ClipboardList, MessageCircle, Users, Check, Settings, Home, Calendar, X, Reply, type LucideIcon } from 'lucide-react'
+import HoverActions from '@/components/chat/HoverActions'
+import ReactionPills from '@/components/chat/ReactionPills'
+import { useMessageReactions } from '@/lib/useMessageReactions'
 
 type Community = {
   id: string
@@ -103,6 +106,15 @@ export default function CommunityDetailPage() {
   const params = useParams()
   const communityId = params.id as string
   const bottomRef = useRef<HTMLDivElement>(null)
+  const seenAtLoadRef = useRef<Set<string> | null>(null)
+  // refreshAll() is defined once inside the mount effect and closes over `userId`
+  // from that render (still null at that point, before auth resolves) — a plain
+  // state read there would always be stale. Mirror it into a ref that's updated
+  // the instant we know who's signed in, and read the ref instead.
+  const userIdRef = useRef<string | null>(null)
+  const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null)
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null)
+  const REPLY_RE = /^\[\[REPLYTO:([^\]]*)\]\]/
   const bannerInputRef = useRef<HTMLInputElement>(null)
   const iconInputRef = useRef<HTMLInputElement>(null)
 
@@ -162,6 +174,7 @@ export default function CommunityDetailPage() {
         return
       }
       setUserId(user.id)
+      userIdRef.current = user.id
 
       const { data: c } = await supabase
         .from('communities')
@@ -222,14 +235,28 @@ export default function CommunityDetailPage() {
           .order('starts_at', { ascending: true }),
       ])
 
-      setMessages((msgs ?? []).map((m: any) => ({
+      const mappedMsgs = (msgs ?? []).map((m: any) => ({
         id: m.id,
         sender_id: m.sender_id,
         content: m.content,
         created_at: m.created_at,
         channel_id: m.channel_id,
         senderName: m.profiles?.username ? `@${m.profiles.username}` : (m.profiles?.full_name ?? 'Someone'),
-      })))
+      }))
+      setMessages(mappedMsgs)
+      // This refetches the WHOLE message list on every INSERT (see the realtime
+      // subscription below) rather than appending one row, so "new" here means
+      // "wasn't present at the very first load" — same session-scoped divider
+      // approach as the DM/event chat surfaces, just diffed against a full list.
+      if (!seenAtLoadRef.current) {
+        seenAtLoadRef.current = new Set(mappedMsgs.map((m) => m.id))
+      } else {
+        const firstNew = mappedMsgs.find((m) => !seenAtLoadRef.current!.has(m.id) && m.sender_id !== userIdRef.current)
+        if (firstNew) {
+          setFirstUnreadId((prev) => prev ?? firstNew.id)
+          seenAtLoadRef.current = new Set(mappedMsgs.map((m) => m.id))
+        }
+      }
 
       setAnnouncements((ann ?? []).map((a: any) => ({
         id: a.id,
@@ -431,13 +458,15 @@ export default function CommunityDetailPage() {
   const handleSend = async () => {
     if (!userId || !draft.trim() || !activeChannelId) return
     setSending(true)
+    const quotePrefix = replyingTo ? `[[REPLYTO:${replyingTo.content.replace(REPLY_RE, '').slice(0, 80).replace(/[\[\]]/g, '')}]]` : ''
     await supabase.from('community_messages').insert({
       community_id: communityId,
       sender_id: userId,
       channel_id: activeChannelId,
-      content: draft.trim(),
+      content: quotePrefix + draft.trim(),
     })
     setDraft('')
+    setReplyingTo(null)
     setSending(false)
   }
 
@@ -588,6 +617,8 @@ export default function CommunityDetailPage() {
 
   const activeChannel = channels.find((c) => c.id === activeChannelId)
   const channelMessages = messages.filter((m) => m.channel_id === activeChannelId)
+  const channelMessageIds = useMemo(() => channelMessages.map((m) => m.id), [channelMessages])
+  const { forMessage, toggle: toggleReaction } = useMessageReactions('community', channelMessageIds, userId)
   const latestAnnouncement = announcements[0]
   const lastMessageByChannel = (channelId: string) => {
     const msgs = messages.filter((m) => m.channel_id === channelId)
@@ -1061,22 +1092,58 @@ export default function CommunityDetailPage() {
                 )}
               </div>
             ) : (
-              <div className="space-y-3 mb-3">
+              <div
+                className="mb-3 -mx-4 px-4 py-2"
+                style={{
+                  backgroundImage: 'radial-gradient(rgba(128,128,128,0.18) 1px, transparent 1px)',
+                  backgroundSize: '22px 22px',
+                }}
+              >
                 {channelMessages.length === 0 && (
                   <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-6">No messages yet in #{activeChannel?.name ?? 'general'}.</p>
                 )}
-                {channelMessages.map((m) => (
-                  <div key={m.id} className={`flex flex-col ${m.sender_id === userId ? 'items-end' : 'items-start'}`}>
-                    <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">{m.senderName}</span>
-                    <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                      m.sender_id === userId
-                        ? 'bg-accent text-white'
-                        : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700'
-                    }`}>
-                      {m.content}
+                {channelMessages.map((m) => {
+                  const replyMatch = m.content.match(REPLY_RE)
+                  const quoted = replyMatch?.[1]
+                  const displayContent = replyMatch ? m.content.replace(REPLY_RE, '').trim() : m.content
+                  const isMe = m.sender_id === userId
+                  return (
+                    <div key={m.id}>
+                      {firstUnreadId === m.id && (
+                        <div className="flex items-center gap-2 my-2">
+                          <div className="flex-1 h-px bg-accent/40" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-accent">New messages</span>
+                          <div className="flex-1 h-px bg-accent/40" />
+                        </div>
+                      )}
+                      <div
+                        className="group relative flex flex-col -mx-4 px-4 py-1 rounded-lg transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
+                        style={{ alignItems: isMe ? 'flex-end' : 'flex-start' }}
+                      >
+                        <HoverActions
+                          isMe={isMe}
+                          content={displayContent}
+                          onReply={() => setReplyingTo(m)}
+                          onReact={(emoji) => toggleReaction(m.id, emoji)}
+                        />
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">{m.senderName}</span>
+                        {quoted && (
+                          <div className="max-w-[80%] text-xs text-gray-500 dark:text-gray-400 border-l-2 border-gray-300 dark:border-gray-600 pl-2 mb-1 truncate">
+                            {quoted}
+                          </div>
+                        )}
+                        <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+                          isMe
+                            ? 'bg-accent text-white'
+                            : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700'
+                        }`}>
+                          {displayContent}
+                        </div>
+                        <ReactionPills reactions={forMessage(m.id)} currentUserId={userId} onToggle={(emoji) => toggleReaction(m.id, emoji)} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
                 <div ref={bottomRef} />
               </div>
             )}
@@ -1315,6 +1382,15 @@ export default function CommunityDetailPage() {
       </div>
 
       {/* Chat input — only on the Chat tab, while a member, and only for plain chat channels (forum channels compose via the post/reply UI above) */}
+      {mainTab === 'chat' && isMember && !isForumChannel && replyingTo && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-[#221c16] border-t border-gray-200 dark:border-gray-700 text-xs shrink-0">
+          <Reply size={12} className="text-accent shrink-0" />
+          <span className="flex-1 truncate text-gray-600 dark:text-gray-400">Replying to: {replyingTo.content.replace(REPLY_RE, '').slice(0, 60)}</span>
+          <button onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-black dark:hover:text-white shrink-0">
+            <X size={14} />
+          </button>
+        </div>
+      )}
       {mainTab === 'chat' && isMember && !isForumChannel && (
         <div className="flex gap-2 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-[#fdf6ec] dark:bg-[#15110d] shrink-0">
           <input

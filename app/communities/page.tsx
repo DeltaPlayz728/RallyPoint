@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { effectiveTier, hasFeature, SubscriptionTier } from '@/lib/subscription'
+import { Users2 } from 'lucide-react'
+import EmptyState from '@/components/EmptyState'
 
 type CommunityRow = {
   id: string
@@ -96,9 +98,13 @@ export default function CommunitiesPage() {
         )}
 
         {communities.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-sm text-center pt-8">
-            No communities yet. Be the first to start one.
-          </p>
+          <EmptyState
+            icon={Users2}
+            title="No communities yet"
+            description="Communities are where people with shared interests hang out, chat, and plan events together. Be the first to start one."
+            ctaLabel="Explore events instead"
+            ctaHref="/feed"
+          />
         ) : (
           <div className="space-y-3">
             {communities.map((c) => (

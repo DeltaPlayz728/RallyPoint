@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
         .from('event_attendees')
         .select('user_id')
         .eq('event_id', event.id)
+        .eq('rsvp_status', 'going')
 
       const { data: rated } = await supabaseAdmin
         .from('event_ratings')
