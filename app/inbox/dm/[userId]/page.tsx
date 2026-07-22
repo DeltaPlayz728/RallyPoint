@@ -303,23 +303,28 @@ export default function DmThreadPage() {
                 className="group relative flex flex-col -mx-4 px-4 py-1 rounded-lg transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
                 style={{ alignItems: isMe ? 'flex-end' : 'flex-start' }}
               >
-                <HoverActions
-                  isMe={isMe}
-                  content={displayContent}
-                  onReply={() => setReplyingTo(msg)}
-                  onReact={(emoji) => toggleReaction(msg.id, emoji)}
-                />
                 {quoted && (
                   <div className="max-w-xs text-xs text-gray-500 dark:text-gray-400 border-l-2 border-gray-300 dark:border-gray-600 pl-2 mb-1 truncate">
                     {quoted}
                   </div>
                 )}
-                <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm text-[#15110d] dark:text-[#fdf6ec] ${
-                  isMe
-                    ? 'bg-accent text-white rounded-br-sm'
-                    : 'bg-gray-200 dark:bg-gray-700 rounded-bl-sm'
-                }`}>
-                  {displayContent}
+                {/* HoverActions is positioned relative to THIS wrapper (sized to the
+                    bubble, not the full-width row) so it lands next to the bubble's
+                    actual edge instead of translating off past the row/screen edge. */}
+                <div className="relative inline-block max-w-xs">
+                  <HoverActions
+                    isMe={isMe}
+                    content={displayContent}
+                    onReply={() => setReplyingTo(msg)}
+                    onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                  />
+                  <div className={`px-4 py-2 rounded-2xl text-sm text-[#15110d] dark:text-[#fdf6ec] ${
+                    isMe
+                      ? 'bg-accent text-white rounded-br-sm'
+                      : 'bg-gray-200 dark:bg-gray-700 rounded-bl-sm'
+                  }`}>
+                    {displayContent}
+                  </div>
                 </div>
                 <ReactionPills reactions={forMessage(msg.id)} currentUserId={userId} onToggle={(emoji) => toggleReaction(msg.id, emoji)} />
                 {proposalId && !resolved && (

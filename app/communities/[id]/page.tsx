@@ -1121,24 +1121,29 @@ export default function CommunityDetailPage() {
                         className="group relative flex flex-col -mx-4 px-4 py-1 rounded-lg transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
                         style={{ alignItems: isMe ? 'flex-end' : 'flex-start' }}
                       >
-                        <HoverActions
-                          isMe={isMe}
-                          content={displayContent}
-                          onReply={() => setReplyingTo(m)}
-                          onReact={(emoji) => toggleReaction(m.id, emoji)}
-                        />
                         <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">{m.senderName}</span>
                         {quoted && (
                           <div className="max-w-[80%] text-xs text-gray-500 dark:text-gray-400 border-l-2 border-gray-300 dark:border-gray-600 pl-2 mb-1 truncate">
                             {quoted}
                           </div>
                         )}
-                        <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                          isMe
-                            ? 'bg-accent text-white'
-                            : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700'
-                        }`}>
-                          {displayContent}
+                        {/* HoverActions is positioned relative to THIS wrapper (sized to the
+                            bubble, not the full-width row) so it lands next to the bubble's
+                            actual edge instead of translating off past the row/screen edge. */}
+                        <div className="relative inline-block max-w-[80%]">
+                          <HoverActions
+                            isMe={isMe}
+                            content={displayContent}
+                            onReply={() => setReplyingTo(m)}
+                            onReact={(emoji) => toggleReaction(m.id, emoji)}
+                          />
+                          <div className={`rounded-2xl px-3 py-2 text-sm ${
+                            isMe
+                              ? 'bg-accent text-white'
+                              : 'bg-white dark:bg-[#221c16] text-[#15110d] dark:text-[#fdf6ec] border border-gray-200 dark:border-gray-700'
+                          }`}>
+                            {displayContent}
+                          </div>
                         </div>
                         <ReactionPills reactions={forMessage(m.id)} currentUserId={userId} onToggle={(emoji) => toggleReaction(m.id, emoji)} />
                       </div>
