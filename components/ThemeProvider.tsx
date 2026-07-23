@@ -24,16 +24,28 @@ export const ACCENT_PRESETS: { id: Accent; label: string; hex: string }[] = [
 ]
 const DEFAULT_ACCENT_HEX = ACCENT_PRESETS[0].hex
 
+// "Background style" — the mesh-gradient wash (see components/MeshBackdrop.tsx)
+// vs. the old flat single-color page fill. Lives here (not on a per-page
+// Supabase fetch) so it's instant, works logged-out, and can reuse the
+// accent hex above to tint the mesh to whatever the user already picked.
+export type BackgroundStyle = 'flat' | 'mesh'
+
 const ThemeContext = createContext<{
   theme: Theme
   toggleTheme: () => void
   accent: Accent
   setAccent: (accent: Accent) => void
+  accentHex: string
+  backgroundStyle: BackgroundStyle
+  setBackgroundStyle: (style: BackgroundStyle) => void
 }>({
   theme: 'light',
   toggleTheme: () => {},
   accent: 'orange',
   setAccent: () => {},
+  accentHex: DEFAULT_ACCENT_HEX,
+  backgroundStyle: 'mesh',
+  setBackgroundStyle: () => {},
 })
 
 // Inline script injected into <head> so the `dark` class and --accent
@@ -59,6 +71,7 @@ export const THEME_BOOTSTRAP_SCRIPT = `
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
   const [accent, setAccentState] = useState<Accent>('orange')
+  const [backgroundStyle, setBackgroundStyleState] = useState<BackgroundStyle>('mesh')
 
   useEffect(() => {
     const stored = localStorage.getItem('rallypoint-theme') as Theme | null
@@ -68,6 +81,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const storedAccent = localStorage.getItem('rallypoint-accent') as Accent | null
     if (storedAccent && ACCENT_PRESETS.some(p => p.id === storedAccent)) {
       setAccentState(storedAccent)
+    }
+    const storedBg = localStorage.getItem('rallypoint-background-style') as BackgroundStyle | null
+    if (storedBg === 'flat' || storedBg === 'mesh') {
+      setBackgroundStyleState(storedBg)
     }
   }, [])
 
@@ -91,8 +108,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('rallypoint-accent', next)
   }
 
+  const setBackgroundStyle = (next: BackgroundStyle) => {
+    setBackgroundStyleState(next)
+    localStorage.setItem('rallypoint-background-style', next)
+  }
+
+  const accentHex = ACCENT_PRESETS.find(p => p.id === accent)?.hex ?? DEFAULT_ACCENT_HEX
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, accent, setAccent }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, accent, setAccent, accentHex, backgroundStyle, setBackgroundStyle }}>
       {children}
     </ThemeContext.Provider>
   )

@@ -12,7 +12,7 @@ import { Check, AlertTriangle } from 'lucide-react'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { theme, toggleTheme, accent, setAccent } = useTheme()
+  const { theme, toggleTheme, accent, setAccent, backgroundStyle, setBackgroundStyle } = useTheme()
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const [tier, setTier] = useState<SubscriptionTier>('free')
@@ -183,6 +183,31 @@ export default function SettingsPage() {
                   {accent === preset.id && (
                     <Check size={14} className="text-white" />
                   )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4 mt-3">
+            <p className="font-medium text-[#15110d] dark:text-[#fdf6ec] mb-0.5">Background style</p>
+            <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
+              A subtle gradient wash behind pages instead of a flat fill, tinted to your accent color.
+            </p>
+            <div className="flex gap-2">
+              {([
+                { key: 'mesh', label: 'Gradient' },
+                { key: 'flat', label: 'Flat' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setBackgroundStyle(opt.key)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                    backgroundStyle === opt.key
+                      ? 'bg-accent border-accent text-white'
+                      : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  {opt.label}
                 </button>
               ))}
             </div>

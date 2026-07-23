@@ -59,7 +59,6 @@ type Profile = {
   subscription_status?: string | null
   profile_banner_color?: string | null
   is_founding_member?: boolean
-  background_style?: 'flat' | 'mesh'
 }
 
 type Stats = {
@@ -98,7 +97,6 @@ export default function ProfilePage() {
   const [upgradingOrganizer, setUpgradingOrganizer] = useState(false)
   const [activeTab, setActiveTab] = useState<'hosting' | 'attending'>('hosting')
   const [savingBanner, setSavingBanner] = useState(false)
-  const [savingBackgroundStyle, setSavingBackgroundStyle] = useState(false)
   const [myCommunities, setMyCommunities] = useState<{ id: string; name: string; banner_color: string }[]>([])
   const [savingCommunityTag, setSavingCommunityTag] = useState(false)
   const [reputationTier, setReputationTier] = useState<string | null>(null)
@@ -112,7 +110,7 @@ export default function ProfilePage() {
       setUserId(user.id)
 
       const [profileRes, hostingRes, attendingRes, friendsRes, ratingsRes, communityRes] = await Promise.all([
-        supabase.from('profiles').select('full_name, username, bio, city, interests, vibe, social_battery, available_this_week, preferred_time, account_type, venue_name, avatar_url, created_at, primary_community_id, subscription_tier, subscription_status, profile_banner_color, is_founding_member, background_style').eq('id', user.id).single(),
+        supabase.from('profiles').select('full_name, username, bio, city, interests, vibe, social_battery, available_this_week, preferred_time, account_type, venue_name, avatar_url, created_at, primary_community_id, subscription_tier, subscription_status, profile_banner_color, is_founding_member').eq('id', user.id).single(),
         supabase.from('events').select('*').eq('created_by', user.id).eq('status', 'active').order('starts_at', { ascending: true }),
         supabase.from('event_attendees').select('events(*)').eq('user_id', user.id).eq('rsvp_status', 'going'),
         supabase.from('friendships').select('id').or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`).eq('status', 'accepted'),
@@ -195,14 +193,6 @@ export default function ProfilePage() {
     await supabase.from('profiles').update({ profile_banner_color: color }).eq('id', userId)
     setProfile(prev => prev ? { ...prev, profile_banner_color: color } : prev)
     setSavingBanner(false)
-  }
-
-  const handleBackgroundStyle = async (style: 'flat' | 'mesh') => {
-    if (!userId) return
-    setSavingBackgroundStyle(true)
-    await supabase.from('profiles').update({ background_style: style }).eq('id', userId)
-    setProfile(prev => prev ? { ...prev, background_style: style } : prev)
-    setSavingBackgroundStyle(false)
   }
 
   const handleToggleAccommodation = async (id: string, next: boolean) => {
@@ -499,32 +489,6 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
-
-        {/* Background style — swaps the app's flat page fill for a subtle
-            gradient/depth wash (see MeshBackdrop). Free for everyone, since
-            this is a general readability/polish fix, not a paid perk. */}
-        <div className="mb-5">
-          <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">Background style</p>
-          <div className="flex gap-2">
-            {([
-              { key: 'mesh', label: 'Gradient' },
-              { key: 'flat', label: 'Flat' },
-            ] as const).map((opt) => (
-              <button
-                key={opt.key}
-                onClick={() => handleBackgroundStyle(opt.key)}
-                disabled={savingBackgroundStyle}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
-                  (profile?.background_style ?? 'mesh') === opt.key
-                    ? 'bg-accent border-accent text-white'
-                    : 'bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Action buttons */}
         <div className="flex gap-2 mb-6">

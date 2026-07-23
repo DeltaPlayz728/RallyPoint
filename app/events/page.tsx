@@ -8,6 +8,7 @@ import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Building2, MapPin, Clock, Users } from 'lucide-react'
 import EmptyIllustration from '@/components/EmptyIllustration'
 import MeshBackdrop from '@/components/MeshBackdrop'
+import { useTheme } from '@/components/ThemeProvider'
 import { boundingBox, EVENT_RADIUS_KM } from '@/lib/geo'
 import { AGE_GATING_ENABLED, canSeeAgeRestricted } from '@/lib/ageGating'
 
@@ -132,14 +133,12 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
 
 export default function EventsPage() {
   const router = useRouter()
+  const { backgroundStyle, accentHex } = useTheme()
   const [events, setEvents] = useState<EventRow[]>([])
   const [loading, setLoading] = useState(true)
   const [slide, setSlide] = useState<Slide>('social')
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
   const [unread, setUnread] = useState(false)
-  // "Custom background" preference (Profile > Background style) — 'mesh' is
-  // the default for everyone; users can switch back to the old flat fill.
-  const [backgroundStyle, setBackgroundStyle] = useState<'flat' | 'mesh'>('mesh')
 
   useEffect(() => {
     const load = async (pos: { lat: number; lng: number } | null) => {
@@ -153,15 +152,6 @@ export default function EventsPage() {
         .eq('user_id', user.id)
         .eq('read', false)
       setUnread((count ?? 0) > 0)
-
-      const { data: bgProf } = await supabase
-        .from('profiles')
-        .select('background_style')
-        .eq('id', user.id)
-        .maybeSingle()
-      if (bgProf?.background_style === 'flat' || bgProf?.background_style === 'mesh') {
-        setBackgroundStyle(bgProf.background_style)
-      }
 
       // If this area looks empty, let the assistant propose a seed event (at most
       // once/day across Map/Feed/Events — see lib/seedCheck.ts).
@@ -246,7 +236,7 @@ export default function EventsPage() {
           can switch back to the old flat bubbles). Cards stay solid on top
           either way; this is purely a fixed, pointer-events-none backdrop. */}
       {backgroundStyle === 'mesh' ? (
-        <MeshBackdrop />
+        <MeshBackdrop accent={accentHex} />
       ) : (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
           <div className="absolute top-[22%] -left-16 w-40 h-40 rounded-full bg-[#f6d9bf] dark:bg-accent/10" />
