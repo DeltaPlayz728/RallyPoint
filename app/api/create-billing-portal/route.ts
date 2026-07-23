@@ -21,7 +21,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
-  if (isRateLimited(`billing-portal:${ip}`, { limit: 10, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`billing-portal:${ip}`, { limit: 10, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 

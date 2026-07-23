@@ -46,7 +46,7 @@ async function getOrCreateBotThread(userId: string, botId: string) {
 // POST — send a message to the RallyPoint Assistant, get a reply
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  if (isRateLimited(`assistant:${ip}`, { limit: 30, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`assistant:${ip}`, { limit: 30, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 

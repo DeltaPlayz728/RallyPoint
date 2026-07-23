@@ -9,7 +9,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  if (isRateLimited(`waitlist:${ip}`, { limit: 5, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`waitlist:${ip}`, { limit: 5, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 

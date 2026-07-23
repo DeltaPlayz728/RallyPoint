@@ -12,7 +12,7 @@ const supabaseAdmin = createClient(
 // Logged-in users submit feedback during the playtest.
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  if (isRateLimited(`feedback:${ip}`, { limit: 10, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`feedback:${ip}`, { limit: 10, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too much feedback submitted — try again later' }, { status: 429 })
   }
 

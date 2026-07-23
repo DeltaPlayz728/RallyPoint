@@ -24,7 +24,7 @@ function secretsMatch(a: string, b: string): boolean {
 // GET /api/admin/bot?secret=YOUR_SECRET
 export async function GET(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
-  if (isRateLimited(`admin-bot-setup:${ip}`, { limit: 5, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`admin-bot-setup:${ip}`, { limit: 5, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 

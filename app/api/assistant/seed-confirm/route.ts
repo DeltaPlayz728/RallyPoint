@@ -11,7 +11,7 @@ const supabaseAdmin = createClient(
 // POST — accept or decline a bot-proposed event
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  if (isRateLimited(`seed-confirm:${ip}`, { limit: 20, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`seed-confirm:${ip}`, { limit: 20, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 

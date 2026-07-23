@@ -1,10 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import Script from 'next/script'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { reportConversionIfPending } from '@/lib/referral'
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement, options: Record<string, unknown>) => string
+      reset: (widgetId?: string) => void
+    }
+  }
+}
 
 export default function SignupPage() {
   const router = useRouter()
@@ -14,6 +24,25 @@ export default function SignupPage() {
   const [dob, setDob] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Cloudflare Turnstile — the CAPTCHA blocking automated signups. Supabase
+  // Auth itself verifies the token server-side (Authentication > Attack
+  // Protection, configured 2026-07-23), so this widget is the frontend half
+  // of a real server-enforced gate, not just a client-side speed bump.
+  const turnstileRef = useRef<HTMLDivElement>(null)
+  const turnstileWidgetId = useRef<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [turnstileReady, setTurnstileReady] = useState(false)
+
+  useEffect(() => {
+    if (!turnstileReady || !turnstileRef.current || !window.turnstile || turnstileWidgetId.current) return
+    turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+      callback: (token: string) => setTurnstileToken(token),
+      'expired-callback': () => setTurnstileToken(''),
+      'error-callback': () => setTurnstileToken(''),
+    })
+  }, [turnstileReady])
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,12 +63,26 @@ export default function SignupPage() {
 
     const isMinor = age < 18
 
+    if (!turnstileToken) {
+      setError('Please complete the verification check.')
+      setLoading(false)
+      return
+    }
+
     const { data, error: signupError } = await supabase.auth.signUp({
       email,
       password,
+      options: { captchaToken: turnstileToken },
     })
 
     if (signupError) {
+      // A rejected/expired Turnstile token surfaces here as a Supabase auth
+      // error — reset the widget so the user can retry instead of getting
+      // stuck on a dead token.
+      if (window.turnstile && turnstileWidgetId.current) {
+        window.turnstile.reset(turnstileWidgetId.current)
+      }
+      setTurnstileToken('')
       setError(signupError.message)
       setLoading(false)
       return
@@ -135,16 +178,24 @@ export default function SignupPage() {
             />
           </div>
 
+          <div ref={turnstileRef} />
+
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !turnstileToken}
             className="w-full bg-accent hover:brightness-90 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
+
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+          onLoad={() => setTurnstileReady(true)}
+        />
 
         <p className="text-gray-500 dark:text-gray-400 text-sm text-center mt-6">
           Already have an account?{' '}

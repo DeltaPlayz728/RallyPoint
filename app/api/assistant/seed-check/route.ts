@@ -62,7 +62,7 @@ function rankTemplates(interests: string[]) {
 // propose a couple of alternate ideas (picked using the user's interests) via DM.
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  if (isRateLimited(`seed-check:${ip}`, { limit: 10, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`seed-check:${ip}`, { limit: 10, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 

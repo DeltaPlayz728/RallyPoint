@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
 
   // Generic attempt throttle (brute-forcing token guesses etc.) — separate
   // from the success-based cap above.
-  if (isRateLimited(`referral-convert-attempt:${ip}`, { limit: 30, windowMs: 60 * 60 * 1000 })) {
+  if (await isRateLimited(`referral-convert-attempt:${ip}`, { limit: 30, windowMs: 60 * 60 * 1000 })) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 

@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
 
   // Rate limit auth routes — 10 attempts per IP per 15 minutes
   if (pathname.startsWith('/auth/')) {
-    if (isRateLimited(`auth:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 })) {
+    if (await isRateLimited(`auth:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 })) {
       return new NextResponse('Too many requests. Please wait before trying again.', {
         status: 429,
         headers: { 'Retry-After': '900' },
