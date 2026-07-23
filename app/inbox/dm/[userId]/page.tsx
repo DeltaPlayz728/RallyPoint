@@ -10,6 +10,7 @@ import HoverActions from '@/components/chat/HoverActions'
 import ReactionPills from '@/components/chat/ReactionPills'
 import { useMessageReactions } from '@/lib/useMessageReactions'
 import { moderateContent, flagForReview } from '@/lib/contentModeration'
+import { dotTextureBackground } from '@/lib/color'
 
 type Message = {
   id: string
@@ -47,12 +48,22 @@ export default function DmThreadPage() {
   // exists yet, so this resets on next visit rather than surviving a reload).
   const seenAtLoadRef = useRef<Set<string> | null>(null)
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null)
+  // Own accent color, used to tint the wallpaper (the personal analog of a
+  // community's banner_color, since a DM has no community to draw one from).
+  const [myBannerColor, setMyBannerColor] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
       setUserId(user.id)
+
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('profile_banner_color')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (myProfile?.profile_banner_color) setMyBannerColor(myProfile.profile_banner_color)
 
       const { data: otherProfile } = await supabase
         .from('profiles')
@@ -278,10 +289,7 @@ export default function DmThreadPage() {
           costs nothing at runtime and follows the theme via two different SVGs. */}
       <div
         className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[#fdf6ec] dark:bg-[#15110d]"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(128,128,128,0.18) 1px, transparent 1px)',
-          backgroundSize: '22px 22px',
-        }}
+        style={dotTextureBackground(myBannerColor)}
       >
         {messages.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">

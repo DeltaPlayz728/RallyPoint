@@ -9,6 +9,7 @@ import HoverActions from '@/components/chat/HoverActions'
 import ReactionPills from '@/components/chat/ReactionPills'
 import { useMessageReactions } from '@/lib/useMessageReactions'
 import { moderateContent, flagForReview } from '@/lib/contentModeration'
+import { dotTextureBackground } from '@/lib/color'
 
 type Community = {
   id: string
@@ -1129,10 +1130,7 @@ export default function CommunityDetailPage() {
             ) : (
               <div
                 className="mb-3 -mx-4 px-4 py-2"
-                style={{
-                  backgroundImage: 'radial-gradient(rgba(128,128,128,0.18) 1px, transparent 1px)',
-                  backgroundSize: '22px 22px',
-                }}
+                style={dotTextureBackground(community.banner_color)}
               >
                 {channelMessages.length === 0 && (
                   <p className="text-gray-400 dark:text-gray-500 text-sm text-center pt-6">No messages yet in #{activeChannel?.name ?? 'general'}.</p>

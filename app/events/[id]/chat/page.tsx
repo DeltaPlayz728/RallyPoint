@@ -12,6 +12,7 @@ import HoverActions from '@/components/chat/HoverActions'
 import ReactionPills from '@/components/chat/ReactionPills'
 import { useMessageReactions } from '@/lib/useMessageReactions'
 import { moderateContent, flagForReview } from '@/lib/contentModeration'
+import { dotTextureBackground, DEFAULT_ACCENT } from '@/lib/color'
 
 type Message = {
   id: string
@@ -233,10 +234,7 @@ export default function EventChatPage() {
       {/* Messages — same subtle dot texture + full-row hover highlight as the DM view */}
       <div
         className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[#fdf6ec] dark:bg-[#15110d]"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(128,128,128,0.18) 1px, transparent 1px)',
-          backgroundSize: '22px 22px',
-        }}
+        style={dotTextureBackground(DEFAULT_ACCENT)}
       >
         {messages.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">

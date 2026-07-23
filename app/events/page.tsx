@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Building2, MapPin, Clock, Users } from 'lucide-react'
 import EmptyIllustration from '@/components/EmptyIllustration'
+import MeshBackdrop from '@/components/MeshBackdrop'
 import { boundingBox, EVENT_RADIUS_KM } from '@/lib/geo'
 import { AGE_GATING_ENABLED, canSeeAgeRestricted } from '@/lib/ageGating'
 
@@ -136,6 +137,9 @@ export default function EventsPage() {
   const [slide, setSlide] = useState<Slide>('social')
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
   const [unread, setUnread] = useState(false)
+  // "Custom background" preference (Profile > Background style) — 'mesh' is
+  // the default for everyone; users can switch back to the old flat fill.
+  const [backgroundStyle, setBackgroundStyle] = useState<'flat' | 'mesh'>('mesh')
 
   useEffect(() => {
     const load = async (pos: { lat: number; lng: number } | null) => {
@@ -149,6 +153,15 @@ export default function EventsPage() {
         .eq('user_id', user.id)
         .eq('read', false)
       setUnread((count ?? 0) > 0)
+
+      const { data: bgProf } = await supabase
+        .from('profiles')
+        .select('background_style')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (bgProf?.background_style === 'flat' || bgProf?.background_style === 'mesh') {
+        setBackgroundStyle(bgProf.background_style)
+      }
 
       // If this area looks empty, let the assistant propose a seed event (at most
       // once/day across Map/Feed/Events — see lib/seedCheck.ts).
@@ -229,14 +242,18 @@ export default function EventsPage() {
   return (
     <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
 
-      {/* Background depth bubbles — opaque pastels, sit behind all content (cards
-          stay solid white on top), fixed + pointer-events-none so they never
-          cover or interfere with events. Kept sparse on purpose. */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute top-[22%] -left-16 w-40 h-40 rounded-full bg-[#f6d9bf] dark:bg-accent/10" />
-        <div className="absolute top-[56%] -right-12 w-32 h-32 rounded-full bg-[#cfeede] dark:bg-teal-500/10" />
-        <div className="absolute -bottom-12 left-[18%] w-44 h-44 rounded-full bg-[#dcd2ef] dark:bg-purple-500/10" />
-      </div>
+      {/* Background — mesh gradient by default (Profile > Background style
+          can switch back to the old flat bubbles). Cards stay solid on top
+          either way; this is purely a fixed, pointer-events-none backdrop. */}
+      {backgroundStyle === 'mesh' ? (
+        <MeshBackdrop />
+      ) : (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute top-[22%] -left-16 w-40 h-40 rounded-full bg-[#f6d9bf] dark:bg-accent/10" />
+          <div className="absolute top-[56%] -right-12 w-32 h-32 rounded-full bg-[#cfeede] dark:bg-teal-500/10" />
+          <div className="absolute -bottom-12 left-[18%] w-44 h-44 rounded-full bg-[#dcd2ef] dark:bg-purple-500/10" />
+        </div>
+      )}
 
       {/* Header */}
       <div className="relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
