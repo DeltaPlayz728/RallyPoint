@@ -110,7 +110,7 @@ export default function ProfilePage() {
       setUserId(user.id)
 
       const [profileRes, hostingRes, attendingRes, friendsRes, ratingsRes, communityRes] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('profiles').select('full_name, username, bio, city, interests, vibe, social_battery, available_this_week, preferred_time, account_type, venue_name, avatar_url, created_at, primary_community_id, subscription_tier, subscription_status, profile_banner_color, is_founding_member').eq('id', user.id).single(),
         supabase.from('events').select('*').eq('created_by', user.id).eq('status', 'active').order('starts_at', { ascending: true }),
         supabase.from('event_attendees').select('events(*)').eq('user_id', user.id).eq('rsvp_status', 'going'),
         supabase.from('friendships').select('id').or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`).eq('status', 'accepted'),
@@ -137,6 +137,7 @@ export default function ProfilePage() {
         display_selected: a.display_selected,
       })))
 
+      if (profileRes.error) console.error('profile: failed to load own profile row:', profileRes.error.message)
       const profileData = profileRes.data
       setProfile(profileData)
       if (profileData?.venue_name) setVenueName(profileData.venue_name)
