@@ -133,3 +133,15 @@ button:active:not(:disabled), a:active {
 .dark [data-bg-vivid="true"] .text-gray-500 {
   color: rgba(209, 213, 219, 0.85);
 }
+
+/* Light-mode counterpart — the translucent header over the mesh gradient
+   reads as a soft pastel, not plain cream, so the same gray-500/600 that
+   worked on flat cream washes out against it. Darken instead of lighten.
+   `html:not(.dark)` keeps this from ever fighting the dark-mode rules
+   above regardless of Tailwind's own cascade order. */
+html:not(.dark) [data-bg-vivid="true"] .text-gray-500 {
+  color: rgba(55, 65, 81, 0.95);
+}
+html:not(.dark) [data-bg-vivid="true"] .text-gray-600 {
+  color: rgba(31, 41, 55, 0.95);
+}

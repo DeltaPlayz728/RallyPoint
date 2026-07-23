@@ -1,5 +1,7 @@
 'use client'
 
+import { useTheme } from '@/components/ThemeProvider'
+
 /**
  * Isometric-cube hex grid, drawn with actual hexagon geometry — not a flat
  * dot grid. Each hexagon is split into 3 facets by spokes from its center to
@@ -11,8 +13,15 @@
  * Built as a single generated SVG (grid computed in JS, not hand-placed)
  * so it correctly tiles the full backdrop at any screen size via
  * preserveAspectRatio="xMidYMid slice".
+ *
+ * Dark mode was confirmed to look right as-is; light mode needed its own
+ * pass — the same saturated colors read as a muddy pastel wash against
+ * cream instead of popping the way they do against navy, so the underlying
+ * solid lines go bolder/higher-opacity in light mode specifically.
  */
 export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string }) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const W = 480
   const H = 800
   const R = 58 // hex circumradius — bigger cells read clearly on a phone screen
@@ -70,9 +79,12 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
             <stop offset="100%" stopColor="#e879f9" stopOpacity="1" />
           </linearGradient>
         </defs>
-        {/* Faint solid line underneath the dots — fills the visual gap
-            between dots so each hex edge reads as one continuous line
-            rather than a scatter of disconnected dots ("unfinished" look). */}
+        {/* Solid line underneath the dots on EVERY line (edges and spokes
+            alike — spokes used to be dots-only, which is what read as
+            "missing lines"/unfinished) — fills the gap between dots so
+            each hex facet reads as continuous geometry. Bolder in light
+            mode, where the same opacity that pops against navy goes muddy
+            against cream. */}
         {lines.map((l, i) => (
           <line
             key={`line-${i}`}
@@ -80,9 +92,9 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
             y1={l.y1}
             x2={l.x2}
             y2={l.y2}
-            stroke={l.kind === 'edge' ? accent : '#c084fc'}
-            strokeWidth={1}
-            strokeOpacity={0.22}
+            stroke={l.kind === 'edge' ? accent : (isDark ? '#c084fc' : '#9333ea')}
+            strokeWidth={isDark ? 1 : 1.6}
+            strokeOpacity={isDark ? 0.22 : 0.42}
           />
         ))}
         {lines.map((l, i) => (
