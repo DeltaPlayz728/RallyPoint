@@ -1,6 +1,7 @@
 'use client'
 
 import MeshBackdrop from '@/components/MeshBackdrop'
+import HexDotBackdrop from '@/components/HexDotBackdrop'
 import type { BackgroundStyle } from '@/components/ThemeProvider'
 
 /**
@@ -23,18 +24,7 @@ export default function PageBackdrop({
   }
 
   if (style === 'dots') {
-    return (
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute inset-0 bg-[#fdf6ec] dark:bg-[#15110d]" />
-        <div
-          className="absolute inset-0 opacity-[0.5] dark:opacity-[0.6]"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(128,128,128,0.2) 1.5px, transparent 1.5px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-      </div>
-    )
+    return <HexDotBackdrop accent={accent} />
   }
 
   if (style === 'custom' && customUrl) {

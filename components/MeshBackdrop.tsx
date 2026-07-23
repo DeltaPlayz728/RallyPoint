@@ -1,100 +1,57 @@
 'use client'
 
 /**
- * Low-poly "mesh gradient" backdrop — actual faceted triangles (via
- * clip-path), each filled with its own mini gradient so it reads as lit
- * from one direction, the way real gradient-mesh wallpapers do. Replaces
- * a dead-flat single-color page background on screens with a lot of
- * empty space (Events tab was the first complaint).
+ * Low-poly gradient backdrop — sharp-edged triangular facets (SVG polygons,
+ * not blurred blobs) plus one soft diagonal seam/crease, matching the
+ * faceted-crystal reference wallpaper directly rather than approximating it
+ * with blurred circles. Colors are the app's purple/magenta/red/orange
+ * family so it stays on-brand; `accent` swaps in for the top facet so a
+ * community/profile color still shows through.
  *
- * This is the "turn it up" pass — the first version was blurred pastel
- * blobs at ~20% opacity and read as barely-there. This version keeps the
- * same brand palette (accent + purple/rose/teal) but as bold, visible
- * facets like the reference wallpaper, while still sitting at z-0 behind
- * every card/panel in the app (which are all opaque), so text and content
- * are never actually behind it.
- *
- * `accent` lets a page tint the mesh toward a community/profile color
- * (same idea as the chat wallpaper tinting in lib/color.ts) — defaults to
- * the app's own orange accent.
+ * Rendered as one SVG with preserveAspectRatio="xMidYMid slice" so it always
+ * fully covers the viewport (cropping overflow) regardless of screen size,
+ * the same way a CSS `background-size: cover` image would.
  */
 export default function MeshBackdrop({ accent = '#f97316' }: { accent?: string }) {
-  // Each facet is a triangle (clip-path polygon, in viewport %) filled with
-  // its own two-tone gradient for a faceted "light hits it from one side"
-  // look instead of a flat color wedge.
-  const facets: { clipPath: string; gradient: string; opacity: number; darkOpacity: number }[] = [
-    {
-      clipPath: 'polygon(0% 0%, 55% 0%, 20% 40%)',
-      gradient: `linear-gradient(135deg, ${accent}, #fb923c)`,
-      opacity: 0.55,
-      darkOpacity: 0.4,
-    },
-    {
-      clipPath: 'polygon(55% 0%, 100% 0%, 100% 35%, 20% 40%)',
-      gradient: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-      opacity: 0.5,
-      darkOpacity: 0.36,
-    },
-    {
-      clipPath: 'polygon(100% 35%, 100% 70%, 45% 55%, 20% 40%)',
-      gradient: 'linear-gradient(160deg, #e11d48, #fb7185)',
-      opacity: 0.45,
-      darkOpacity: 0.32,
-    },
-    {
-      clipPath: 'polygon(0% 40%, 20% 40%, 45% 55%, 15% 100%, 0% 100%)',
-      gradient: `linear-gradient(160deg, ${accent}, #7c3aed)`,
-      opacity: 0.4,
-      darkOpacity: 0.28,
-    },
-    {
-      clipPath: 'polygon(45% 55%, 100% 70%, 100% 100%, 15% 100%)',
-      gradient: 'linear-gradient(135deg, #0d9488, #2dd4bf)',
-      opacity: 0.4,
-      darkOpacity: 0.28,
-    },
-    {
-      clipPath: 'polygon(100% 70%, 100% 100%, 60% 100%)',
-      gradient: 'linear-gradient(135deg, #a855f7, #e11d48)',
-      opacity: 0.35,
-      darkOpacity: 0.24,
-    },
-  ]
-
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Warm page base underneath the facets, so gaps between triangles
-          (and the dark-mode blend) still land on-brand. */}
-      <div className="absolute inset-0 bg-[#fdf6ec] dark:bg-[#15110d]" />
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 100 175"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        {/* Base fill so any hairline gaps between polygons land on-brand. */}
+        <rect x="0" y="0" width="100" height="175" fill={accent} opacity="0.9" />
 
-      {facets.map((f, i) => (
-        <div
-          key={i}
-          className="absolute inset-0"
-          style={{
-            clipPath: f.clipPath,
-            backgroundImage: f.gradient,
-            opacity: f.opacity,
-          }}
+        <polygon points="0,0 62,0 22,46" fill={accent} />
+        <polygon points="0,0 20,0 0,18" fill="#c4b5fd" opacity="0.55" />
+        <polygon points="62,0 100,0 100,40 22,46" fill="#7c3aed" />
+        <polygon points="100,40 100,78 50,62 22,46" fill="#be185d" />
+        <polygon points="100,78 100,120 68,102 50,62" fill="#dc2626" />
+        <polygon points="0,46 22,46 50,62 48,110 16,120 0,110" fill="#a21caf" />
+        <polygon points="50,62 68,102 45,120 48,110" fill="#ea580c" />
+        <polygon points="0,110 16,120 48,110 45,120 20,175 0,175" fill="#7c3aed" />
+        <polygon points="48,110 45,120 68,102 100,120 100,175 55,175 20,175" fill="#be185d" />
+        <polygon points="68,102 100,78 100,120" fill="#f97316" opacity="0.85" />
+
+        {/* Diagonal crease — a translucent dark band crossing the whole
+            canvas, softened, the way a real faceted wallpaper reads as
+            "folded" along one seam. */}
+        <polygon
+          points="12,30 30,20 88,95 70,108"
+          fill="#000000"
+          opacity="0.28"
+          style={{ filter: 'blur(6px)' }}
         />
-      ))}
-      {/* Dark-mode opacities are lower (facets would otherwise blow out a
-          dark page) — layered as a second pass that only shows in dark. */}
-      <div className="absolute inset-0 hidden dark:block bg-[#15110d]/45" />
+      </svg>
 
-      {/* Soft blur pass on top of the hard facet edges — keeps the "faceted"
-          read but takes the harshness off the seams so it doesn't look like
-          clip-art. */}
-      <div className="absolute inset-0 backdrop-blur-2xl" />
-
-      {/* Same dot texture used on chat surfaces, so the whole app shares one
-          "material" language instead of flat color vs. dotted chat feeling
-          like two different apps. */}
+      {/* Same dot texture used on chat surfaces, kept faint, so the whole
+          app shares one "material" language. */}
       <div
-        className="absolute inset-0 opacity-[0.25] dark:opacity-[0.35]"
+        className="absolute inset-0 opacity-[0.12]"
         style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)',
-          backgroundSize: '26px 26px',
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)',
+          backgroundSize: '22px 22px',
         }}
       />
     </div>
