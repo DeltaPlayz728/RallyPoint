@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Lock, MapPin, Clock } from 'lucide-react'
 import EmptyIllustration from '@/components/EmptyIllustration'
+import PageBackdrop from '@/components/PageBackdrop'
+import { useTheme } from '@/components/ThemeProvider'
 import { boundingBox, CASUAL_RADIUS_KM } from '@/lib/geo'
 import { canSeeAgeRestricted } from '@/lib/ageGating'
 
@@ -222,6 +224,7 @@ function EventCard({ event }: { event: Event }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FeedPage() {
+  const { backgroundStyle, accentHex, customBackgroundUrl } = useTheme()
   const [events, setEvents]             = useState<Event[]>([])
   const [loading, setLoading]           = useState(true)
   const [activeFilter, setActiveFilter] = useState<Filter>('foryou')
@@ -345,14 +348,11 @@ export default function FeedPage() {
   return (
     <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
 
-      {/* Background depth bubbles — opaque pastels, sit behind all content (cards
-          stay solid white on top), fixed + pointer-events-none so they never
-          cover or interfere with events. Kept sparse on purpose. */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute top-[22%] -left-16 w-40 h-40 rounded-full bg-[#f6d9bf] dark:bg-accent/10" />
-        <div className="absolute top-[56%] -right-12 w-32 h-32 rounded-full bg-[#cfeede] dark:bg-teal-500/10" />
-        <div className="absolute -bottom-12 left-[18%] w-44 h-44 rounded-full bg-[#dcd2ef] dark:bg-purple-500/10" />
-      </div>
+      {/* Background — driven by Settings > Appearance > Background style
+          (gradient / shapes / default / custom photo). This is the actual
+          page the bottom nav's "Events" tab links to (/feed) — the earlier
+          /events route is a separate, unlinked page and was the wrong one. */}
+      <PageBackdrop style={backgroundStyle} accent={accentHex} customUrl={customBackgroundUrl} />
 
       {/* Minor mode banner */}
       {isMinor && (
