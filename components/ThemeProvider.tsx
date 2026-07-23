@@ -24,11 +24,15 @@ export const ACCENT_PRESETS: { id: Accent; label: string; hex: string }[] = [
 ]
 const DEFAULT_ACCENT_HEX = ACCENT_PRESETS[0].hex
 
-// "Background style" — the mesh-gradient wash (see components/MeshBackdrop.tsx)
-// vs. the old flat single-color page fill. Lives here (not on a per-page
-// Supabase fetch) so it's instant, works logged-out, and can reuse the
-// accent hex above to tint the mesh to whatever the user already picked.
-export type BackgroundStyle = 'flat' | 'mesh'
+// "Background style" — what renders behind pages instead of a flat single
+// color fill. Lives here (not a per-page Supabase fetch) so switching is
+// instant and works logged-out, and can reuse the accent hex above to tint
+// the mesh/dots to whatever the user already picked.
+//   - flat   — the original page fill (soft pastel bubbles)
+//   - mesh   — low-poly gradient facets, see components/MeshBackdrop.tsx
+//   - dots   — just the dot texture, no color wash
+//   - custom — a user-uploaded photo (customBackgroundUrl)
+export type BackgroundStyle = 'flat' | 'mesh' | 'dots' | 'custom'
 
 const ThemeContext = createContext<{
   theme: Theme
@@ -38,6 +42,8 @@ const ThemeContext = createContext<{
   accentHex: string
   backgroundStyle: BackgroundStyle
   setBackgroundStyle: (style: BackgroundStyle) => void
+  customBackgroundUrl: string | null
+  setCustomBackgroundUrl: (url: string | null) => void
 }>({
   theme: 'light',
   toggleTheme: () => {},
@@ -46,6 +52,8 @@ const ThemeContext = createContext<{
   accentHex: DEFAULT_ACCENT_HEX,
   backgroundStyle: 'mesh',
   setBackgroundStyle: () => {},
+  customBackgroundUrl: null,
+  setCustomBackgroundUrl: () => {},
 })
 
 // Inline script injected into <head> so the `dark` class and --accent
@@ -72,6 +80,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
   const [accent, setAccentState] = useState<Accent>('orange')
   const [backgroundStyle, setBackgroundStyleState] = useState<BackgroundStyle>('mesh')
+  const [customBackgroundUrl, setCustomBackgroundUrlState] = useState<string | null>(null)
 
   useEffect(() => {
     const stored = localStorage.getItem('rallypoint-theme') as Theme | null
@@ -83,9 +92,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setAccentState(storedAccent)
     }
     const storedBg = localStorage.getItem('rallypoint-background-style') as BackgroundStyle | null
-    if (storedBg === 'flat' || storedBg === 'mesh') {
+    if (storedBg === 'flat' || storedBg === 'mesh' || storedBg === 'dots' || storedBg === 'custom') {
       setBackgroundStyleState(storedBg)
     }
+    const storedCustomUrl = localStorage.getItem('rallypoint-custom-bg-url')
+    if (storedCustomUrl) setCustomBackgroundUrlState(storedCustomUrl)
   }, [])
 
   useEffect(() => {
@@ -113,10 +124,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('rallypoint-background-style', next)
   }
 
+  const setCustomBackgroundUrl = (url: string | null) => {
+    setCustomBackgroundUrlState(url)
+    if (url) localStorage.setItem('rallypoint-custom-bg-url', url)
+    else localStorage.removeItem('rallypoint-custom-bg-url')
+  }
+
   const accentHex = ACCENT_PRESETS.find(p => p.id === accent)?.hex ?? DEFAULT_ACCENT_HEX
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, accent, setAccent, accentHex, backgroundStyle, setBackgroundStyle }}>
+    <ThemeContext.Provider value={{
+      theme, toggleTheme, accent, setAccent, accentHex,
+      backgroundStyle, setBackgroundStyle, customBackgroundUrl, setCustomBackgroundUrl,
+    }}>
       {children}
     </ThemeContext.Provider>
   )

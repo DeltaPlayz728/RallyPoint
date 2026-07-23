@@ -8,11 +8,14 @@ import TopBar from '@/components/TopBar'
 import { useTheme, ACCENT_PRESETS } from '@/components/ThemeProvider'
 import { effectiveTier, TIER_LABELS, nextTier, SubscriptionTier, IS_PLAYTEST } from '@/lib/subscription'
 import { isSoundEnabled, setSoundEnabled, playNotificationSound } from '@/lib/sounds'
-import { Check, AlertTriangle } from 'lucide-react'
+import { Check, AlertTriangle, Upload } from 'lucide-react'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { theme, toggleTheme, accent, setAccent, backgroundStyle, setBackgroundStyle } = useTheme()
+  const {
+    theme, toggleTheme, accent, setAccent,
+    backgroundStyle, setBackgroundStyle, customBackgroundUrl, setCustomBackgroundUrl,
+  } = useTheme()
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const [tier, setTier] = useState<SubscriptionTier>('free')
@@ -22,6 +25,8 @@ export default function SettingsPage() {
   const [patchEmailOptOut, setPatchEmailOptOut] = useState(false)
   const [savingPatchPref, setSavingPatchPref] = useState(false)
   const [soundsOn, setSoundsOn] = useState(true)
+  const [uploadingBg, setUploadingBg] = useState(false)
+  const [bgUploadError, setBgUploadError] = useState<string | null>(null)
 
   useEffect(() => {
     const check = async () => {
@@ -57,6 +62,27 @@ export default function SettingsPage() {
     const { error } = await supabase.from('profiles').update({ patch_email_opt_out: next }).eq('id', userId)
     if (!error) setPatchEmailOptOut(next)
     setSavingPatchPref(false)
+  }
+
+  const handleCustomBgUpload = async (file: File) => {
+    if (!userId) return
+    setBgUploadError(null)
+    setUploadingBg(true)
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${userId}.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('custom-backgrounds')
+      .upload(path, file, { upsert: true, contentType: file.type })
+    if (uploadError) {
+      setBgUploadError('Upload failed. Please try again.')
+      setUploadingBg(false)
+      return
+    }
+    const { data: pub } = supabase.storage.from('custom-backgrounds').getPublicUrl(path)
+    const url = `${pub.publicUrl}?t=${Date.now()}`
+    setCustomBackgroundUrl(url)
+    setBackgroundStyle('custom')
+    setUploadingBg(false)
   }
 
   const handleSignOut = async () => {
@@ -191,12 +217,14 @@ export default function SettingsPage() {
           <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4 mt-3">
             <p className="font-medium text-[#15110d] dark:text-[#fdf6ec] mb-0.5">Background style</p>
             <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
-              A subtle gradient wash behind pages instead of a flat fill, tinted to your accent color.
+              What renders behind pages — a gradient wash tinted to your accent color, a plain dotted texture, the original flat fill, or your own photo.
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 mb-3">
               {([
                 { key: 'mesh', label: 'Gradient' },
+                { key: 'dots', label: 'Dotted' },
                 { key: 'flat', label: 'Flat' },
+                { key: 'custom', label: 'Custom photo' },
               ] as const).map((opt) => (
                 <button
                   key={opt.key}
@@ -211,6 +239,33 @@ export default function SettingsPage() {
                 </button>
               ))}
             </div>
+
+            {backgroundStyle === 'custom' && (
+              <div className="flex items-center gap-3 pt-1">
+                {customBackgroundUrl && (
+                  <div
+                    className="w-14 h-14 rounded-lg bg-cover bg-center border border-gray-200 dark:border-gray-700 shrink-0"
+                    style={{ backgroundImage: `url(${customBackgroundUrl})` }}
+                  />
+                )}
+                <label className="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 text-[#15110d] dark:text-[#fdf6ec] text-xs font-semibold px-3 py-2 rounded-lg cursor-pointer hover:border-accent transition">
+                  <Upload size={13} />
+                  {uploadingBg ? 'Uploading…' : customBackgroundUrl ? 'Change photo' : 'Choose photo'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingBg}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleCustomBgUpload(file)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+                {bgUploadError && <span className="text-red-500 text-xs">{bgUploadError}</span>}
+              </div>
+            )}
           </div>
         </section>
 

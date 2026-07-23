@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { triggerSeedCheck } from '@/lib/seedCheck'
 import { Bell, Building2, MapPin, Clock, Users } from 'lucide-react'
 import EmptyIllustration from '@/components/EmptyIllustration'
-import MeshBackdrop from '@/components/MeshBackdrop'
+import PageBackdrop from '@/components/PageBackdrop'
 import { useTheme } from '@/components/ThemeProvider'
 import { boundingBox, EVENT_RADIUS_KM } from '@/lib/geo'
 import { AGE_GATING_ENABLED, canSeeAgeRestricted } from '@/lib/ageGating'
@@ -133,7 +133,7 @@ function EventCard({ event, distKm }: { event: EventRow; distKm?: number }) {
 
 export default function EventsPage() {
   const router = useRouter()
-  const { backgroundStyle, accentHex } = useTheme()
+  const { backgroundStyle, accentHex, customBackgroundUrl } = useTheme()
   const [events, setEvents] = useState<EventRow[]>([])
   const [loading, setLoading] = useState(true)
   const [slide, setSlide] = useState<Slide>('social')
@@ -232,18 +232,10 @@ export default function EventsPage() {
   return (
     <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
 
-      {/* Background — mesh gradient by default (Profile > Background style
-          can switch back to the old flat bubbles). Cards stay solid on top
-          either way; this is purely a fixed, pointer-events-none backdrop. */}
-      {backgroundStyle === 'mesh' ? (
-        <MeshBackdrop accent={accentHex} />
-      ) : (
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute top-[22%] -left-16 w-40 h-40 rounded-full bg-[#f6d9bf] dark:bg-accent/10" />
-          <div className="absolute top-[56%] -right-12 w-32 h-32 rounded-full bg-[#cfeede] dark:bg-teal-500/10" />
-          <div className="absolute -bottom-12 left-[18%] w-44 h-44 rounded-full bg-[#dcd2ef] dark:bg-purple-500/10" />
-        </div>
-      )}
+      {/* Background — driven by Settings > Appearance > Background style
+          (flat / gradient / dots / custom photo). Cards stay solid on top
+          regardless; this is purely a fixed, pointer-events-none backdrop. */}
+      <PageBackdrop style={backgroundStyle} accent={accentHex} customUrl={customBackgroundUrl} />
 
       {/* Header */}
       <div className="relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
