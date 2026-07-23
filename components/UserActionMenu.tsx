@@ -54,6 +54,9 @@ export default function UserActionMenu({ targetUserId, targetName }: Props) {
 
       <button
         onClick={() => setOpen(o => !o)}
+        aria-label="More options"
+        aria-haspopup="true"
+        aria-expanded={open}
         className="w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white rounded-full hover:bg-gray-200 transition text-lg"
       >
         ···
@@ -62,7 +65,7 @@ export default function UserActionMenu({ targetUserId, targetName }: Props) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-9 z-50 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-xl w-44">
+          <div role="menu" className="absolute right-0 top-9 z-50 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-xl w-44">
             <button
               onClick={handleBlock}
               disabled={blocking}

@@ -248,7 +248,7 @@ export default function FriendsPage() {
       {/* Search bar */}
       <div className="px-4 pt-3 pb-2 sticky top-[72px] bg-[#fdf6ec] dark:bg-[#15110d] z-10">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5" style={{ width: '80%' }}>
+          <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] rounded-2xl px-4 py-2.5 border border-transparent focus-within:border-accent" style={{ width: '80%' }}>
             <Search size={14} className="text-gray-600 dark:text-gray-400" />
             <input
               type="text"

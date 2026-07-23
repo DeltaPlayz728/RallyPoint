@@ -897,7 +897,7 @@ export default function CommunityDetailPage() {
                   value={announcementDraft}
                   onChange={(e) => setAnnouncementDraft(e.target.value)}
                   placeholder="Pin an announcement..."
-                  className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 text-sm outline-none"
+                  className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 text-sm outline-none focus:border-accent"
                 />
                 <button
                   onClick={handlePostAnnouncement}
@@ -1014,7 +1014,7 @@ export default function CommunityDetailPage() {
                               onChange={(e) => setForumReplyDraft(e.target.value)}
                               onKeyDown={(e) => { if (e.key === 'Enter') handlePostForumReply() }}
                               placeholder="Reply..."
-                              className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm outline-none"
+                              className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm outline-none focus:border-accent"
                             />
                             <button
                               onClick={handlePostForumReply}
@@ -1044,20 +1044,20 @@ export default function CommunityDetailPage() {
                           value={newPostTitle}
                           onChange={(e) => setNewPostTitle(e.target.value)}
                           placeholder="Post title"
-                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
                         />
                         <textarea
                           value={newPostBody}
                           onChange={(e) => setNewPostBody(e.target.value)}
                           rows={3}
                           placeholder="What's the idea? (optional)"
-                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
                         />
                         <input
                           value={newPostImageUrl}
                           onChange={(e) => setNewPostImageUrl(e.target.value)}
                           placeholder="Image URL (optional)"
-                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                          className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
                         />
                         <div className="flex gap-1.5 flex-wrap">
                           {FORUM_TAGS.map((tag) => (
@@ -1265,7 +1265,7 @@ export default function CommunityDetailPage() {
                     <input
                       value={nameDraft}
                       onChange={(e) => setNameDraft(e.target.value)}
-                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
                     />
                   </div>
                   <div>
@@ -1274,7 +1274,7 @@ export default function CommunityDetailPage() {
                       value={descDraft}
                       onChange={(e) => setDescDraft(e.target.value)}
                       rows={3}
-                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
                     />
                   </div>
                   <div>
@@ -1284,7 +1284,7 @@ export default function CommunityDetailPage() {
                       onChange={(e) => setRulesDraft(e.target.value)}
                       rows={4}
                       placeholder="e.g. 1. Be respectful  2. No spam  3. Stay on topic"
-                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+                      className="w-full mt-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
                     />
                   </div>
                   <button
@@ -1359,7 +1359,7 @@ export default function CommunityDetailPage() {
                   onChange={(e) => setNewChannelName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleCreateChannel() }}
                   placeholder={newChannelType === 'forum' ? 'e.g. Event Ideas' : 'e.g. photography'}
-                  className="flex-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm outline-none"
+                  className="flex-1 bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm outline-none focus:border-accent"
                 />
                 <button
                   onClick={handleCreateChannel}
@@ -1438,7 +1438,7 @@ export default function CommunityDetailPage() {
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
             placeholder={`Message #${activeChannel?.name ?? 'general'}...`}
-            className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 text-sm outline-none"
+            className="flex-1 bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 text-sm outline-none focus:border-accent"
           />
           <button
             onClick={handleSend}

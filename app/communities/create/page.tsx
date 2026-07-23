@@ -124,7 +124,7 @@ export default function CreateCommunityPage() {
           required
           maxLength={60}
           placeholder="e.g. Breda Weekend Crew"
-          className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm mb-4 outline-none"
+          className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm mb-4 outline-none focus:border-accent"
         />
 
         <label className="block text-sm font-medium mb-1.5">Description</label>
@@ -134,7 +134,7 @@ export default function CreateCommunityPage() {
           maxLength={300}
           rows={3}
           placeholder="What's this community about?"
-          className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm mb-4 outline-none resize-none"
+          className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm mb-4 outline-none focus:border-accent resize-none"
         />
 
         <label className="block text-sm font-medium mb-1.5">Banner color</label>

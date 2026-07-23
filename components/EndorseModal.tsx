@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Check, Award } from 'lucide-react'
+import { useEscapeToClose } from '@/lib/useEscapeToClose'
 
 type AccommodationType = { id: string; name: string }
 
@@ -19,6 +20,8 @@ export default function EndorseModal({
   const [loading, setLoading] = useState(true)
   const [givenId, setGivenId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  useEscapeToClose(onClose)
 
   useEffect(() => {
     supabase.from('accommodation_types').select('id, name').order('name').then(({ data }) => {
@@ -44,10 +47,15 @@ export default function EndorseModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="endorse-modal-title"
+    >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5 z-10 max-h-[80vh] overflow-y-auto">
-        <h3 className="font-bold text-lg mb-1 text-[#15110d] dark:text-[#fdf6ec] inline-flex items-center gap-1.5">
+        <h3 id="endorse-modal-title" className="font-bold text-lg mb-1 text-[#15110d] dark:text-[#fdf6ec] inline-flex items-center gap-1.5">
           <Award size={18} className="shrink-0 text-accent" /> Give {target.name} an accommodation
         </h3>
         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">

@@ -712,7 +712,7 @@ export default function MapPage() {
 
       {/* City search bar */}
       <form onSubmit={handleCitySearch} className="px-4 pt-2 pb-1 shrink-0 z-10">
-        <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 rounded-full px-4 py-2">
+        <div className="flex items-center gap-2 bg-white dark:bg-[#221c16] border border-gray-300 dark:border-gray-700 focus-within:border-accent rounded-full px-4 py-2">
           <Search size={16} className="text-gray-500 dark:text-gray-400" />
           <input
             ref={searchRef}

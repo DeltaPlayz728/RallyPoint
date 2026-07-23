@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { PartyPopper, Star, Check, X } from 'lucide-react'
+import { useEscapeToClose } from '@/lib/useEscapeToClose'
 
 interface Props {
   eventId: string
@@ -48,6 +49,8 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
   const [loading, setLoading] = useState(false)
   const [done, setDone]       = useState(false)
 
+  useEscapeToClose(onDone)
+
   const handleSubmit = async () => {
     if (!rating) return
     setLoading(true)
@@ -79,7 +82,12 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
   const label = ['', 'Not great', 'It was ok', 'Pretty good', 'Really good', 'Amazing!'][active] ?? ''
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rating-modal-title"
+    >
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onDone} />
       <div
         className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-6 z-10 max-h-[85vh] overflow-y-auto"
@@ -98,7 +106,7 @@ export default function RatingModal({ eventId, eventTitle, onDone }: Props) {
         ) : (
           <>
             <p className="text-gray-500 dark:text-gray-400 text-sm text-center mb-1">How was it?</p>
-            <h3 className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg text-center mb-5 leading-snug">
+            <h3 id="rating-modal-title" className="text-[#15110d] dark:text-[#fdf6ec] font-bold text-lg text-center mb-5 leading-snug">
               {eventTitle}
             </h3>
 

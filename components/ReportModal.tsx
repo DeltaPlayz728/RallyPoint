@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { CheckCircle2 } from 'lucide-react'
+import { useEscapeToClose } from '@/lib/useEscapeToClose'
 
 const REASONS = [
   'Fake or spam account',
@@ -25,6 +26,8 @@ export default function ReportModal({ targetType, targetId, targetName, onClose 
   const [details, setDetails] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone]       = useState(false)
+
+  useEscapeToClose(onClose)
 
   const handleSubmit = async () => {
     if (!reason) return
@@ -51,7 +54,12 @@ export default function ReportModal({ targetType, targetId, targetName, onClose 
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="report-modal-title"
+    >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div
         className="relative bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-3xl w-full max-w-md p-5 z-10"
@@ -65,7 +73,7 @@ export default function ReportModal({ targetType, targetId, targetName, onClose 
           </div>
         ) : (
           <>
-            <h3 className="font-bold text-lg text-[#15110d] dark:text-[#fdf6ec] mb-1">
+            <h3 id="report-modal-title" className="font-bold text-lg text-[#15110d] dark:text-[#fdf6ec] mb-1">
               Report {targetType === 'user' ? 'user' : targetType === 'event' ? 'event' : 'message'}
             </h3>
             {targetName && (

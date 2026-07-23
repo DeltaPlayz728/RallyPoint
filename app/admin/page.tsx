@@ -359,20 +359,20 @@ export default function AdminPage() {
               value={patchVersion}
               onChange={e => setPatchVersion(e.target.value)}
               placeholder="Version, e.g. 2026.07.15"
-              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
             />
             <input
               value={patchTitle}
               onChange={e => setPatchTitle(e.target.value)}
               placeholder="Title"
-              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
             />
             <textarea
               value={patchBody}
               onChange={e => setPatchBody(e.target.value)}
               rows={4}
               placeholder="What changed (markdown supported)"
-              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none"
+              className="w-full bg-[#fdf6ec] dark:bg-[#15110d] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-accent"
             />
             <div className="flex gap-2">
               {(['minor', 'standard', 'critical'] as const).map(sev => (
@@ -510,7 +510,7 @@ export default function AdminPage() {
             value={foundingSearch}
             onChange={(e) => searchFounding(e.target.value)}
             placeholder="Search by username or name..."
-            className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm mb-4 outline-none"
+            className="w-full bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm mb-4 outline-none focus:border-accent"
           />
 
           {foundingSearch.trim() && (
