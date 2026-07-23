@@ -836,7 +836,7 @@ export default function CommunityDetailPage() {
                     <p className="text-gray-400 dark:text-gray-500 text-xs truncate">
                       {ch.type === 'forum'
                         ? (activeChannelId === ch.id && forumPostCount > 0 ? `${forumPostCount} post${forumPostCount === 1 ? '' : 's'}` : 'Forum channel')
-                        : (preview ? `${preview.senderName}: ${preview.content}` : 'No messages yet')}
+                        : (preview ? `${preview.senderName}: ${preview.content.replace(REPLY_RE, '')}` : 'No messages yet')}
                     </p>
                   </div>
                   <span className="text-gray-300 dark:text-gray-600">›</span>
