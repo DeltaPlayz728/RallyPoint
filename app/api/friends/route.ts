@@ -79,6 +79,11 @@ export async function POST(req: NextRequest) {
 
 // PATCH — accept or decline
 export async function PATCH(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  if (isRateLimited(`friends-patch:${ip}`, { limit: 60, windowMs: 60 * 60 * 1000 })) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { friendshipId, userId, action } = await req.json()
   if (!friendshipId || !userId || !['accepted', 'declined'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
@@ -123,6 +128,11 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE — cancel request or unfriend
 export async function DELETE(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  if (isRateLimited(`friends-delete:${ip}`, { limit: 60, windowMs: 60 * 60 * 1000 })) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { friendshipId, userId } = await req.json()
   if (!(await requireMatchingUser(req, userId))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

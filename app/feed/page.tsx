@@ -329,12 +329,18 @@ export default function FeedPage() {
     return list
   }, [events, activeFilter, userInterests])
 
-  const greeting = (() => {
+  // Time-of-day greeting must not be computed during the initial render:
+  // this page is statically prerendered at build time, so `new Date()` at
+  // render time would bake in whatever hour the build happened to run at,
+  // then mismatch the client's real clock on hydration (React error #418,
+  // seen live 2026-07-22). Start with a stable, time-neutral default that's
+  // identical on server and first client paint, then swap to the real
+  // greeting client-side after mount.
+  const [greeting, setGreeting] = useState('Welcome back')
+  useEffect(() => {
     const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 18) return 'Good afternoon'
-    return 'Good evening'
-  })()
+    setGreeting(h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening')
+  }, [])
 
   return (
     <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">

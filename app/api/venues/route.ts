@@ -50,8 +50,16 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const lat = parseFloat(searchParams.get('lat') || '51.5719')
-  const lng = parseFloat(searchParams.get('lng') || '4.7683')
+  let lat = parseFloat(searchParams.get('lat') || '51.5719')
+  let lng = parseFloat(searchParams.get('lng') || '4.7683')
+
+  // Garbage/out-of-range coordinates (NaN, "999999", etc.) were previously
+  // accepted as-is and still forwarded to the public Overpass API — free
+  // cost-abuse vector with no benefit to a real user. Fall back to the
+  // default location instead of trusting unvalidated input.
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90) lat = 51.5719
+  if (!Number.isFinite(lng) || lng < -180 || lng > 180) lng = 4.7683
+
   const city = searchParams.get('city') || `@${lat.toFixed(1)},${lng.toFixed(1)}`
 
   // Bounding box (~RADIUS_M) around the user.

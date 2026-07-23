@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash, timingSafeEqual } from 'crypto'
+import { isRateLimited } from '@/lib/rateLimit'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,12 +10,26 @@ const supabaseAdmin = createClient(
 
 const BOT_EMAIL = 'assistant@rallypoint.app'
 
+// Hash both sides to a fixed-length digest before comparing — avoids both
+// the timing side-channel of `!==` on raw strings and the length-mismatch
+// exception timingSafeEqual throws when given differently-sized buffers.
+function secretsMatch(a: string, b: string): boolean {
+  const hashA = createHash('sha256').update(a).digest()
+  const hashB = createHash('sha256').update(b).digest()
+  return timingSafeEqual(hashA, hashB)
+}
+
 // One-time setup: creates the RallyPoint Assistant auth user + profile.
 // Protected by ADMIN_SETUP_SECRET — call once, then you can ignore this route.
 // GET /api/admin/bot?secret=YOUR_SECRET
 export async function GET(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
+  if (isRateLimited(`admin-bot-setup:${ip}`, { limit: 5, windowMs: 60 * 60 * 1000 })) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const secret = req.nextUrl.searchParams.get('secret')
-  if (!secret || secret !== process.env.ADMIN_SETUP_SECRET) {
+  if (!secret || !process.env.ADMIN_SETUP_SECRET || !secretsMatch(secret, process.env.ADMIN_SETUP_SECRET)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

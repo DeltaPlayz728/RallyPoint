@@ -27,10 +27,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data)
   }
 
+  // `q` gets interpolated into a raw PostgREST .or() filter string below.
+  // Commas and parens are filter-syntax metacharacters there (comma separates
+  // clauses, parens group them), so an admin-controlled q containing them
+  // could inject additional filter clauses. Strip them — a legit username/
+  // name search never needs them.
+  const safeQ = q.replace(/[,()]/g, '')
+
   const { data, error } = await supabaseAdmin
     .from('profiles')
     .select('id, full_name, username, avatar_url, is_founding_member, subscription_tier')
-    .or(`username.ilike.%${q}%,full_name.ilike.%${q}%`)
+    .or(`username.ilike.%${safeQ}%,full_name.ilike.%${safeQ}%`)
     .limit(20)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
