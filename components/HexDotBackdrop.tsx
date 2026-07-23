@@ -79,12 +79,10 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
             <stop offset="100%" stopColor="#e879f9" stopOpacity="1" />
           </linearGradient>
         </defs>
-        {/* Solid line underneath the dots on EVERY line (edges and spokes
-            alike — spokes used to be dots-only, which is what read as
-            "missing lines"/unfinished) — fills the gap between dots so
-            each hex facet reads as continuous geometry. Bolder in light
-            mode, where the same opacity that pops against navy goes muddy
-            against cream. */}
+        {/* Straight solid lines — no dashes/dots. Every edge and spoke is
+            one continuous stroke, colored via the same two-tone gradient
+            (accent on edges, purple/pink on spokes) so it still reads as
+            faceted/varied rather than a single flat hue. */}
         {lines.map((l, i) => (
           <line
             key={`line-${i}`}
@@ -92,25 +90,10 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
             y1={l.y1}
             x2={l.x2}
             y2={l.y2}
-            stroke={l.kind === 'edge' ? accent : (isDark ? '#c084fc' : '#9333ea')}
-            strokeWidth={isDark ? 1 : 1.6}
-            strokeOpacity={isDark ? 0.22 : 0.42}
-          />
-        ))}
-        {lines.map((l, i) => (
-          <line
-            key={`dot-${i}`}
-            x1={l.x1}
-            y1={l.y1}
-            x2={l.x2}
-            y2={l.y2}
             stroke={l.kind === 'edge' ? 'url(#hexEdgeGrad)' : 'url(#hexSpokeGrad)'}
-            strokeWidth={3.5}
+            strokeWidth={isDark ? 1.75 : 2.25}
+            strokeOpacity={isDark ? 0.65 : 0.8}
             strokeLinecap="round"
-            /* Near-zero dash length + round cap draws actual circular
-               dots (not hairline dashes) spaced along each line — this is
-               what was too thin to see before. */
-            strokeDasharray="0.01 5"
           />
         ))}
       </svg>
