@@ -17,9 +17,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request })
   }
 
-  // Rate limit auth routes — 10 attempts per IP per 15 minutes
-  if (pathname.startsWith('/auth/')) {
-    if (await isRateLimited(`auth:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 })) {
+  // Rate limit only actual auth *submissions* (POST) — not GET page loads,
+  // redirects, or <Link> prefetches. Those are normal browsing and were
+  // tripping the 429 for real users (especially several behind one shared/
+  // CGNAT IP). Brute force is still capped here, and Supabase Auth's own
+  // Turnstile attack-protection remains the primary gate on credentials.
+  if (pathname.startsWith('/auth/') && request.method === 'POST') {
+    if (await isRateLimited(`auth:${ip}`, { limit: 20, windowMs: 15 * 60 * 1000 })) {
       return new NextResponse('Too many requests. Please wait before trying again.', {
         status: 429,
         headers: { 'Retry-After': '900' },
