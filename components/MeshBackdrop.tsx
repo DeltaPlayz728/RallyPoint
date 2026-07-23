@@ -1,60 +1,99 @@
 'use client'
 
 /**
- * Toned-down "mesh gradient" backdrop — a subtle, faceted wash of soft color
- * blobs behind page content, meant to replace a dead-flat single-color page
- * background on screens with a lot of empty space (Events tab was the first
- * complaint, but this is meant to be reused anywhere that looks flat).
+ * Low-poly "mesh gradient" backdrop — actual faceted triangles (via
+ * clip-path), each filled with its own mini gradient so it reads as lit
+ * from one direction, the way real gradient-mesh wallpapers do. Replaces
+ * a dead-flat single-color page background on screens with a lot of
+ * empty space (Events tab was the first complaint).
  *
- * Inspired by low-poly gradient-mesh wallpapers, but pulled way back in
- * saturation/opacity so it reads as depth/texture rather than a loud
- * wallpaper — text and cards on top stay fully legible. Renders as a fixed,
- * pointer-events-none layer so it never intercepts clicks or scrolls with
- * content.
+ * This is the "turn it up" pass — the first version was blurred pastel
+ * blobs at ~20% opacity and read as barely-there. This version keeps the
+ * same brand palette (accent + purple/rose/teal) but as bold, visible
+ * facets like the reference wallpaper, while still sitting at z-0 behind
+ * every card/panel in the app (which are all opaque), so text and content
+ * are never actually behind it.
  *
- * `accent` lets a page tint the wash toward a community/profile color
+ * `accent` lets a page tint the mesh toward a community/profile color
  * (same idea as the chat wallpaper tinting in lib/color.ts) — defaults to
  * the app's own orange accent.
  */
 export default function MeshBackdrop({ accent = '#f97316' }: { accent?: string }) {
+  // Each facet is a triangle (clip-path polygon, in viewport %) filled with
+  // its own two-tone gradient for a faceted "light hits it from one side"
+  // look instead of a flat color wedge.
+  const facets: { clipPath: string; gradient: string; opacity: number; darkOpacity: number }[] = [
+    {
+      clipPath: 'polygon(0% 0%, 55% 0%, 20% 40%)',
+      gradient: `linear-gradient(135deg, ${accent}, #fb923c)`,
+      opacity: 0.55,
+      darkOpacity: 0.4,
+    },
+    {
+      clipPath: 'polygon(55% 0%, 100% 0%, 100% 35%, 20% 40%)',
+      gradient: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+      opacity: 0.5,
+      darkOpacity: 0.36,
+    },
+    {
+      clipPath: 'polygon(100% 35%, 100% 70%, 45% 55%, 20% 40%)',
+      gradient: 'linear-gradient(160deg, #e11d48, #fb7185)',
+      opacity: 0.45,
+      darkOpacity: 0.32,
+    },
+    {
+      clipPath: 'polygon(0% 40%, 20% 40%, 45% 55%, 15% 100%, 0% 100%)',
+      gradient: `linear-gradient(160deg, ${accent}, #7c3aed)`,
+      opacity: 0.4,
+      darkOpacity: 0.28,
+    },
+    {
+      clipPath: 'polygon(45% 55%, 100% 70%, 100% 100%, 15% 100%)',
+      gradient: 'linear-gradient(135deg, #0d9488, #2dd4bf)',
+      opacity: 0.4,
+      darkOpacity: 0.28,
+    },
+    {
+      clipPath: 'polygon(100% 70%, 100% 100%, 60% 100%)',
+      gradient: 'linear-gradient(135deg, #a855f7, #e11d48)',
+      opacity: 0.35,
+      darkOpacity: 0.24,
+    },
+  ]
+
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Faint directional wash — gives the flat page a light source instead
-          of looking like a solid fill. */}
-      <div
-        className="absolute inset-0 opacity-[0.05] dark:opacity-[0.09]"
-        style={{
-          backgroundImage: `linear-gradient(135deg, ${accent} 0%, transparent 45%, transparent 60%, #7c3aed 100%)`,
-        }}
-      />
+      {/* Warm page base underneath the facets, so gaps between triangles
+          (and the dark-mode blend) still land on-brand. */}
+      <div className="absolute inset-0 bg-[#fdf6ec] dark:bg-[#15110d]" />
 
-      {/* Large soft blobs, heavily blurred — the "facets" of the mesh, minus
-          the hard edges, so they still feel 3D/layered without competing
-          with cards. Sizes/positions vary so no two screens read identical. */}
-      <div
-        className="absolute -top-24 -left-20 w-[26rem] h-[26rem] rounded-full blur-3xl opacity-30 dark:opacity-20"
-        style={{ background: accent }}
-      />
-      <div
-        className="absolute top-[38%] -right-28 w-96 h-96 rounded-full blur-3xl opacity-25 dark:opacity-[0.18]"
-        style={{ background: '#7c3aed' }}
-      />
-      <div
-        className="absolute -bottom-28 left-[8%] w-[22rem] h-[22rem] rounded-full blur-3xl opacity-25 dark:opacity-[0.16]"
-        style={{ background: '#e11d48' }}
-      />
-      <div
-        className="absolute bottom-[10%] right-[18%] w-56 h-56 rounded-full blur-3xl opacity-20 dark:opacity-[0.14]"
-        style={{ background: '#14b8a6' }}
-      />
+      {facets.map((f, i) => (
+        <div
+          key={i}
+          className="absolute inset-0"
+          style={{
+            clipPath: f.clipPath,
+            backgroundImage: f.gradient,
+            opacity: f.opacity,
+          }}
+        />
+      ))}
+      {/* Dark-mode opacities are lower (facets would otherwise blow out a
+          dark page) — layered as a second pass that only shows in dark. */}
+      <div className="absolute inset-0 hidden dark:block bg-[#15110d]/45" />
 
-      {/* Same subtle dot texture used on chat surfaces, kept very sparse, so
-          the whole app shares one "material" language instead of flat color
-          vs. dotted chat feeling like two different apps. */}
+      {/* Soft blur pass on top of the hard facet edges — keeps the "faceted"
+          read but takes the harshness off the seams so it doesn't look like
+          clip-art. */}
+      <div className="absolute inset-0 backdrop-blur-2xl" />
+
+      {/* Same dot texture used on chat surfaces, so the whole app shares one
+          "material" language instead of flat color vs. dotted chat feeling
+          like two different apps. */}
       <div
-        className="absolute inset-0 opacity-[0.35] dark:opacity-[0.5]"
+        className="absolute inset-0 opacity-[0.25] dark:opacity-[0.35]"
         style={{
-          backgroundImage: 'radial-gradient(rgba(128,128,128,0.15) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)',
           backgroundSize: '26px 26px',
         }}
       />
