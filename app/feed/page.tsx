@@ -346,7 +346,10 @@ export default function FeedPage() {
   }, [])
 
   return (
-    <div className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28">
+    <div
+      className="min-h-dvh bg-[#fdf6ec] dark:bg-[#15110d] text-[#15110d] dark:text-[#fdf6ec] pb-28"
+      data-bg-vivid={backgroundStyle !== 'flat'}
+    >
 
       {/* Background — driven by Settings > Appearance > Background style
           (gradient / shapes / default / custom photo). This is the actual
@@ -362,8 +365,14 @@ export default function FeedPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm z-10 border-b border-gray-300 dark:border-gray-700">
+      {/* Header — translucent + blurred (instead of a flat opaque block) when
+          there's a colorful backdrop behind it, so the gradient/shapes read
+          through softly rather than getting fully hidden by the header bar. */}
+      <div className={`relative overflow-hidden px-4 pt-8 pb-4 sticky top-0 z-10 border-b border-gray-300 dark:border-gray-700 ${
+        backgroundStyle === 'flat'
+          ? 'bg-[#fdf6ec] dark:bg-[#15110d]/95 backdrop-blur-sm'
+          : 'bg-[#fdf6ec]/70 dark:bg-[#15110d]/55 backdrop-blur-xl'
+      }`}>
         {/* Decorative blobs — layered, solid (not blurred) shapes bleeding off the
             corner, matching the hand-picked, collage-poster feel of the mockup. */}
         <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-accent pointer-events-none" aria-hidden="true" />

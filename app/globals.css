@@ -116,3 +116,20 @@ button:active:not(:disabled), a:active {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── Contrast rescue for colorful backdrops ───────────────────
+   Muted gray text (text-gray-400/500) was tuned against a flat cream/dark
+   page fill. Against the new mesh-gradient/hex-dot backdrops (see
+   PageBackdrop.tsx) in dark mode specifically, that same gray reads as
+   nearly invisible — busy color behind it eats the little contrast it had.
+   Pages opt in via data-bg-vivid="true" on their root element whenever
+   backgroundStyle isn't 'flat'. Scoped to dark mode only: the light-mode
+   cream backdrop never had this problem. Selector specificity (two classes)
+   beats Tailwind's own single-class utility without needing !important, so
+   hover states etc. still work normally on top of it. */
+.dark [data-bg-vivid="true"] .text-gray-400 {
+  color: rgba(229, 231, 235, 0.92);
+}
+.dark [data-bg-vivid="true"] .text-gray-500 {
+  color: rgba(209, 213, 219, 0.85);
+}

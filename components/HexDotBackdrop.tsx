@@ -56,22 +56,38 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          {/* Bright at both ends, faint mid-way — hexagon edges converge
-              brightly at shared vertices in the reference image. */}
+          {/* Edges use the accent color; spokes use a purple/pink mix — two
+              tones instead of one flat hue, closer to the reference's
+              varied palette and less "unfinished"-looking. Bright at the
+              vertex end(s), faint mid-way/at center. */}
           <linearGradient id="hexEdgeGrad">
             <stop offset="0%" stopColor={accent} stopOpacity="1" />
-            <stop offset="50%" stopColor={accent} stopOpacity="0.18" />
+            <stop offset="50%" stopColor="#c026d3" stopOpacity="0.25" />
             <stop offset="100%" stopColor={accent} stopOpacity="1" />
           </linearGradient>
-          {/* Faint at center, bright at the vertex end. */}
           <linearGradient id="hexSpokeGrad">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
-            <stop offset="100%" stopColor={accent} stopOpacity="1" />
+            <stop offset="0%" stopColor="#a855f7" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="#e879f9" stopOpacity="1" />
           </linearGradient>
         </defs>
+        {/* Faint solid line underneath the dots — fills the visual gap
+            between dots so each hex edge reads as one continuous line
+            rather than a scatter of disconnected dots ("unfinished" look). */}
         {lines.map((l, i) => (
           <line
-            key={i}
+            key={`line-${i}`}
+            x1={l.x1}
+            y1={l.y1}
+            x2={l.x2}
+            y2={l.y2}
+            stroke={l.kind === 'edge' ? accent : '#c084fc'}
+            strokeWidth={1}
+            strokeOpacity={0.22}
+          />
+        ))}
+        {lines.map((l, i) => (
+          <line
+            key={`dot-${i}`}
             x1={l.x1}
             y1={l.y1}
             x2={l.x2}
@@ -82,7 +98,7 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
             /* Near-zero dash length + round cap draws actual circular
                dots (not hairline dashes) spaced along each line — this is
                what was too thin to see before. */
-            strokeDasharray="0.01 6"
+            strokeDasharray="0.01 5"
           />
         ))}
       </svg>
