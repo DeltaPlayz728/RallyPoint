@@ -217,13 +217,13 @@ export default function SettingsPage() {
           <div className="bg-white dark:bg-[#221c16] border border-gray-200 dark:border-gray-700 rounded-xl p-4 mt-3">
             <p className="font-medium text-[#15110d] dark:text-[#fdf6ec] mb-0.5">Background style</p>
             <p className="text-gray-500 dark:text-gray-400 text-xs mb-3">
-              What renders behind pages — a gradient wash tinted to your accent color, a plain dotted texture, the original flat fill, or your own photo.
+              What renders behind pages — faceted triangles tinted to your accent color, a repeating hex-dot pattern, the original look, or your own photo.
             </p>
             <div className="flex flex-wrap gap-2 mb-3">
               {([
                 { key: 'mesh', label: 'Gradient' },
-                { key: 'dots', label: 'Dotted' },
-                { key: 'flat', label: 'Flat' },
+                { key: 'dots', label: 'Shapes' },
+                { key: 'flat', label: 'Default' },
                 { key: 'custom', label: 'Custom photo' },
               ] as const).map((opt) => (
                 <button

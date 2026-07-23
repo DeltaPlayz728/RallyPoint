@@ -15,7 +15,7 @@
 export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string }) {
   const W = 480
   const H = 800
-  const R = 46 // hex circumradius
+  const R = 58 // hex circumradius — bigger cells read clearly on a phone screen
 
   const hexW = R * Math.sqrt(3)
   const hexH = R * 1.5
@@ -59,14 +59,14 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
           {/* Bright at both ends, faint mid-way — hexagon edges converge
               brightly at shared vertices in the reference image. */}
           <linearGradient id="hexEdgeGrad">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.85" />
-            <stop offset="50%" stopColor={accent} stopOpacity="0.05" />
-            <stop offset="100%" stopColor={accent} stopOpacity="0.85" />
+            <stop offset="0%" stopColor={accent} stopOpacity="1" />
+            <stop offset="50%" stopColor={accent} stopOpacity="0.18" />
+            <stop offset="100%" stopColor={accent} stopOpacity="1" />
           </linearGradient>
           {/* Faint at center, bright at the vertex end. */}
           <linearGradient id="hexSpokeGrad">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.05" />
-            <stop offset="100%" stopColor={accent} stopOpacity="0.85" />
+            <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
+            <stop offset="100%" stopColor={accent} stopOpacity="1" />
           </linearGradient>
         </defs>
         {lines.map((l, i) => (
@@ -77,9 +77,12 @@ export default function HexDotBackdrop({ accent = '#f97316' }: { accent?: string
             x2={l.x2}
             y2={l.y2}
             stroke={l.kind === 'edge' ? 'url(#hexEdgeGrad)' : 'url(#hexSpokeGrad)'}
-            strokeWidth={1.6}
+            strokeWidth={3.5}
             strokeLinecap="round"
-            strokeDasharray="0.5 3.2"
+            /* Near-zero dash length + round cap draws actual circular
+               dots (not hairline dashes) spaced along each line — this is
+               what was too thin to see before. */
+            strokeDasharray="0.01 6"
           />
         ))}
       </svg>

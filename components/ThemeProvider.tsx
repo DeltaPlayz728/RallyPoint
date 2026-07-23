@@ -99,6 +99,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (storedCustomUrl) setCustomBackgroundUrlState(storedCustomUrl)
   }, [])
 
+  // Cross-tab sync: if Settings is changed in one tab while another tab
+  // (e.g. Events) is already open, the second tab's React state wouldn't
+  // otherwise know anything changed — localStorage writes don't re-render
+  // a different tab's already-mounted context on their own. The `storage`
+  // event fires in every OTHER tab on the same origin when one tab writes,
+  // so this catches exactly that case.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'rallypoint-background-style' && e.newValue) {
+        const v = e.newValue as BackgroundStyle
+        if (v === 'flat' || v === 'mesh' || v === 'dots' || v === 'custom') {
+          setBackgroundStyleState(v)
+        }
+      }
+      if (e.key === 'rallypoint-custom-bg-url') {
+        setCustomBackgroundUrlState(e.newValue)
+      }
+      if (e.key === 'rallypoint-accent' && e.newValue) {
+        const v = e.newValue as Accent
+        if (ACCENT_PRESETS.some(p => p.id === v)) setAccentState(v)
+      }
+      if (e.key === 'rallypoint-theme' && (e.newValue === 'dark' || e.newValue === 'light')) {
+        setTheme(e.newValue)
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
